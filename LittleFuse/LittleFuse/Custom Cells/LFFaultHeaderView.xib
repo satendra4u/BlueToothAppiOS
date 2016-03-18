@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="jcn-LQ-2KN" customClass="LFFaultHeaderView">
+            <rect key="frame" x="0.0" y="0.0" width="600" height="40"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GGs-1T-tQK">
+                    <rect key="frame" x="10" y="12" width="40" height="17"/>
+                    <fontDescription key="fontDescription" name="Arial-BoldMT" family="Arial" pointSize="15"/>
+                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h6x-7f-lAM">
+                    <rect key="frame" x="553" y="12" width="37" height="17"/>
+                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="15"/>
+                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RlY-cd-Qrs">
+                    <rect key="frame" x="0.0" y="39" width="600" height="1"/>
+                    <color key="backgroundColor" red="0.83921568627450982" green="0.84313725490196079" blue="0.85882352941176465" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="1" id="kjk-Qk-ZyS"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.92549019607843142" green="0.92941176470588238" blue="0.94509803921568625" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="RlY-cd-Qrs" secondAttribute="trailing" id="5NH-eT-P7d"/>
+                <constraint firstAttribute="bottom" secondItem="RlY-cd-Qrs" secondAttribute="bottom" id="DG6-Xu-VZy"/>
+                <constraint firstItem="GGs-1T-tQK" firstAttribute="leading" secondItem="jcn-LQ-2KN" secondAttribute="leading" constant="10" id="HMo-Q1-e19"/>
+                <constraint firstAttribute="trailing" secondItem="h6x-7f-lAM" secondAttribute="trailing" constant="10" id="JRu-ao-ze5"/>
+                <constraint firstItem="h6x-7f-lAM" firstAttribute="centerY" secondItem="jcn-LQ-2KN" secondAttribute="centerY" id="UJC-vQ-ghH"/>
+                <constraint firstItem="GGs-1T-tQK" firstAttribute="centerY" secondItem="jcn-LQ-2KN" secondAttribute="centerY" id="nIF-97-sCL"/>
+                <constraint firstItem="RlY-cd-Qrs" firstAttribute="leading" secondItem="jcn-LQ-2KN" secondAttribute="leading" id="sQQ-Dy-DWI"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="lblDate" destination="GGs-1T-tQK" id="sR4-vJ-mzc"/>
+                <outlet property="lblFualtReason" destination="h6x-7f-lAM" id="t7s-5y-XTc"/>
+            </connections>
+            <point key="canvasLocation" x="344" y="82"/>
+        </view>
+    </objects>
+</document>
