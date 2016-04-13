@@ -52,6 +52,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getVoltageData:) name:VOLTAGE_NOTIFICATION object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getTimersData:) name:REAL_TIME_CONFIGURATION object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
 
 
 }
@@ -254,13 +255,51 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)equipmentStatus:(NSData *)data
 {
-    NSData *data0, *data1;
+    NSLog(@"Equipment data = %@", data);
+    BOOL isFaultPresent = YES;
+    NSString *dataString = [self getDataStringFromData:[data subdataWithRange:NSMakeRange(0, 4)]];
+    NSString *faultError;
+    NSInteger code = [self getCorrectCodeForFaultString:dataString];
+    if (code == 0) {
+        isFaultPresent = NO;
+        dataString = [self getDataStringFromData:[data subdataWithRange:NSMakeRange(4, 4)]];
+        faultError = [self getCorrectStringForWarningString:dataString];
+        
+    }
+    else {
+        faultError = [self faultWithCode:code];
+    }
+    UIColor *applicableColor;
+    if ([faultError isEqualToString:@"OK"]) {
+        applicableColor = [UIColor greenColor];
+    }
+    else {
+        if (!isFaultPresent) {
+            applicableColor = [UIColor yellowColor];
+        }
+        else {
+            applicableColor = [UIColor redColor];
+        }
+    }
+//    NSString *faultError = [self faultWithCode:code];
+    if (faultError) {
+        NSMutableAttributedString *mutAttrStr = [[NSMutableAttributedString alloc]initWithString:@"System Status:"];
+        NSAttributedString *attrStr = [[NSAttributedString alloc]initWithString:faultError attributes:@{
+                                                                                                        NSBackgroundColorAttributeName: applicableColor ,
+                                                                                                        NSForegroundColorAttributeName: [UIColor whiteColor]
+                                                                                                            }];
+        [mutAttrStr appendAttributedString:attrStr];
+        [self.lblSystemStatus setAttributedText:mutAttrStr];
+    }
+    NSData *data0, *data1, *data2;
     data0 = [data subdataWithRange:NSMakeRange(14, 4)];
     data1 = [data subdataWithRange:NSMakeRange(18, 2)];
-    
+    data2 = [data subdataWithRange:NSMakeRange(12, 2)];
     NSInteger val1 = [LFUtilities getValueFromHexData:data0];
     NSInteger val2 = [LFUtilities getValueFromHexData:data1];
-        
+    NSInteger vunb = [LFUtilities getValueFromHexData:data2];
+    
+    LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.1f %%", (vunb/100.0)] Code:@"TCR"];
     NSInteger hours = val1/3600; //Hours
     NSInteger minutesVal = val1%3600;
     NSInteger minutes = minutesVal/60; //Minutes
@@ -271,10 +310,161 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     
     LFDisplay *mst = [[LFDisplay alloc] initWithKey:@"Run Time in Hours" Value:[NSString stringWithFormat:@"%02d:%02d:%02d hrs", (int)hours, (int)minutes, (int)seconds] Code:@"RT"];
     LFDisplay *scnt = [[LFDisplay alloc] initWithKey:@"Start Count - Number of starts that have occurred" Value:[NSString stringWithFormat:@"%d", (int)val2] Code:@"SCNT"];
-    NSArray *arr = @[mst, scnt];
+    NSArray *arr = @[mst, scnt,vunbaised];
     [sectionArray replaceObjectAtIndex:3 withObject:arr];
     [tblDisplay reloadData];
 
+}
+
+- (NSInteger)getCorrectCodeForFaultString:(NSString *)dataString {
+    NSInteger codeVal = 0;
+    if ([dataString isEqualToString:@"00000000"]) {
+        codeVal = 0;
+    }
+    else if ([dataString isEqualToString:@"00000001"]) {
+        codeVal = 1;
+    }
+    else if ([dataString isEqualToString:@"00000002"]) {
+        codeVal = 2;
+    }
+    else if ([dataString isEqualToString:@"00000004"]) {
+        codeVal = 3;
+    }
+    else if ([dataString isEqualToString:@"00000008"]) {
+        codeVal = 4;
+    }
+    else if ([dataString isEqualToString:@"00000010"]) {
+        codeVal = 5;
+    }
+    else if ([dataString isEqualToString:@"00000020"]) {
+        codeVal = 6;
+    }
+    else if ([dataString isEqualToString:@"00000040"]) {
+        codeVal = 7;
+    }
+    else if ([dataString isEqualToString:@"00000080"]) {
+        codeVal = 8;
+    }
+    else if ([dataString isEqualToString:@"00000100"]) {
+        codeVal = 9;
+    }
+    else if ([dataString isEqualToString:@"00000200"]) {
+        codeVal = 10;
+    }
+    else if ([dataString isEqualToString:@"00000400"]) {
+        codeVal = 11;
+    }
+    else if ([dataString isEqualToString:@"00010000"]) {
+        codeVal = 100;
+    }
+    else if ([dataString isEqualToString:@"00020000"]) {
+        codeVal = 101;
+    }
+    else if ([dataString isEqualToString:@"00040000"]) {
+        codeVal = 102;
+    }
+    else if ([dataString isEqualToString:@"00008000"]) {
+        codeVal = 61166;
+    }
+    return codeVal;
+}
+
+- (NSString *)getCorrectStringForWarningString:(NSString *)dataString {
+    NSString *errorVal = @"OK";
+    if ([dataString isEqualToString:@"00000000"]) {
+        errorVal = @"OK";
+    }
+    else if ([dataString isEqualToString:@"00000001"]) {
+        errorVal = @"Warning on overcurrent";
+    }
+    else if ([dataString isEqualToString:@"00000002"]) {
+        errorVal = @"Warning on undercurrent ";
+    }
+    else if ([dataString isEqualToString:@"00000004"]) {
+        errorVal = @"Warning on current unbalance";
+    }
+    else if ([dataString isEqualToString:@"00000020"]) {
+        errorVal = @"Warning on ground fault";
+    }
+    else if ([dataString isEqualToString:@"00000040"]) {
+        errorVal = @"Warning on High Power Fault";
+    }
+    else if ([dataString isEqualToString:@"00000080"]) {
+        errorVal = @"Warning on low power fault ";
+    }
+    else if ([dataString isEqualToString:@"00008000"]) {
+        errorVal = @"Undefined Warning condition";
+    }
+
+
+    return errorVal;
+}
+
+- (NSString *)getDataStringFromData:(NSData *)data {
+    uint8_t *bytesArr = (uint8_t*)[data bytes];
+    NSMutableString *dataString = [[NSMutableString alloc] init];
+    for (NSInteger i = [data length]-1; i >= 0; i-- ) {
+        [dataString appendFormat:@"%02x", bytesArr[i]];
+    }
+    return dataString;
+}
+
+- (NSString *)faultWithCode:(NSInteger)code
+{
+    NSString *error = @"";
+    switch (code) {
+        case 0:
+            error = @"OK";
+            break;
+        case 1:
+            error = @"Tripped on overcurrent";
+            break;
+        case 2:
+            error = @"Tripped on undercurrent";
+            break;
+        case 3:
+            error = @"Tripped on current unbalance";
+            break;
+        case 4:
+            error = @"Tripped on current single-phasing";
+            break;
+        case 5:
+            error = @"Tripped on contactor failure";
+            break;
+        case 6:
+            error = @"Tripped on ground fault";
+            break;
+        case 7:
+            error = @"Tripped on High Power Fault";
+            break;
+        case 8:
+            error = @"Tripped on low power fault";
+            break;
+        case 9:
+            error = @"Power Outage fault";
+            break;
+        case 10:
+            error = @"Trip or holdoff due to PTC fault";
+            break;
+        case 11:
+            error = @"Tripped triggered from remote source";
+            break;
+        case 100:
+            error = @"Low voltage Holdoff";
+            break;
+        case 101:
+            error = @"High Voltage Holdoff";
+            break;
+        case 102:
+            error = @"Voltage Unbalanced Holdoff";
+            break;
+        case 61166:
+            error = @"Undefined trip condition";
+            break;
+        default:
+            break;
+    }
+    return error;
 }
 
 #pragma mark - Table view data source
@@ -380,4 +570,16 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 
 }
+
+#pragma Peripheral Disconnected Notification
+
+- (void)peripheralDisconnected {
+ [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Little Fuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+     if ([alert isKindOfClass:[UIAlertController class]]) {
+         [alert dismissViewControllerAnimated:NO completion:nil];
+     }
+ }];
+}
+
+
 @end

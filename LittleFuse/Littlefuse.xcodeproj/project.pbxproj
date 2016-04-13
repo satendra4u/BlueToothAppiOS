@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */; };
+		21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */; };
 		93165BD21C902C3F005462CB /* LFInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93165BD11C902C3F005462CB /* LFInfoViewController.m */; };
 		932A33141C8EFD9D0009BDF6 /* LFFaultsDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 932A33131C8EFD9D0009BDF6 /* LFFaultsDetailsController.m */; };
 		932EF6DB1C5251DC0098DFD4 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 932EF6D01C5251DC0098DFD4 /* LICENSE.txt */; };
@@ -76,6 +78,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCharactersticBitDisplayCell.h; sourceTree = "<group>"; };
+		21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCharactersticBitDisplayCell.m; sourceTree = "<group>"; };
+		21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LFCharactersticBitDisplayCell.xib; sourceTree = "<group>"; };
 		93165BD01C902C3F005462CB /* LFInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFInfoViewController.h; sourceTree = "<group>"; };
 		93165BD11C902C3F005462CB /* LFInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFInfoViewController.m; sourceTree = "<group>"; };
 		9319622D1C50BF100036D28B /* LFConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LFConstants.h; sourceTree = "<group>"; };
@@ -356,6 +361,9 @@
 				93EC63361C9A9424001ACB9C /* LFConfigureButtonsCell.xib */,
 				937B839C1C59EB4C008D1063 /* LFDeviceTableViewCell.h */,
 				937B839D1C59EB4C008D1063 /* LFDeviceTableViewCell.m */,
+				21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */,
+				21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */,
+				21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */,
 			);
 			path = "Custom Cells";
 			sourceTree = "<group>";
@@ -519,6 +527,7 @@
 				933600C11C50A81D007CD61A /* Assets.xcassets in Resources */,
 				932EF6DC1C5251DC0098DFD4 /* OpenSans-Bold.ttf in Resources */,
 				933600BF1C50A81D007CD61A /* Main.storyboard in Resources */,
+				21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */,
 				932EF6E51C5251DC0098DFD4 /* OpenSans-SemiboldItalic.ttf in Resources */,
 				932EF6E11C5251DC0098DFD4 /* OpenSans-Light.ttf in Resources */,
 				932EF6E31C5251DC0098DFD4 /* OpenSans-Regular.ttf in Resources */,
@@ -559,6 +568,7 @@
 				933600B91C50A81D007CD61A /* LFAppDelegate.m in Sources */,
 				9346E4A71C5B661C004D681D /* LFDisplay.m in Sources */,
 				93EC633E1C9ABB01001ACB9C /* LFRTDViewController.m in Sources */,
+				21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */,
 				93165BD21C902C3F005462CB /* LFInfoViewController.m in Sources */,
 				937B83A41C59EB4C008D1063 /* LFBluetoothManager.m in Sources */,
 				937B83A11C59EB4C008D1063 /* LFCharactersticDisplayCell.m in Sources */,
@@ -646,8 +656,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -669,7 +679,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PROVISIONING_PROFILE = "ed5e6217-d832-435a-af05-3c616f4b8817";
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -691,8 +701,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -707,7 +717,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PROVISIONING_PROFILE = "ed5e6217-d832-435a-af05-3c616f4b8817";
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -718,8 +728,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -727,7 +737,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littlefuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "ed5e6217-d832-435a-af05-3c616f4b8817";
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 			};
 			name = Debug;
 		};
@@ -736,8 +746,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -745,7 +755,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littlefuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "ed5e6217-d832-435a-af05-3c616f4b8817";
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 			};
 			name = Release;
 		};

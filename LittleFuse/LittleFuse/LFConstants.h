@@ -95,4 +95,7 @@
 #define attribute_voltage   @"voltage"
 #define attribute_other     @"other"
 
+#define PeripheralDidDisconnect @"PeripheralDidDisconnectNotification"
+#define LittleFuseNotificationCenter [NSNotificationCenter defaultCenter]
+
 #endif /* LFConstants_h */

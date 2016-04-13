@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface LFRealTimeViewController : LFBaseViewController
+@property (weak, nonatomic) IBOutlet UILabel *lblSystemStatus;
 
 @end

@@ -15,9 +15,11 @@
 #import "LFConfigureButtonsCell.h"
 #import "LFCommunicationSettingsController.h"
 #import "LFRTDViewController.h"
+#import "LFCharactersticBitDisplayCell.h"
 
 #define BUTTON_CELL_ID @"LFConfigureButtonsCellID"
-@interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate>
+#define TOGGLE_CELL_ID @"LFCharactersticBitDisplayCell"
+@interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol>
 {
     
     __weak IBOutlet UITableView *tblConfigDisplay;
@@ -37,6 +39,8 @@
 
     
 }
+@property (nonatomic) NSUInteger hardwareConfigVal;
+@property (nonatomic) NSUInteger featureEndisVal;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentControl;
 @property (weak, nonatomic) IBOutlet UILabel *deviceId;
 
@@ -47,14 +51,14 @@
 @implementation LFConfigurationViewController
 
 const char basicMemMap[] = {0x0A,
-    0x0E, 0x12, 0x16, 0x1A, 0x20, 0x14, 0x26, 0x2A, 0x2E, 0x32};
+    0x0E, 0x12, 0x16, 0x1A, 0x20, 0x14, 0x26, 0x2A, 0x2E, 0x32, 0x36, 0x38};
 
-const char basicMemFieldLens[] = { 0x04, 0x04, 0x02, 0x04, 0x04, 0x02, 0x02, 0x04, 0x04, 0x04, 0x04
+const char basicMemFieldLens[] = { 0x04, 0x04, 0x02, 0x04, 0x04, 0x02, 0x02, 0x04, 0x04, 0x04, 0x04, 0x02, 0x02
 };
 
 const char advance_MemMap[] = {0x06, 0x08, 0x1E, 0x22, 0x24, 0x3A, 0x3E, 0x40,
-    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56, 0x5A};
-const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x4, 0x04};
+    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56 ,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A};
+const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04};
 
 
 - (void)viewDidLoad
@@ -65,6 +69,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     basicValuesArray = [[NSMutableArray alloc] initWithCapacity:0];
 
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
+    [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticBitDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:TOGGLE_CELL_ID];
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFConfigureButtonsCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:BUTTON_CELL_ID];
 
     tblConfigDisplay.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -82,29 +87,36 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 //    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
 //    [self readCharactisticsWithIndex:currentIndex];
 
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
 }
 
 - (void)configArr
 {
+    // Voltage Settings
     LFDisplay *lowVoltage = [[LFDisplay alloc] initWithKey:@"Low Voltage" Value:@"" Code:@"LV"];
     LFDisplay *highVoltage = [[LFDisplay alloc] initWithKey:@"High Voltage" Value:@"" Code:@"HV"];
     LFDisplay *voltageUnb = [[LFDisplay alloc] initWithKey:@"Voltage  Unbalance" Value:@"" Code:@"VUB"];
     
+    // Current Settings
     LFDisplay *overCurrent = [[LFDisplay alloc] initWithKey:@"Over Current" Value:@"" Code:@"OC"];
     LFDisplay *underCurrent = [[LFDisplay alloc] initWithKey:@"Under Current" Value:@"" Code:@"UC"];
     LFDisplay *currentUnb = [[LFDisplay alloc] initWithKey:@"Current  Unbalance" Value:@"" Code:@"CUB"];
     LFDisplay *tripClass = [[LFDisplay alloc] initWithKey:@"Trip Class" Value:@"" Code:@"TC"];
     
+    // Timer Settings
     LFDisplay *powerUpTimer = [[LFDisplay alloc] initWithKey:@"Power up timer" Value:@"" Code:@"RD0"];
-
     LFDisplay *rapidTimer = [[LFDisplay alloc] initWithKey:@"Rapid-cycle timer" Value:@"" Code:@"RD1"];
     LFDisplay *motorCoolDown = [[LFDisplay alloc] initWithKey:@"Motor cool-down timer" Value:@"" Code:@"RD2"];
     LFDisplay *dryWellRecover = [[LFDisplay alloc] initWithKey:@"Dry-well recovery timer" Value:@"" Code:@"RD3"];
     
-    basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec"];
+    // Restart Attempts
+    LFDisplay *restartAttemptsUCTrips = [[LFDisplay alloc] initWithKey:@"Restart attempts for undercurrent trips" Value:@"" Code:@"RU"];
+    LFDisplay *restartAttemptsOtherTrips = [[LFDisplay alloc] initWithKey:@"Restart attempts for all other trips" Value:@"" Code:@"RF"];
+    
+    basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
     advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""];
     
-    basicConfigDetails = [[NSMutableArray alloc] initWithObjects:lowVoltage, highVoltage, voltageUnb, overCurrent, underCurrent, currentUnb, tripClass, powerUpTimer, rapidTimer, motorCoolDown,  dryWellRecover,nil];
+    basicConfigDetails = [[NSMutableArray alloc] initWithObjects:lowVoltage, highVoltage, voltageUnb, overCurrent, underCurrent, currentUnb, tripClass, powerUpTimer, rapidTimer, motorCoolDown,  dryWellRecover,restartAttemptsUCTrips,restartAttemptsOtherTrips,nil];
     
     LFDisplay *currentTansformer = [[LFDisplay alloc] initWithKey:@"Current Transformer Ratio" Value:@"" Code:@"CT"];
     LFDisplay *pt = [[LFDisplay alloc] initWithKey:@"Potential Transformer Ratio" Value:@"" Code:@"PT"];
@@ -125,33 +137,50 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     LFDisplay *stallTripDelay = [[LFDisplay alloc] initWithKey:@"Stall Trip Delay" Value:@"" Code:@"STTD"];
     
     LFDisplay *stallInhibt = [[LFDisplay alloc] initWithKey:@"Stall Inhibit Delay" Value:@"" Code:@"STID"];
-    LFDisplay *fetaure = [[LFDisplay alloc] initWithKey:@"Feature enable/disable Mask" Value:@"" Code:@"ENDIS"];
+    
+    LFDisplay *bitZero = [[LFDisplay alloc] initWithKey:@"GF Trip" Value:@"" Code:@"GFT"];
+    LFDisplay *bitOne = [[LFDisplay alloc] initWithKey:@"VUB Trip" Value:@"" Code:@"VUBT"];
+    LFDisplay *bitTwo = [[LFDisplay alloc] initWithKey:@"CUB Trip" Value:@"" Code:@"CUBT"];
+    LFDisplay *bitThree = [[LFDisplay alloc] initWithKey:@"UC Trip" Value:@"" Code:@"UCT"];
+    LFDisplay *bitFour = [[LFDisplay alloc] initWithKey:@"OC Trip" Value:@"" Code:@"OCT"];
+    LFDisplay *bitSix = [[LFDisplay alloc] initWithKey:@"LPR Trip" Value:@"" Code:@"LPRT"];
+    LFDisplay *bitSeven = [[LFDisplay alloc] initWithKey:@"HPR Trip" Value:@"" Code:@"HPRT"];
+    LFDisplay *configBitFive = [[LFDisplay alloc] initWithKey:@"Zero L2 and L3 voltages" Value:@"" Code:@"ZV"];
+    LFDisplay *configBitSix = [[LFDisplay alloc] initWithKey:@"Single Phase voltage" Value:@"" Code:@"SPV"];
+    LFDisplay *configBitSeven = [[LFDisplay alloc] initWithKey:@"Single Phase current" Value:@"" Code:@"SPC"];
+    LFDisplay *configBitEight = [[LFDisplay alloc] initWithKey:@"Disable RP" Value:@"" Code:@"RP"];
+    LFDisplay *configBitNine = [[LFDisplay alloc] initWithKey:@"Low Control voltage trip" Value:@"" Code:@"LCVT"];
+    LFDisplay *configBitTen = [[LFDisplay alloc] initWithKey:@"Stall 1" Value:@"" Code:@"STAL"];
+    LFDisplay *configBitEleven = [[LFDisplay alloc] initWithKey:@"Low KV mode" Value:@"" Code:@"LKV"];
+    LFDisplay *configBitTwelve = [[LFDisplay alloc] initWithKey:@"CBA phase rotation" Value:@"" Code:@"CBA"];
 
-    LFDisplay *cnfg = [[LFDisplay alloc] initWithKey:@"Hardware Configuration Fields" Value:@"00000000" Code:@"CNFG"];
+
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
     
-    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, uctd, cutd, lin, gftc, gftd, gfib, lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, fetaure, cnfg, nil];
+    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, uctd, cutd, lin, gftc, gftd, gfib, lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
     
     isBasic = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
     
     
-    basicFormateArray = @[@"H", @"H", @"B", @"H", @"H", @"B",  @"B",  @"L", @"L", @"L", @"L"];
-    advancedFormateArray = @[@"B", @"B", @"L", @"Q", @"L", @"H", @"Q", @"L", @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C"];
+    basicFormateArray = @[@"H", @"H", @"B", @"H", @"H", @"B",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
+    advancedFormateArray = @[@"B", @"B", @"L", @"Q", @"L", @"H", @"Q", @"L", @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C"];
+
     currentIndex = 0;
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    [self readCharactisticsWithIndex:currentIndex];
+    isAdvanceLoded = NO;
 
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
-    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-    [self readCharactisticsWithIndex:currentIndex];
-    isAdvanceLoded = NO;
+    
 
 }
 
@@ -165,9 +194,10 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     if (isBasic) {
+        return 4;
+    } else {
         return 3;
     };
-    return 1;
 }
 
 
@@ -181,21 +211,47 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             return 4;
         } else if (section == 2) {
             return 4;
+        } else if (section == 3) {
+            return 2;
         }
         return 0;
 
     } else {
-        return  advanceConfigDetails.count+1;
+        if (section == 0) {
+           return  14;
+        } else if (section == 1) {
+            return 7;
+        } else if (section == 2) {
+            return 9;
+        }
+        return 0;
     }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (!isBasic  && indexPath.row == advanceConfigDetails.count) {
+    //Last cell to be shown.
+    if (!isBasic  && indexPath.section == 2 && indexPath.row == 8) {
         LFConfigureButtonsCell *cell = (LFConfigureButtonsCell *)[tableView dequeueReusableCellWithIdentifier:BUTTON_CELL_ID forIndexPath:indexPath];
         [cell.btnCommunication addTarget:self action:@selector(showCommunication:) forControlEvents:UIControlEventTouchUpInside];
         [cell.btnRTD addTarget:self action:@selector(showRTD:) forControlEvents:UIControlEventTouchUpInside];
         return cell;
     }
+    
+    if (!isBasic && indexPath.section != 0) {
+        LFCharactersticBitDisplayCell *cell = (LFCharactersticBitDisplayCell *)[tableView dequeueReusableCellWithIdentifier:TOGGLE_CELL_ID forIndexPath:indexPath];
+        cell.path = indexPath;
+        cell.toggleDelegate = self;
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        if (indexPath.section == 1) {
+            [cell updateValues:advanceConfigDetails[indexPath.row + 14]];
+            return cell;
+        }
+        else if(indexPath.section == 2){
+            [cell updateValues:advanceConfigDetails[indexPath.row + 21]];
+            return cell;
+        }
+    }
+    
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tableView dequeueReusableCellWithIdentifier:CHARACTER_DISPLAY_CELL_ID forIndexPath:indexPath];
     if (isBasic) {
         NSInteger cont = 0;
@@ -214,28 +270,45 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    if (!isBasic) {
-        return nil;
-    }
-    
-    UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
-    UILabel *aLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, 200, 40)];
-    switch (section) {
-        case 0:
-            aLabel.text = @"Voltage Settings";
-            break;
-        case 1:
-            aLabel.text = @"Current Settings";
-            break;
-        case 2:
-            aLabel.text = @"Timer  Settings";
-            break;
+{ UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
+    UILabel *aLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, CGRectGetWidth(tableView.frame), 40)];
 
-            
-        default:
-            break;
+    if (!isBasic) {
+        
+        switch (section) {
+            case 0:
+                return nil;
+                case 1:
+                aLabel.text = @"Feature enable/disable mask";
+                break;
+                case 2:
+                aLabel.text = @"Hardware Configuration Fields";
+                break;
+                
+            default:
+                break;
+        }
+    } else {
+        
+        switch (section) {
+            case 0:
+                aLabel.text = @"Voltage Settings";
+                break;
+            case 1:
+                aLabel.text = @"Current Settings";
+                break;
+            case 2:
+                aLabel.text = @"Timer  Settings";
+                break;
+            case 3:
+                aLabel.text = @"Restart Attempts";
+                
+                
+            default:
+                break;
+        }
     }
+
     aLabel.font = [UIFont fontWithName:AERIAL_BOLD size:14.0];
     aLabel.textColor = [UIColor colorWithRed:17.0/255 green:17.0/255 blue:17.0/255 alpha:1.0];
     aLabel.backgroundColor = [UIColor clearColor];
@@ -246,7 +319,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (!isBasic && indexPath.row == advanceConfigDetails.count) {
+    if (!isBasic && indexPath.section == 2 && indexPath.row == 8) {
         return 80.0;
     }
     return 75.0;
@@ -257,12 +330,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     if (isBasic) {
         return 44.0;
     }
-    return 0.01;
+    return 44.0;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (!isBasic && advanceConfigDetails.count == indexPath.row) {
+    if (!isBasic && indexPath.section != 0) {
         return;
     }
     NSInteger cont = 0;
@@ -283,6 +356,28 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     editing.selectedText = cell.lblKey.text;
     editing.delegate = self;
     editing.showAuthentication = YES;
+    [navController setViewControllers:@[editing]];
+    [self.navigationController presentViewController:navController animated:NO completion:nil];
+    
+}
+
+
+- (void) toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
+    LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+    LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+    if (indexPath.section == 1) {
+        selectedTag = indexPath.row+14;
+    } else if (indexPath.section == 2) {
+        selectedTag = indexPath.row + 21;
+    }
+    
+    self.providesPresentationContextTransitionStyle = YES;
+    self.definesPresentationContext = YES;
+    [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+    [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+    editing.delegate = self;
+    editing.showAuthentication = YES;
+    editing.isAdvConfig = YES;
     [navController setViewControllers:@[editing]];
     [self.navigationController presentViewController:navController animated:NO completion:nil];
     
@@ -377,6 +472,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)getValuesFromData:(NSData *)data withForamte:(NSString *)formate
 {
+    NSLog(@"data comming : currentIndex %lu data %@", currentIndex, data);
     
     NSUInteger val = [LFUtilities getValueFromHexData:data];
     
@@ -433,7 +529,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             break;
         case 'K': //formate H with Kilo Wats conversion
         {
-            convertedVal = [NSString stringWithFormat:@"%.3f KW", val/(100.0*1000)];
+            convertedVal = [NSString stringWithFormat:@"%.3f KW", ((float)val/100000.0)];
         }
             break;
 
@@ -448,12 +544,73 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         [basicConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
     } else {
         LFDisplay *display = [advanceConfigDetails objectAtIndex:currentIndex];
-        display.value = convertedVal;
+        NSLog(@"current index:%ld,byteValue:%lu",(long)currentIndex,(unsigned long)val);
+        if (!isBasic) {
+            if (currentIndex == 14 ) {
+                _featureEndisVal = val;
+                NSLog(@"_featureEndisVal index featureval:%lu",(unsigned long)_featureEndisVal);
+            } 
+            else if (currentIndex == 21 ) {
+                _hardwareConfigVal = val;
+                NSLog(@"_hardwareConfigVal index featureval:%lu",(unsigned long)_hardwareConfigVal);
+            }
+        }
+        switch (currentIndex) {
+            case 14:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
+                break;
+                case 15:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 1))? 1:0];
+                break;
+            case 16:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 2))? 1:0];
+                break;
+            case 17:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 3))? 1:0];
+                break;
+            case 18:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 4))? 1:0];
+                break;
+            case 19:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 6))? 1:0];
+                break;
+            case 20:
+                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 7))? 1:0];
+                break;
+            case 21:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
+                break;
+            case 22:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
+                break;
+            case 23:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                break;
+            case 24:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 8))? 1:0];
+                break;
+            case 25:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
+                break;
+            case 26:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 10))? 1:0];
+                break;
+            case 27:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 11))? 1:0];
+                break;
+            case 28:
+                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
+                break;
+            default:
+                display.value = convertedVal;
+                break;
+        }
+        
         [advanceConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
 
     }
     
-    DLog(@"data %@", data);
+    DLog(@"currentIndex %lu data %@", currentIndex, data);
     [tblConfigDisplay reloadData];
     
 }
@@ -461,6 +618,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)writeDataToIndex:(NSInteger)index withValue:(float)val
 {
+    NSLog(@"WriteVal :%f array:%@",val, advanceConfigDetails);
+
     isWrite = YES;
     currentIndex = index;
     NSString *formate = isBasic ? basicFormateArray[currentIndex]: advancedFormateArray[currentIndex];
@@ -491,11 +650,11 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     NSInteger convertedVal = (NSInteger)val;
     char* bytes = (char*) &convertedVal;
     
-    for (int i=0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
         if (i < 8) {
             data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
         } else {
-            if (i== 8) {
+            if (i == 8) {
                 data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
             } else if (i == 10){
                 data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
@@ -513,6 +672,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
+    [tblConfigDisplay reloadData];
 
 }
 
@@ -538,6 +698,81 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     }
     
     [self writeDataToIndex:selectedTag withValue:txt.floatValue];
+}
+
+- (void)toggleSelectedWithSuccess:(BOOL)isSuccess {
+    if (!isSuccess) {
+        [tblConfigDisplay reloadData];
+        return;
+    }
+    NSLog(@"before Array:%@",advanceConfigDetails);
+    LFDisplay *display = advanceConfigDetails[selectedTag];
+    display.value = [NSString stringWithFormat:@"%d", !display.value.boolValue];
+    [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
+    
+    if (!isBasic) {
+        if (selectedTag >= 14 && selectedTag <= 20) {
+            switch (selectedTag) {
+                case 14:
+                    _featureEndisVal  ^= 1 << 0;
+                    break;
+                case 15:
+                    _featureEndisVal  ^= 1 << 1;
+                    break;
+                case 16:
+                    _featureEndisVal  ^= 1 << 2;
+                    break;
+                case 17:
+                    _featureEndisVal  ^= 1 << 3;
+                    break;
+                case 18:
+                    _featureEndisVal  ^= 1 << 4;
+                    break;
+                case 19:
+                    _featureEndisVal  ^= 1 << 6;
+                    break;
+                case 20:
+                    _featureEndisVal  ^= 1 << 7;
+                    break;
+                default:
+                    break;
+            }
+            [self writeDataToIndex:selectedTag withValue:(float)_featureEndisVal];
+        } else if (selectedTag >= 21 && selectedTag <= 28) {
+            switch (selectedTag) {
+                case 21:
+                    _hardwareConfigVal  ^= 1 << 5;
+                    break;
+                case 22:
+                    _hardwareConfigVal  ^= 1 << 6;
+                    break;
+                case 23:
+                    _hardwareConfigVal  ^= 1 << 7;
+                    break;
+                case 24:
+                    _hardwareConfigVal  ^= 1 << 8;
+                    break;
+                case 25:
+                    _hardwareConfigVal  ^= 1 << 9;
+                    break;
+                case 26:
+                    _hardwareConfigVal  ^= 1 << 10;
+                    break;
+                case 27:
+                    _hardwareConfigVal  ^= 1 << 11;
+                    break;
+                case 28:
+                    _hardwareConfigVal  ^= 1 << 12;
+                    break;
+                default:
+                    break;
+            }
+            [self writeDataToIndex:selectedTag withValue:(float)_hardwareConfigVal];
+        }
+    }
+    NSLog(@"After Array:%@",advanceConfigDetails);
+
+    [tblConfigDisplay reloadData];
 }
 
  - (void)showOperationCompletedAlert
@@ -570,5 +805,15 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 {
     NSLog(@"%s", __func__);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+#pragma Peripheral Disconnected Notification
+
+- (void)peripheralDisconnected {
+    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Little Fuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            [alert dismissViewControllerAnimated:NO completion:nil];
+        }
+    }];
 }
 @end

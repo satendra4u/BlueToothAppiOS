@@ -343,6 +343,22 @@
         case 10:
             error = @"PTC";
             break;
+//        case 11:// uncomment data
+//            error = @"PTC";
+//            break;
+//        case 100:
+//            error = @"PTC";
+//            break;
+//        case 101:
+//            error = @"PTC";
+//            break;
+//        case 102:
+//            error = @"PTC";
+//            break;
+//        case 61166:
+//            error = @"PTC";
+//            break;
+//            
 
     
         default:

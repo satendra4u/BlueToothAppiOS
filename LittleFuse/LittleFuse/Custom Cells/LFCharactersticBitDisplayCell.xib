@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="LFCharactersticBitDisplayCell" rowHeight="85" id="hgA-Ej-WE1" customClass="LFCharactersticBitDisplayCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="85"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="hgA-Ej-WE1" id="3pb-qd-vXQ">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="84"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vXf-IF-oAD">
+                        <rect key="frame" x="10" y="17" width="50" height="50"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R44-S3-4ue">
+                                <rect key="frame" x="25" y="18" width="0.0" height="14"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="14" id="3ZU-BV-wCx"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" id="SgC-Ax-CUz"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" id="t5N-LN-Tyc"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="12"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="t5N-LN-Tyc"/>
+                                    </mask>
+                                </variation>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.41960784309999999" blue="0.2274509804" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="R44-S3-4ue" firstAttribute="centerX" secondItem="vXf-IF-oAD" secondAttribute="centerX" id="2Kf-YF-tJ0"/>
+                            <constraint firstItem="R44-S3-4ue" firstAttribute="centerY" secondItem="vXf-IF-oAD" secondAttribute="centerY" id="8qe-8t-ndL"/>
+                            <constraint firstItem="R44-S3-4ue" firstAttribute="centerY" secondItem="vXf-IF-oAD" secondAttribute="centerY" id="N7c-h2-QDq"/>
+                            <constraint firstAttribute="width" constant="50" id="VET-XT-UmV"/>
+                            <constraint firstItem="R44-S3-4ue" firstAttribute="centerX" secondItem="vXf-IF-oAD" secondAttribute="centerX" id="ehC-bd-eLz"/>
+                            <constraint firstAttribute="height" constant="50" id="nex-xo-16d"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="25"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="2Kf-YF-tJ0"/>
+                                <exclude reference="8qe-8t-ndL"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DdN-2E-e2F">
+                        <rect key="frame" x="70" y="12" width="188" height="60"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="60" id="iFb-y2-uzE"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="15"/>
+                        <color key="textColor" red="0.32549019610000002" green="0.32549019610000002" blue="0.32549019610000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="iny-nH-FrY">
+                        <rect key="frame" x="263" y="26" width="51" height="31"/>
+                        <connections>
+                            <action selector="changeSwitchValueAction:" destination="hgA-Ej-WE1" eventType="valueChanged" id="WIg-Uu-iFg"/>
+                        </connections>
+                    </switch>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="DdN-2E-e2F" firstAttribute="leading" secondItem="vXf-IF-oAD" secondAttribute="trailing" constant="10" id="HbV-CD-Og0"/>
+                    <constraint firstItem="vXf-IF-oAD" firstAttribute="centerY" secondItem="3pb-qd-vXQ" secondAttribute="centerY" id="PLy-as-GNd"/>
+                    <constraint firstAttribute="trailing" secondItem="iny-nH-FrY" secondAttribute="trailing" constant="8" id="TMZ-GU-EdE"/>
+                    <constraint firstItem="iny-nH-FrY" firstAttribute="centerY" secondItem="3pb-qd-vXQ" secondAttribute="centerY" id="cB3-5w-hYv"/>
+                    <constraint firstItem="DdN-2E-e2F" firstAttribute="centerY" secondItem="3pb-qd-vXQ" secondAttribute="centerY" id="qe7-bX-ofz"/>
+                    <constraint firstItem="vXf-IF-oAD" firstAttribute="leading" secondItem="3pb-qd-vXQ" secondAttribute="leading" constant="10" id="trW-KR-mci"/>
+                    <constraint firstItem="iny-nH-FrY" firstAttribute="leading" secondItem="DdN-2E-e2F" secondAttribute="trailing" constant="5" id="zKe-Yb-noE"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="lblKey" destination="DdN-2E-e2F" id="uSU-Ac-GbV"/>
+                <outlet property="lblPrefix" destination="R44-S3-4ue" id="BDo-GL-rbU"/>
+                <outlet property="switchValue" destination="iny-nH-FrY" id="TI9-pQ-6e2"/>
+            </connections>
+            <point key="canvasLocation" x="504" y="268.5"/>
+        </tableViewCell>
+    </objects>
+</document>

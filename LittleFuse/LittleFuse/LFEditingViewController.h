@@ -12,6 +12,9 @@
 
 - (void)selectedValue:(NSString *)txt;
 
+@optional
+
+- (void)toggleSelectedWithSuccess:(BOOL)isSuccess;
 
 @end
 
@@ -25,6 +28,7 @@
 @property (nonatomic, strong) NSString *selectedText;
 
 @property (nonatomic, assign) BOOL showAuthentication;
+@property (nonatomic,assign) BOOL isAdvConfig;
 
 
 @end

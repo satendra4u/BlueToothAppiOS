@@ -122,6 +122,13 @@
 
 - (IBAction)authenticationCancel:(UIButton *)sender
 {
+    if (_isAdvConfig) {
+        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
+            [_delegate toggleSelectedWithSuccess:NO];
+            [self dismissViewControllerAnimated:NO completion:nil];
+            return;
+        }
+    }
     [self dismissViewControllerAnimated:NO completion:nil];
 
 }
@@ -143,6 +150,13 @@
         
         [self.textFiled becomeFirstResponder];
         self.lblTitleheader.text = _selectedText;
+        if (_isAdvConfig) {
+            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
+                [_delegate toggleSelectedWithSuccess:YES];
+                [self dismissViewControllerAnimated:NO completion:nil];
+                return;
+            }
+        }
         [self.view bringSubviewToFront:self.passwordView];
 
 
