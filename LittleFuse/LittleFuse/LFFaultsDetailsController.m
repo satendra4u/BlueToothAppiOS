@@ -8,9 +8,12 @@
 
 #import "LFFaultsDetailsController.h"
 #import "LFCharactersticDisplayCell.h"
+#import "LFBluetoothManager.h"
+
 
 @interface LFFaultsDetailsController ()
 {
+    BOOL canContinueTimer;
     NSMutableArray *detailsArr;
     NSMutableDictionary *faultDict;
 }
@@ -30,18 +33,45 @@
     detailsArr = [[NSMutableArray alloc] initWithCapacity:0];
     [_faultDetails registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:nil] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [_faultDetails setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
-
+    
     self.faultName.text = _errorType;
     self.faultDate.text = _errorDate;
+    canContinueTimer = YES;
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
 
     [self convertFaultData];
-
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
+
+- (void)appEnteredBackground {
+    [[LFBluetoothManager  sharedManager] disconnectDevice];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:YES];
+    canContinueTimer = NO;
+    self.navigationItem.title = @"";
+    [[LFBluetoothManager sharedManager] stopFaultTimer];
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    canContinueTimer = YES;
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
     
 }
+
+- (void)updateFaultData {
+    if(!canContinueTimer) {
+        return;
+    }
+    [LFBluetoothManager sharedManager].tCurIndex = 1;
+    [LFBluetoothManager sharedManager].canContinueTimer = YES;
+    [[LFBluetoothManager sharedManager] readFaultData];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+}
+
 - (void)convertFaultData
 {
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -54,7 +84,6 @@
     [detailsArr addObject:faultDict[FAULT_CURRENT_DETAILS]];
     [detailsArr addObject:faultDict[FAULT_POWER_DETAILS]];
     [detailsArr addObject:faultDict[OTHER_FAULTS]];
-
     [self.faultDetails reloadData];
 }
 
@@ -152,6 +181,7 @@
     [df setDateFormat:@"yyyy-MM-dd HH:mm a"];
     
     NSString *faultdate = [df stringFromDate:date];
+    DLog(@"Fault date = %@", faultdate);
     
     NSInteger Vab = [LFUtilities getValueFromHexData:data2];
     
@@ -160,12 +190,12 @@
     NSInteger Vca = [LFUtilities getValueFromHexData:data4];
     
     NSInteger tcrVal = [LFUtilities getValueFromHexData:data5];
+//    NSLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
+    LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"L1-L2" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vab/100.0f)] Code:@"L1-L2"];
     
-    LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"L1-L2" Value:[NSString stringWithFormat:@"%d VAC", (int)Vab/100] Code:@"L1-L2"];
+    LFDisplay *bToc = [[LFDisplay alloc] initWithKey:@"L2-L3" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vbc/100.0f)] Code:@"L2-L3"];
     
-    LFDisplay *bToc = [[LFDisplay alloc] initWithKey:@"L2-L3" Value:[NSString stringWithFormat:@"%d VAC", (int)Vbc/100] Code:@"L2-L3"];
-    
-    LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%d VAC", (int)Vca/100] Code:@"L3-L1"];
+    LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vca/100.0f)] Code:@"L3-L1"];
     
     LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCR"];;
     
@@ -282,17 +312,21 @@
     
     
     NSString *type = [LFUtilities conversionJFormate:data3];
-
     
-    CGFloat totalPower = (Pa + Pb + Pc)/1000;
     
-    LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"Power" Value:[NSString stringWithFormat:@"%.3f KW", totalPower/100.0] Code:@"P"];
+    CGFloat totalPower = (Pa + Pb + Pc)/100000.0f;
+    LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"Power" Value:[NSString stringWithFormat:@"%.3f KW", totalPower] Code:@"P"];
     
     LFDisplay *pfa = [[LFDisplay alloc] initWithKey:@"Power Factor" Value:type Code:@"PF"];
     
     
     LFDisplay *phaseSequence = [[LFDisplay alloc] initWithKey:@"Phase Sequence" Value:[NSString stringWithFormat:@"%d", (int)seq] Code:@"PS"];
-    
+    if (seq == 0) {
+        phaseSequence.value = @"ABC";
+    }
+    else {
+        phaseSequence.value = @"CBA";
+    }
     
     NSArray *powerDetails = @[aTob, pfa];
     
@@ -318,11 +352,12 @@
     data1 = [data subdataWithRange:range];
     range = NSMakeRange(range.location + range.length, len);
     data2 = [data subdataWithRange:range];
-    
+    DLog(@"Other Data: %@", data);
     NSInteger vub = [LFUtilities getValueFromHexData:data0];
     NSInteger cub = [LFUtilities getValueFromHexData:data1];
     NSInteger freq = [LFUtilities getValueFromHexData:data2];
-    
+    DLog(@"Voltage unbalance = %ld", (long)vub);
+    DLog(@"Current Unbalance = %ld", (long)cub);
     LFDisplay *vubVal = [[LFDisplay alloc] initWithKey:@"Voltage Unbalance" Value:[NSString stringWithFormat:@"%.1f %%", vub/100.0] Code:@"VUB"];
     LFDisplay *cubVal = [[LFDisplay alloc] initWithKey:@"Current Unbalance" Value:[NSString stringWithFormat:@"%.1f %%", cub/100.0] Code:@"CUB"];
     
@@ -352,12 +387,27 @@
     if (val < 5) {
         convertedString = [NSString stringWithFormat:@"%0.2f amps", val];
     } else if (val >= 5 && val < 20) {
-        NSString *strVal = [NSNumber numberWithFloat:val].stringValue;
-        convertedString = [NSString stringWithFormat:@"%@ amps", [strVal substringToIndex:strVal.length-1]];
+        convertedString = [NSString stringWithFormat:@"%0.1f amps", val];
+        if (val >= 19.95) {
+            convertedString = @"20 amps";
+        }
     } else {
-        convertedString = [NSString stringWithFormat:@"%d amps", (int)val];
+        convertedString = [NSString stringWithFormat:@"%ld amps", lroundf(val)];
     }
     return convertedString;
+}
+
+#pragma mark Device Disconnected Notification
+- (void)peripheralDisconnected {
+    if (!canContinueTimer) {
+        return;
+    }
+    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            [alert dismissViewControllerAnimated:NO completion:nil];
+            [self.navigationController popToRootViewControllerAnimated:NO];
+        }
+    }];
 }
 
 @end

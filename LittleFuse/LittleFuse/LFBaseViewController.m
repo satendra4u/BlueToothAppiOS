@@ -8,6 +8,7 @@
 
 #import "LFBaseViewController.h"
 
+
 #define INDICATOR_WIDTH_HT  37.0
 
 typedef void(^LFAlertBlock)(id alert, NSInteger index);
@@ -32,6 +33,7 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
 
 }
 
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -46,6 +48,7 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     // Pass the selected object to the new view controller.
 }
 */
+
 
 - (void)showAlertViewWithCancelButtonTitle:(NSString *)cancelTitle
                                withMessage:(NSString *)message
@@ -117,11 +120,13 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     aView.layer.cornerRadius = 5.0;
     [indicatorView addSubview:aView];
     [superView bringSubviewToFront:indicatorView];
+    [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 }
 
 
 - (void)removeIndicator
 {
+    [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     [indicatorView removeFromSuperview];
     indicatorView = nil;
 }

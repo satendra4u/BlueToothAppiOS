@@ -81,7 +81,7 @@ static LFDataManager *dataManager = nil;
     
     //updating new data
     [peripheralObj setValue:[NSNumber numberWithBool:peripheral.isConfigured] forKey:attiribute_config];
-    
+    [peripheralObj setValue:[NSNumber numberWithBool:peripheral.isPaired] forKey:attiribute_paired];
     
     // Save the object to persistent store
     if (![_managedObjectContext save:&error]) {
@@ -229,7 +229,10 @@ static LFDataManager *dataManager = nil;
         NSPredicate *filter = [NSPredicate predicateWithFormat:@"date == %@ ", date];
         
         NSSet *filteredSet = [faultList filteredSetUsingPredicate:filter];
-        
+//        if (filteredSet.count > 0) {
+//            NSLog(@"Count of filtered set = %ld", (long)filteredSet.count);
+//            NSLog(@"Items in filtered set = %@", filteredSet);
+//        }
         NSManagedObject *fault = [[filteredSet allObjects] firstObject];
        faultData = [[LFFaultData alloc]initWithManagedObject:fault];
     }
@@ -257,4 +260,5 @@ static LFDataManager *dataManager = nil;
     return faultsCount;
 
 }
+
 @end

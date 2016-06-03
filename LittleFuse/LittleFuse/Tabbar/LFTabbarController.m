@@ -7,6 +7,7 @@
 //
 
 #import "LFTabbarController.h"
+#import "LFBluetoothManager.h"
 
 @implementation LFTabbarController
 
@@ -19,8 +20,23 @@
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     //    [self.topItem setTitleView:imageView];
     self.navigationItem.titleView = imageView;
-    self.navigationItem.title = @"";
-    
+    self.navigationItem.title = @"";    
+}
+
+- (void)refreshContent {
+    if (_tabBarDelegate && [_tabBarDelegate respondsToSelector:@selector(refreshContentInCurrentController)]) {
+        [_tabBarDelegate refreshContentInCurrentController];
+    }
+}
+
+- (void)setEnableRefresh:(BOOL)enableRefresh {
+    if (!enableRefresh) {
+        self.navigationItem.rightBarButtonItems = @[];
+    }
+    else {
+        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"scan_icon"] style:UIBarButtonItemStylePlain target:self action:@selector(refreshContent)];
+        self.navigationItem.rightBarButtonItems = @[refreshButton];
+    }
 }
 
 

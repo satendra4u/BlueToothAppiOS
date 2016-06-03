@@ -735,9 +735,10 @@
 				INFOPLIST_FILE = LittleFuse/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littlefuse;
+				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
 				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -753,9 +754,10 @@
 				INFOPLIST_FILE = LittleFuse/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littlefuse;
+				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
 				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -763,10 +765,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Debug;
@@ -775,10 +779,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
+				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Release;
@@ -790,6 +797,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseUITests;
 				PRODUCT_NAME = Littlefuse;
+				PROVISIONING_PROFILE = "";
 				TEST_TARGET_NAME = LittleFuse;
 				USES_XCTRUNNER = YES;
 			};
@@ -802,6 +810,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseUITests;
 				PRODUCT_NAME = Littlefuse;
+				PROVISIONING_PROFILE = "";
 				TEST_TARGET_NAME = LittleFuse;
 				USES_XCTRUNNER = YES;
 			};

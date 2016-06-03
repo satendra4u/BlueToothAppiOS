@@ -34,7 +34,7 @@ static LFBluetoothManager *sharedData = nil;
     if (self) {
         
     }
-
+    
     return self;
 }
 
@@ -44,7 +44,18 @@ static LFBluetoothManager *sharedData = nil;
     devicesList = [[NSMutableArray alloc] initWithCapacity:0];
     charactersticsList = [[NSMutableArray alloc] initWithCapacity:0];
     savedPeripheralsDB = [[NSMutableArray alloc] initWithCapacity:0];
-
+    self.curFaultData = [[LFFaultData alloc]init];
+    
+}
+- (void)destroyObjects {
+    centralManager = nil;
+    devicesList = nil;
+    charactersticsList = nil;
+    savedPeripheralsDB = nil;
+    discoveredPeripheral = nil;
+    selectedPeripheral = nil;
+    self.curFaultData = nil;
+    
 }
 
 - (void)dealloc {
@@ -60,10 +71,7 @@ static LFBluetoothManager *sharedData = nil;
     discoveredPeripheral = nil;
     savedPeripheralsDB = [[LFDataManager sharedManager] fetchSavedPeripherals];
     [centralManager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:DEVICE_UUID]]
-                                           options:@{ CBCentralManagerScanOptionAllowDuplicatesKey : @NO }]; //@[[CBUUID UUIDWithString:DEVICE_UUID]]
-    
-    
-    // // // NSLog(@"Scanning started");
+                                           options:@{ CBCentralManagerScanOptionAllowDuplicatesKey : @NO}]; //@[[CBUUID UUIDWithString:DEVICE_UUID]]
 }
 
 - (void)stopScan
@@ -83,7 +91,7 @@ static LFBluetoothManager *sharedData = nil;
                     [discoveredPeripheral setNotifyValue:NO forCharacteristic:characteristic];
                     
                     // And we're done.
-                    return;
+                    //return;
                 }
             }
         }
@@ -99,9 +107,9 @@ static LFBluetoothManager *sharedData = nil;
 {
     if (central.state != CBCentralManagerStatePoweredOn) {
         // In a real app, you'd deal with all the states correctly
-//        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
-//            [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
-//        }
+        //        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+        //            [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+        //        }
         return;
     }
     
@@ -116,16 +124,16 @@ static LFBluetoothManager *sharedData = nil;
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
 {
     // Reject any where the value is above reasonable range
-
+    
     if (RSSI.integerValue > 0) {
         return;
     }
     NSString *uuidString = [NSString stringWithFormat:@"%@", [[peripheral identifier] UUIDString]];
-
+    
     NSArray *peripherals = [self.centralManager retrievePeripheralsWithIdentifiers:@[[CBUUID UUIDWithString:uuidString]]];
     // // // NSLog(@"><><><><><><saved devices identifers %@><><><><><", peripherals);
     peripheral = [peripherals firstObject];
-
+    
     // // // NSLog(@"Discovered %@ %@at %@", peripheral.name, peripheral.identifier, RSSI);
     NSString *name = peripheral.name;
     if (advertisementData[kLocalName]) {
@@ -138,7 +146,7 @@ static LFBluetoothManager *sharedData = nil;
         
         advData = [advData subdataWithRange:range];
         // // // NSLog(@"data %@", advData);
-
+        
     }
     if (!name || !advData) {
         return;
@@ -154,14 +162,15 @@ static LFBluetoothManager *sharedData = nil;
     }
     NSInteger rssiVal = RSSI.integerValue + 100;
     NSDictionary *dict = @{kPeripheral : peripheral, kRssi : [NSNumber numberWithInteger:rssiVal], kName : name, kIdentifier : peripheral.identifier.UUIDString, kConfigStatus : @(isConfigured)};
+//    DLog(@"Discovered device property dict = %@", dict);
     LFPeripheral *discoveredDevice = [[LFPeripheral alloc] initWithDict:dict];
-    LFPeripheral *savedVal = [[LFDataManager sharedManager] getDeviceWithIdentifier:discoveredDevice];
-
-    if (savedVal) {
-        discoveredDevice.paired = savedVal.isPaired;
-        discoveredDevice.configured = savedVal.isConfigured;
-    }
-
+    //This code is fetching data from local cache where data is saved.So configuration status is not correct.
+    //    LFPeripheral *savedVal = [[LFDataManager sharedManager] getDeviceWithIdentifier:discoveredDevice];
+    //    if (savedVal) {
+    //        discoveredDevice.paired = savedVal.isPaired;
+    //        discoveredDevice.configured = savedVal.isConfigured;
+    //    }
+    
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.identifer MATCHES[cd] %@ ", peripheral.identifier.UUIDString];
     NSArray *fileteredArr = [devicesList filteredArrayUsingPredicate:predicate];
     if ([fileteredArr count]) {
@@ -173,14 +182,14 @@ static LFBluetoothManager *sharedData = nil;
         [devicesList replaceObjectAtIndex:index withObject:discoveredDevice];
     } else {
         [devicesList addObject:discoveredDevice];
-
+        
     }
     NSArray *sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"rssi" ascending:NO]];
     [devicesList sortUsingDescriptors:sortDescriptors];
-
+    
     if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
-            [_delegate showScannedDevices:devicesList];
-        }
+        [_delegate showScannedDevices:devicesList];
+    }
     //If Bluetooth lost connection it should connect after scan
     if (self.isDisplayCharacterstics && [discoveredPeripheral isEqual:peripheral]) {
         [centralManager connectPeripheral:peripheral options:nil];
@@ -203,8 +212,8 @@ static LFBluetoothManager *sharedData = nil;
  */
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
-    // // // NSLog(@"Peripheral Connected");
-    
+//    NSLog(@"Peripheral Connected");
+    [[NSNotificationCenter defaultCenter] postNotificationName:PeripheralDidConnect object:nil];
     // Stop scanning
     [centralManager stopScan];
     // // // NSLog(@"Scanning stopped");
@@ -225,14 +234,17 @@ static LFBluetoothManager *sharedData = nil;
  */
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error
 {
-    // // // NSLog(@"Peripheral Disconnected");
     discoveredPeripheral = nil;
-//
-//    // We're disconnected, so start scanning again
+    [devicesList removeAllObjects];
+//    if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
+//        [_delegate showScannedDevices:devicesList];
+//    }//It causes the flickering effect.
+    //
+    //    // We're disconnected, so start scanning again
     [self scan];
-//    [centralManager connectPeripheral:discoveredPeripheral options:nil];
+    //    [centralManager connectPeripheral:discoveredPeripheral options:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:PeripheralDidDisconnect object:nil];
-
+    
 }
 
 
@@ -246,8 +258,8 @@ static LFBluetoothManager *sharedData = nil;
     discoveredPeripheral.delegate = self;
     // // // NSLog(@"%s.. %@", __func__, discoveredPeripheral.name);
     
-//    NSString *str = [NSString stringWithFormat: @"%@ %@", @"Device: ", discoveredPeripheral.identifier.UUIDString];
-//    [self sendNotification:str];
+    //    NSString *str = [NSString stringWithFormat: @"%@ %@", @"Device: ", discoveredPeripheral.identifier.UUIDString];
+    //    [self sendNotification:str];
 }
 
 /** The Transfer Service was discovered
@@ -283,12 +295,12 @@ static LFBluetoothManager *sharedData = nil;
     
     discoveredPeripheral = peripheral;
     discoveredPeripheral.delegate = self;
-
+    
     // Again, we loop through the array, just in case.
-//    for (CBCharacteristic *characteristic in service.characteristics) {
-//        
-//        [discoveredPeripheral setNotifyValue:YES forCharacteristic:characteristic];
-//    }
+    for (CBCharacteristic *characteristic in service.characteristics) {
+        [peripheral setNotifyValue:YES forCharacteristic:characteristic];
+        [discoveredPeripheral setNotifyValue:YES forCharacteristic:characteristic];
+    }
     
     // Once this is complete, we just need to wait for the data to come in.
     [charactersticsList removeAllObjects];
@@ -298,41 +310,36 @@ static LFBluetoothManager *sharedData = nil;
     }
 }
 
-
-
-
-
-
 /** This callback lets us know more data has arrived via notification on the characteristic
  */
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
 {
-    // // // NSLog(@"%s", __func__);
+//           NSLog(@"%s", __func__);
     if (error) {
-        // // // NSLog(@"Error discovering characteristics: %@", [error localizedDescription]);
+        if (error.code == 15 && [error.localizedDescription isEqualToString:@"Encryption is insufficient."]) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:[error localizedDescription]];
+                [self scan];
+                return;
+            }
+        }
         if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
             [_delegate showAlertWithText:[error localizedDescription]];
-            if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
-                [_delegate showScannedDevices:nil];
-            }
-
             [self scan];
         }
         return;
     }
     NSData *readdata = [characteristic value];
     if (![self isDisplayCharacterstics]) {
-//        if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
-//            [[NSNotificationCenter defaultCenter] postNotificationName:SAVE_CONFIG_VALUES object:readdata];
-//        } else {
+        //        if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
+        //            [[NSNotificationCenter defaultCenter] postNotificationName:SAVE_CONFIG_VALUES object:readdata];
+        //        } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:DISPLAY_TABBAR object:nil];
-//        }
+       
+        //        }
         return;
     }
     if ([characteristic.UUID.UUIDString containsString:VOLTAGE_CHARACTERSTICS]) {
-        
-        // // // NSLog(@"Voltage data from manager = %@",readdata);
-
         [[NSNotificationCenter defaultCenter] postNotificationName:VOLTAGE_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:CURRENT_CHARACTERSTICS]) {
@@ -342,46 +349,146 @@ static LFBluetoothManager *sharedData = nil;
         [[NSNotificationCenter defaultCenter] postNotificationName:POWER_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:STATUS_CHARACTERSTICS]) {
-        // // // NSLog(@"Equipment Data from manager = %@", readdata);
-        
         [[NSNotificationCenter defaultCenter] postNotificationName:EQUIPMENT_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
-            if (_delegate && [_delegate respondsToSelector:@selector(configureServiceWithValue:)]) {
-                [_delegate configureServiceWithValue:readdata];
-            }
+        if (_delegate && [_delegate respondsToSelector:@selector(configureServiceWithValue:)]) {
+            [_delegate configureServiceWithValue:readdata];
+        }
     } else if ([characteristic.UUID.UUIDString containsString:FAULT_CHARACTERSTICS]) {
         NSData *data = characteristic.value;
-        // // // NSLog(@"Normal fault characteristics from manager = %@", data);
         uint8_t *bytesArr = (uint8_t*)[data bytes];
         if (bytesArr[1] == 0x01) {
-        [self displayFaults];
+            [self displayFaults];
         }
         
     } else if ([characteristic.UUID.UUIDString containsString:VOLATAGE_FAULT_CHARACTERSTIC]) {
         if (_delegate && [_delegate respondsToSelector:@selector(getFaultVoltageData:)]) {
-            
-            // // // NSLog(@"Fault Voltage data from manager = %@",readdata);
             [_delegate getFaultVoltageData:readdata];
+        }
+        else {
+            if (!self.curFaultData) {
+                self.curFaultData = [[LFFaultData alloc]init];
+            }
+            NSRange range = NSMakeRange(2, 4);
+            
+            NSData *data1 = [readdata subdataWithRange:range];
+            
+            NSInteger dateandTime = [LFUtilities getValueFromHexData:data1];
+            
+            NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:(dateandTime)];
+            
+            _curFaultData.date = date;
+            
+            _curFaultData.voltage = readdata;
         }
         
     } else if ([characteristic.UUID.UUIDString containsString:CURRENT_FAULT_CHARACTERSTIC]) {
         if (_delegate && [_delegate respondsToSelector:@selector(getFaultCurrentData:)]) {
-            // // // NSLog(@"Current Fault data from manager = %@",readdata);
-            [_delegate getFaultCurrentData:readdata]; }
+            [_delegate getFaultCurrentData:readdata];
+        }
+        else {
+            if (!_curFaultData) {
+                _curFaultData = [[LFFaultData alloc]init];
+            }
+            _curFaultData.current = readdata;
+        }
         
     } else if ([characteristic.UUID.UUIDString containsString:POWER_FAULT_CHARACTERSTIC]) {
         if (_delegate && [_delegate respondsToSelector:@selector(getFaultPowerData:)]) {
-            [_delegate getFaultPowerData:readdata]; }
+            [_delegate getFaultPowerData:readdata];
+        }
+        else {
+            if (!_curFaultData) {
+                _curFaultData = [[LFFaultData alloc]init];
+            }
+            _curFaultData.power = readdata;
+        }
         
     } else if ([characteristic.UUID.UUIDString containsString:OTHER_FAULT_CHARACTERSTIC]) {
+        if (!_canContinueTimer) {
+            return;
+        }
         if (_delegate && [_delegate respondsToSelector:@selector(getFaultOtherData:)]) {
-            // // // NSLog(@"Other Fault data from manager = %@",readdata);
-            [_delegate getFaultOtherData:readdata]; }
+            [_delegate getFaultOtherData:readdata];
+        }
+        else {
+            [self getFaultOtherData:readdata];
+        }
         
     }
 }
 
+- (void)getFaultOtherData:(NSData *)data
+{
+    _curFaultData.other = data;
+    // To save the Data
+    if (![self isCurrentDataSameWithPreviousSavedOne]) {
+            [[LFDataManager sharedManager] saveFaultDetails:_curFaultData WithPeripheral:selectedPeripheral];
+        _curFaultData = nil;
+        _curFaultData = [[LFFaultData alloc] init];
+        [self  readFaultData];
+    } else {
+        _tCurIndex = (_tCurIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+        [self readFaultData];
+    }
+
+}
+
+- (BOOL)isCurrentDataSameWithPreviousSavedOne
+{
+    LFFaultData *fault = [[LFDataManager sharedManager] getSavedDataWithDate:_curFaultData.date];
+    if ([fault.voltage isEqualToData:_curFaultData.voltage] ) {
+        return YES;
+    }
+    return NO;
+    
+}
+
+
+- (void)readFaultData
+{
+    if (!_canContinueTimer) {
+        _tCurIndex = 1;
+        return;
+    }
+    [[LFBluetoothManager sharedManager] setConfig:NO];
+    if (_tCurIndex > 1000) {
+        return;
+    }
+    DLog(@"Reading Fault Data of %d", (int)_tCurIndex);
+    Byte data[20];
+    char* bytes = (char*) &_tCurIndex;
+    int convertedLen = sizeof(bytes)/2;
+    
+    for (int i = 0; i < 20; i++) {
+        if (i > 1 && (i-2)<convertedLen) {
+            data[i] = (Byte)bytes[i-2];
+        } else {
+            if (i== 0 ) {
+                data[i] = (Byte)0x01;
+            }  else {
+                data[i] = (Byte)0x00;
+            }
+        }
+    }
+    
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+//    [[LFBluetoothManager sharedManager] writeConfigData:data1];//Old code
+
+    [[LFBluetoothManager sharedManager] writeConfigDataForFaultsList:data1];
+    _tCurIndex += 1;
+}
+
+- (void)restartFaultData {
+    _tCurIndex = 1;
+    [self readFaultData];
+}
+
+- (void)stopFaultTimer {
+    _tCurIndex = 1001;
+    _canContinueTimer = NO;
+}
 
 /** The peripheral letting us know whether our subscribe/unsubscribe happened or not
  */
@@ -395,24 +502,29 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)peripheral:(CBPeripheral *)peripheral didWriteValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
 {
-    // // // NSLog(@"%s", __func__);
-
+//       NSLog(@"%s", __func__);
+    
     if (error) {
         // // // NSLog(@"error %@", error.localizedDescription);
-        
+        if (_isWriting) {
+            DLog(@"Error occured while writing data to hardware. Error is = %@", error);
+            if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
+                [_delegate showOperationCompletedAlertWithStatus:NO];
+            }
+        }
         
         return;
     }
     discoveredPeripheral = peripheral;
     discoveredPeripheral.delegate = self;
     if (_isWriting) {
-        if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlert)]) {
-            [_delegate showOperationCompletedAlert];
+        if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
+            [_delegate showOperationCompletedAlertWithStatus:YES];
         }
     } else {
         [discoveredPeripheral readValueForCharacteristic:characteristic];
     }
-
+    
     
     
     
@@ -450,15 +562,22 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)writeConfigData:(NSData *)data
 {
-//    // // // NSLog(@"=======================================================");
-//    // // // NSLog(@"%s data-->%@", __func__, data);
+    //    // // // NSLog(@"=======================================================");
+    //    // // // NSLog(@"%s data-->%@", __func__, data);
     dispatch_async(dispatch_get_main_queue(), ^{
         if ([self isConfig]) {
             [discoveredPeripheral writeValue:data forCharacteristic:charactersticsList[4] type:CBCharacteristicWriteWithResponse];
         } else {
             [discoveredPeripheral writeValue:data forCharacteristic:charactersticsList[5] type:CBCharacteristicWriteWithResponse];
         }
+        
+    });
+    
+}
 
+- (void)writeConfigDataForFaultsList:(NSData *)data {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [discoveredPeripheral writeValue:data forCharacteristic:charactersticsList[5] type:CBCharacteristicWriteWithResponse];
     });
 }
 
@@ -491,7 +610,7 @@ static LFBluetoothManager *sharedData = nil;
     for (int i = 6; i < charactersticsList.count; i++) {
         CBCharacteristic *charactestic = charactersticsList[i];
         [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
-
+        
     }
 }
 
@@ -509,13 +628,45 @@ static LFBluetoothManager *sharedData = nil;
 - (void)disconnectDevice
 {
     if (centralManager.state == CBCentralManagerStatePoweredOn &&discoveredPeripheral && discoveredPeripheral.state == CBPeripheralStateConnected) {
-        [centralManager cancelPeripheralConnection:discoveredPeripheral];
+        [self cleanup];
+        //        [centralManager cancelPeripheralConnection:discoveredPeripheral];
     } else if (centralManager.state == CBCentralManagerStatePoweredOn){
+        if (devicesList.count) {
+            [devicesList removeAllObjects];
+        }
+//        if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
+//            [_delegate showScannedDevices:devicesList];
+//        }
         [self scan];
     } else {
-        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
-            [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+        if (centralManager.state == CBCentralManagerStatePoweredOff) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+            }
         }
+        else if (centralManager.state == CBCentralManagerStateUnsupported) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Your device does not support the Bluetooth Low Energy (BLE) services. Please try with a different device."];
+            }
+        }
+        else if (centralManager.state == CBCentralManagerStateResetting) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"The bluetooth connection is being reset.Please try again."];
+            }
+        }
+        else if (centralManager.state == CBCentralManagerStateUnauthorized) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Please authorize the application to use the bluetooth services."];
+            }
+        }
+        else if (centralManager.state == CBCentralManagerStateUnknown) {
+            if (selectedPeripheral) {
+                if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                    [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+                }
+            }
+        }
+        
     }
 }
 

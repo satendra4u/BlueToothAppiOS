@@ -23,6 +23,6 @@
 
 + (NSString *)convertToHFormate:(float)val;
 
-+ (NSString *)convertToLFormate:(float)val;
++ (NSString *)convertToLFormate:(double)val;
 
 @end

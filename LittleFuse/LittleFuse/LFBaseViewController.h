@@ -23,5 +23,4 @@
 - (void)showIndicatorOn:(UIView*)superView withText:(NSString *)msg;
 - (void)removeIndicator;
 
-
 @end

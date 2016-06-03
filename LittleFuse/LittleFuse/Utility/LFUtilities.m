@@ -92,10 +92,10 @@
     return [NSString stringWithFormat:@"%0.2f sec", (val/100)];
 }
 
-+ (NSString *)convertToLFormate:(float)val
++ (NSString *)convertToLFormate:(double)val
 {
     
-    return [NSString stringWithFormat:@"%d sec", (int)val];
+    return [NSString stringWithFormat:@"%ld sec", (long)val];
 }
 
 

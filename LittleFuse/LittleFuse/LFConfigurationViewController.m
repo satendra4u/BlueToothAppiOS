@@ -16,10 +16,11 @@
 #import "LFCommunicationSettingsController.h"
 #import "LFRTDViewController.h"
 #import "LFCharactersticBitDisplayCell.h"
+#import "LFTabbarController.h"
 
 #define BUTTON_CELL_ID @"LFConfigureButtonsCellID"
 #define TOGGLE_CELL_ID @"LFCharactersticBitDisplayCell"
-@interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol>
+@interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol, LFTabbarRefreshDelegate>
 {
     
     __weak IBOutlet UITableView *tblConfigDisplay;
@@ -36,8 +37,9 @@
     BOOL isWrite;
     NSString *previousSelected;
     BOOL isAdvanceLoded;
-
-    
+    BOOL canContinueTimer;
+    BOOL isInitialLaunch;
+    NSInteger prevEnteredVal;//Used to compare previously entered value.
 }
 @property (nonatomic) NSUInteger hardwareConfigVal;
 @property (nonatomic) NSUInteger featureEndisVal;
@@ -64,14 +66,15 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    isInitialLaunch = YES;
     // Do any additional setup after loading the view.
     advanceConfigDetails = [[NSMutableArray alloc] initWithCapacity:0];
     basicValuesArray = [[NSMutableArray alloc] initWithCapacity:0];
-
+    
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticBitDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:TOGGLE_CELL_ID];
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFConfigureButtonsCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:BUTTON_CELL_ID];
-
+    
     tblConfigDisplay.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     NSString *name = [[LFBluetoothManager sharedManager] selectedDevice];
     name = [name substringToIndex:name.length-4];
@@ -84,14 +87,21 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     previousSelected = @"";
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] setConfig:YES];
-//    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-//    [self readCharactisticsWithIndex:currentIndex];
-
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
+    isAdvanceLoded = NO;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+}
+
+- (void)appEnteredBackground {
+    [[LFBluetoothManager  sharedManager] disconnectDevice];
 }
 
 - (void)configArr
 {
+    
+    basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
+    advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""];
+    
     // Voltage Settings
     LFDisplay *lowVoltage = [[LFDisplay alloc] initWithKey:@"Low Voltage" Value:@"" Code:@"LV"];
     LFDisplay *highVoltage = [[LFDisplay alloc] initWithKey:@"High Voltage" Value:@"" Code:@"HV"];
@@ -113,8 +123,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     LFDisplay *restartAttemptsUCTrips = [[LFDisplay alloc] initWithKey:@"Restart attempts for undercurrent trips" Value:@"" Code:@"RU"];
     LFDisplay *restartAttemptsOtherTrips = [[LFDisplay alloc] initWithKey:@"Restart attempts for all other trips" Value:@"" Code:@"RF"];
     
-    basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
-    advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""];
+    
     
     basicConfigDetails = [[NSMutableArray alloc] initWithObjects:lowVoltage, highVoltage, voltageUnb, overCurrent, underCurrent, currentUnb, tripClass, powerUpTimer, rapidTimer, motorCoolDown,  dryWellRecover,restartAttemptsUCTrips,restartAttemptsOtherTrips,nil];
     
@@ -153,8 +162,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     LFDisplay *configBitTen = [[LFDisplay alloc] initWithKey:@"Stall 1" Value:@"" Code:@"STAL"];
     LFDisplay *configBitEleven = [[LFDisplay alloc] initWithKey:@"Low KV mode" Value:@"" Code:@"LKV"];
     LFDisplay *configBitTwelve = [[LFDisplay alloc] initWithKey:@"CBA phase rotation" Value:@"" Code:@"CBA"];
-
-
+    
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
     
@@ -163,31 +171,87 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     isBasic = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
-    
-    
-    basicFormateArray = @[@"H", @"H", @"B", @"H", @"H", @"B",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
+    basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
     advancedFormateArray = @[@"B", @"B", @"L", @"Q", @"L", @"H", @"Q", @"L", @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C"];
-
     currentIndex = 0;
+    
+}
+
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:YES];
+    canContinueTimer = NO;
+    [self removeIndicator];
+    [[LFBluetoothManager sharedManager] stopFaultTimer];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:YES];
+    LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
+    [tabBarController setEnableRefresh:YES];
+    tabBarController.tabBarDelegate = self;
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [[LFBluetoothManager sharedManager] setDelegate:self];
-    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-    [self readCharactisticsWithIndex:currentIndex];
-    isAdvanceLoded = NO;
+    canContinueTimer = YES;
+    if (isInitialLaunch) {
+        isInitialLaunch = NO;
+        [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+        [self readCharactisticsWithIndex:currentIndex];
+    }
+//    isAdvanceLoded = NO;
+//    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
 
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:YES];
+    [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:2];
+}
 
+- (void)stopIndicator {
+    if (isBasic && currentIndex == 0) {
+        [self removeIndicator];
+    }
+    else {
+        if (isAdvanceLoded && currentIndex == 0) {
+            [self removeIndicator];
+        }
+    }
+}
+
+
+- (void)updateFaultData {
+    if(canContinueTimer) {
+        [LFBluetoothManager sharedManager].tCurIndex = 1;
+        [LFBluetoothManager sharedManager].canContinueTimer = YES;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [[LFBluetoothManager sharedManager] readFaultData];
+        });
+        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+    }
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+#pragma mark Tab bar Delegate Refresh Method
+
+- (void)refreshContentInCurrentController {
+    if (!canContinueTimer) {
+        return;
+    }
+    canContinueTimer = YES;
+    currentIndex = 0;
+    [self removeIndicator];
+    [self readCharactisticsWithIndex:currentIndex];
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
+
+}
+
 
 #pragma mark - Table view data source
 
@@ -215,10 +279,10 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             return 2;
         }
         return 0;
-
+        
     } else {
         if (section == 0) {
-           return  14;
+            return  14;
         } else if (section == 1) {
             return 7;
         } else if (section == 2) {
@@ -260,7 +324,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         }
         cont += indexPath.row;
         [cell updateValues:[basicConfigDetails objectAtIndex:cont]];
-
+        
     } else {
         [cell updateValues:[advanceConfigDetails objectAtIndex:indexPath.row]];
     }
@@ -272,16 +336,16 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 { UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
     UILabel *aLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, CGRectGetWidth(tableView.frame), 40)];
-
+    
     if (!isBasic) {
         
         switch (section) {
             case 0:
                 return nil;
-                case 1:
+            case 1:
                 aLabel.text = @"Feature enable/disable mask";
                 break;
-                case 2:
+            case 2:
                 aLabel.text = @"Hardware Configuration Fields";
                 break;
                 
@@ -308,7 +372,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
                 break;
         }
     }
-
+    
     aLabel.font = [UIFont fontWithName:AERIAL_BOLD size:14.0];
     aLabel.textColor = [UIColor colorWithRed:17.0/255 green:17.0/255 blue:17.0/255 alpha:1.0];
     aLabel.backgroundColor = [UIColor clearColor];
@@ -330,11 +394,16 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     if (isBasic) {
         return 44.0;
     }
+    if (section == 0) {
+        return 0.01f;
+    }
     return 44.0;
 }
 
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+//    curCell set
     if (!isBasic && indexPath.section != 0) {
         return;
     }
@@ -357,12 +426,13 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     editing.delegate = self;
     editing.showAuthentication = YES;
     [navController setViewControllers:@[editing]];
-    [self.navigationController presentViewController:navController animated:NO completion:nil];
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.navigationController presentViewController:navController animated:NO completion:nil];
+    });
 }
 
 
-- (void) toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
+- (void)toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
     LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
     if (indexPath.section == 1) {
@@ -398,27 +468,27 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             isAdvanceLoded = YES;
         }
     }
-
+    
     [tblConfigDisplay reloadData];
 }
 
 - (void)configureServiceWithValue:(NSData *)data
 {
-    NSLog(@"%s", __func__);
-
-//    NSDictionary *dict = notification.object;
-//    NSString *selectedVal = dict[@"tag"];
-//    if ([previousSelected isEqualToString:selectedVal]) {
-//        return;
-//    }
-//    previousSelected = selectedVal;
-//    NSData *data = dict[@"val"];
+    //    NSLog(@"%s", __func__);
+    
+    //    NSDictionary *dict = notification.object;
+    //    NSString *selectedVal = dict[@"tag"];
+    //    if ([previousSelected isEqualToString:selectedVal]) {
+    //        return;
+    //    }
+    //    previousSelected = selectedVal;
+    //    NSData *data = dict[@"val"];
     NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
-
+    
     NSRange range = NSMakeRange(0, 4);
     
     data = [data subdataWithRange:range];
-
+    
     
     [self getValuesFromData:data withForamte:formate];
     
@@ -443,15 +513,13 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         }
     }
     [self readCharactisticsWithIndex:currentIndex];
-
-    
 }
 
 - (void)readCharactisticsWithIndex:(NSInteger)index;
 {
     [[LFBluetoothManager sharedManager] setDelegate:self];
-
-      Byte data[20];
+    
+    Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
             data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
@@ -470,9 +538,33 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
 
+
+- (NSString *)getConvertedStringForValue:(NSUInteger)dataVal {
+    NSString *strVal = [NSString stringWithFormat:@"%0.2lu", (unsigned long)dataVal];
+    if (dataVal < 500) {
+        strVal = [NSString stringWithFormat:@"%0.2f", dataVal/100.0f];
+    }
+    else if (dataVal >= 500 && dataVal < 2000) {
+        strVal = [NSString stringWithFormat:@"%0.1f", dataVal/100.0f];
+        if (dataVal >= 1995) {
+            strVal = @"20";
+        }
+    }
+    else if (dataVal >= 2000) {
+        strVal = [NSString stringWithFormat:@"%ld", lroundf(dataVal/100.0f)];
+    }
+    NSString *convertedVal;
+//    if (isBasic) {
+//        convertedVal = [NSString stringWithFormat:@"%@ %@", strVal, basicUnitsArray[currentIndex]];
+//    }
+//    else {
+        convertedVal = [NSString stringWithFormat:@"%@", strVal];
+//    }
+    return convertedVal;
+}
+
 - (void)getValuesFromData:(NSData *)data withForamte:(NSString *)formate
 {
-    NSLog(@"data comming : currentIndex %lu data %@", currentIndex, data);
     
     NSUInteger val = [LFUtilities getValueFromHexData:data];
     
@@ -483,7 +575,35 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     switch (c) {
         case 'B':
             if (isBasic) {
-                convertedVal = [NSString stringWithFormat:@"%d %@", (int)val, basicUnitsArray[currentIndex]];
+                if (currentIndex == 3 || currentIndex == 4) {
+                    NSString *strVal;
+                    //New Code after feedback for V0.5
+//                    if (val < 500) {
+//                        strVal = [NSString stringWithFormat:@"%0.2f", val/100.0f];
+//                        
+//                    }
+//                    else if (val >= 500 && val < 2000) {
+//                        strVal = [NSString stringWithFormat:@"%0.1f", val/100.0f];//One decimal place.
+//                        if (val >= 1995) {
+//                            strVal = @"20";
+//                        }
+//                    }
+//                    else if (val >= 2000) {
+//                        //lroundf used to round off the float number to nearest integer.
+//                        strVal = [NSString stringWithFormat:@"%ld", lroundf(val/100.0f)];
+//                    }
+                    strVal = [self getConvertedStringForValue:val];
+                    convertedVal = [NSString stringWithFormat:@"%@ %@", strVal, basicUnitsArray[currentIndex]];
+                    //                    }
+                }
+                else {
+                    if (currentIndex == 2 || currentIndex == 5) {
+                        convertedVal = [NSString stringWithFormat:@"%0.1f %@", (float)val, basicUnitsArray[currentIndex]];
+                    }
+                    else {
+                        convertedVal = [NSString stringWithFormat:@"%d %@", (int)val, basicUnitsArray[currentIndex]];
+                    }
+                }
             } else {
                 convertedVal = [NSString stringWithFormat:@"%d", (int)val];
             }
@@ -493,14 +613,33 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         {
             if (isBasic) {
                 if (currentIndex == 0 || currentIndex == 1) {
-                    convertedVal = [NSString stringWithFormat:@"%d %@", (int)(val/100),basicUnitsArray[currentIndex]];
+                    convertedVal = [NSString stringWithFormat:@"%ld %@", lroundf(val/100.0f),basicUnitsArray[currentIndex]];
                 } else {
                     NSString *strVal = [NSNumber numberWithFloat:val/100.0].stringValue;
                     convertedVal = [NSString stringWithFormat:@"%@ %@", [strVal substringToIndex:strVal.length-1], basicUnitsArray[currentIndex]];
-
+                    
                 }
             } else {
-                 convertedVal = [NSString stringWithFormat:@"%.2f", val/100.0];
+                if (currentIndex == 5) {
+//                    if (val < 500) {
+//                        convertedVal = [NSString stringWithFormat:@"%0.2f", val/100.0f];//two decimal places.
+//                        
+//                    }
+//                    else if (val >= 500 && val < 2000) {
+//                        convertedVal = [NSString stringWithFormat:@"%0.1f", val/100.0f];//One decimal place.
+//                        if (val >= 1995) {
+//                            convertedVal = @"20";
+//                        }
+//                    }
+//                    else if (val >= 2000) {
+//                        //lroundf used to convert the float number to nearest integer.
+//                        convertedVal = [NSString stringWithFormat:@"%ld", lroundf(val/100.0f)];
+//                    }
+                    convertedVal = [self getConvertedStringForValue:val];
+                }
+                else {
+                    convertedVal = [NSString stringWithFormat:@"%.2f", val/100.0];
+                }
             }
         }
             break;
@@ -518,21 +657,23 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         case 'L' :
         {
             convertedVal = [LFUtilities convertToLFormate:val];
-
+            
         }
             break;
         case 'Q' :
         {
             convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
         }
-
+            
             break;
         case 'K': //formate H with Kilo Wats conversion
         {
             convertedVal = [NSString stringWithFormat:@"%.3f KW", ((float)val/100000.0)];
         }
             break;
-
+        case 'G':
+            convertedVal = [NSString stringWithFormat:@"%0.1f %@", (float)val/100.0f, basicUnitsArray[currentIndex]];
+            break;
         default:
             break;
     }
@@ -544,22 +685,19 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         [basicConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
     } else {
         LFDisplay *display = [advanceConfigDetails objectAtIndex:currentIndex];
-        NSLog(@"current index:%ld,byteValue:%lu",(long)currentIndex,(unsigned long)val);
         if (!isBasic) {
             if (currentIndex == 14 ) {
                 _featureEndisVal = val;
-                NSLog(@"_featureEndisVal index featureval:%lu",(unsigned long)_featureEndisVal);
-            } 
+            }
             else if (currentIndex == 21 ) {
                 _hardwareConfigVal = val;
-                NSLog(@"_hardwareConfigVal index featureval:%lu",(unsigned long)_hardwareConfigVal);
             }
         }
         switch (currentIndex) {
             case 14:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
                 break;
-                case 15:
+            case 15:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 1))? 1:0];
                 break;
             case 16:
@@ -607,24 +745,26 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         }
         
         [advanceConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
-
+        
     }
     
-    DLog(@"currentIndex %lu data %@", currentIndex, data);
+    DLog(@"currentIndex %lu data %@", (long)currentIndex, data);
+//    if (currentIndex == 28) {
+////        NSLog(@"config data ended");
+//    }
     [tblConfigDisplay reloadData];
+    //All the data is fetched after index = 28. Now fault refresh can be started to avoid blocking.
     
 }
 
 
-- (void)writeDataToIndex:(NSInteger)index withValue:(float)val
+- (void)writeDataToIndex:(NSInteger)index withValue:(double)val
 {
-    NSLog(@"WriteVal :%f array:%@",val, advanceConfigDetails);
-
     isWrite = YES;
     currentIndex = index;
     NSString *formate = isBasic ? basicFormateArray[currentIndex]: advancedFormateArray[currentIndex];
     unichar c = [formate characterAtIndex:0];
-
+    
     switch (c) {
         case 'B':
             val = val;
@@ -641,6 +781,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         {
             val = val * (100.0*1000);
         }
+            break;
+        case 'G':
+            val = val*100;
             break;
         default:
             break;
@@ -664,18 +807,34 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
                 data[i] = (Byte)0x00;
             }
         }
-    
+        
     }
-
+    
     NSData *data1 = [NSData dataWithBytes:data length:20];
     [[LFBluetoothManager sharedManager] setIsWriting:YES];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
+    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:1];
     [tblConfigDisplay reloadData];
-
+    
 }
 
+#pragma mark Writing TimeOut Method.
+- (void)checkTimeOut {
+    if (isWrite) {
+        [[LFBluetoothManager sharedManager] setIsWriting:NO];
+        [self readCharactisticsWithIndex:selectedTag];
+        [self removeIndicator];
+        isWrite = NO;
+        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+            [tblConfigDisplay reloadData];
+        }];
+    }
+}
 
 #pragma mark -Editing Delegate
 - (void)selectedValue:(NSString *)txt
@@ -684,20 +843,26 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     if (txt.length == 0) {
         txt = @"";
     }
-
+    
     LFDisplay *display;
     if (isBasic) {
         display = [basicConfigDetails objectAtIndex:selectedTag];
-        display.value = txt;
+        if (selectedTag == 3 || selectedTag == 4 ) {
+            CGFloat curVal = txt.floatValue;
+            display.value = [NSString stringWithFormat:@"%0.2f", (float)curVal*100.0f];
+            txt = display.value;
+        }
+        else {
+            display.value = txt;
+        }
         [basicConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
     } else {
         display = [advanceConfigDetails objectAtIndex:selectedTag];
         display.value = txt;
         [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
-
     }
     
-    [self writeDataToIndex:selectedTag withValue:txt.floatValue];
+    [self writeDataToIndex:selectedTag withValue:txt.doubleValue];
 }
 
 - (void)toggleSelectedWithSuccess:(BOOL)isSuccess {
@@ -705,7 +870,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         [tblConfigDisplay reloadData];
         return;
     }
-    NSLog(@"before Array:%@",advanceConfigDetails);
     LFDisplay *display = advanceConfigDetails[selectedTag];
     display.value = [NSString stringWithFormat:@"%d", !display.value.boolValue];
     [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
@@ -770,22 +934,33 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             [self writeDataToIndex:selectedTag withValue:(float)_hardwareConfigVal];
         }
     }
-    NSLog(@"After Array:%@",advanceConfigDetails);
-
+    
     [tblConfigDisplay reloadData];
 }
 
- - (void)showOperationCompletedAlert
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
 {
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
     [self readCharactisticsWithIndex:selectedTag];
     [self removeIndicator];
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-        if ([alert isKindOfClass:[UIAlertController class]]) {
-            [alert dismissViewControllerAnimated:NO completion:nil];
-        }
-        [tblConfigDisplay reloadData];
-    }];
+    if (isSuccess) {
+        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+            [tblConfigDisplay reloadData];
+        }];
+    }
+    else {
+        //Error occured while writing data to device.
+        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"There is a problem saving data." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+            [tblConfigDisplay reloadData];
+        }];
+    }
+    
 }
 
 - (void)showCommunication:(UIButton *)btn
@@ -803,16 +978,19 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)dealloc
 {
-    NSLog(@"%s", __func__);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-#pragma Peripheral Disconnected Notification
+#pragma mark Peripheral Disconnected Notification
 
 - (void)peripheralDisconnected {
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Little Fuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    if (!canContinueTimer) {
+        return;
+    }
+    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
+            [self.navigationController popToRootViewControllerAnimated:NO];
         }
     }];
 }

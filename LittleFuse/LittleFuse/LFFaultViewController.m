@@ -14,16 +14,19 @@
 #import "LFFaultTableViewCell.h"
 #import "LFFaultData.h"
 #import "LFFaultsDetailsController.h"
+#import "LFTabbarController.h"
 
 
-@interface LFFaultViewController () <BlutoothSharedDataDelegate>
+@interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
 {
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
     NSInteger currentIndex;
     LFFaultData *currentData;
+    LFFaultData *prevFaultData;
     NSDate *selectedDate;
-
+    BOOL canContinueTimer;
+    
 }
 @property (strong, nonatomic) IBOutlet UIDatePicker *datepicker;
 @property (weak, nonatomic) IBOutlet UITextField *tfPicker;
@@ -46,12 +49,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
     currentIndex = 1;
     
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-
+    
     sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     NSString *name = [[LFBluetoothManager sharedManager] selectedDevice];
@@ -63,32 +65,69 @@
     _lblDevice.attributedText = string;
     _tblFaults.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     _datepicker.maximumDate = [NSDate date];
-    
+    canContinueTimer = YES;
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+}
+
+- (void)appEnteredBackground {
+    [[LFBluetoothManager  sharedManager] disconnectDevice];
 }
 
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
     [_btnSelectedDate setImageEdgeInsets:UIEdgeInsetsMake(0, CGRectGetWidth(self.btnSelectedDate.frame)-30, 0, 0)];
-
+    
 }
+
+//Changed code in didappear to will appear.
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:YES];
+    [[LFBluetoothManager sharedManager] setConfig:NO];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
+    [LFBluetoothManager sharedManager].canContinueTimer = NO;
+    LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
+    [tabBarController setEnableRefresh:NO];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:YES];
+    canContinueTimer = NO;
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+     self.navigationItem.title = @"";
+    [[LFBluetoothManager sharedManager] stopFaultTimer];
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [[LFBluetoothManager sharedManager] setConfig:NO];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
+    canContinueTimer = YES;
+    [LFBluetoothManager sharedManager].canContinueTimer = YES;
     NSDate *date = [NSDate date];
-    
-    
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
-
     [self fetchDataWithDate:date];
-
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
 }
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    self.navigationItem.title = @"";
+
+//Refreshing the faults.
+- (void)updateFaultData {
+    if(!canContinueTimer) {
+        return;
+    }
+    [LFBluetoothManager sharedManager].tCurIndex = 1;
+    currentIndex = 1;
+    [LFBluetoothManager sharedManager].canContinueTimer = YES;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        [[LFBluetoothManager sharedManager] readFaultData];
+    });
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+}
+
+- (void)dealloc {
+    sectionArray = nil;
+    faultDict = nil;
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -112,16 +151,13 @@
     NSRange range = NSMakeRange(2, 4);
     
     NSData *data1 = [data subdataWithRange:range];
-
+    
     NSInteger dateandTime = [LFUtilities getValueFromHexData:data1];
     
     NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:(dateandTime)];
     
     currentData.date = date;
-
     currentData.voltage = data;
-    
-
 }
 
 - (void)getFaultCurrentData:(NSData *)data
@@ -144,14 +180,15 @@
         } else {
             _noDataLabel.hidden = NO;
         }
-
+        
         [[LFDataManager sharedManager] saveFaultDetails:currentData WithPeripheral:[[LFBluetoothManager sharedManager] selectedPeripheral]];
+        prevFaultData = currentData;
         currentData = nil;
         currentData = [[LFFaultData alloc] init];
-        
         [self  readFaultData];
     } else {
-        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+//        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+        currentIndex = sectionArray.count + 1;
         [self readFaultData];
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
@@ -160,16 +197,16 @@
         }
         [_tblFaults reloadData];
     }
-    
-
 
 }
 
 
 - (void)showData:(NSData *)data
 {
+    if (!data || data.length == 0) {
+        return;
+    }
     NSInteger code = [LFUtilities getValueFromHexData:[data subdataWithRange:NSMakeRange(0, 2)]];
-    
     NSString *faultError = [self faultWithCode:code];
     
     NSString *faultCode = [self faultCodeWithCode:code];
@@ -191,10 +228,17 @@
     [faultDict setValue:faultCode forKey:FAULT_CODE];
     
     [sectionArray addObject:[faultDict copy]];
-    
+    DLog(@"Show data  = %@ current count = %ld", data, (long)sectionArray.count);
     [faultDict removeAllObjects];
     _noDataLabel.hidden = YES;
-    [_tblFaults reloadData];
+    if (sectionArray.count >= 10) {
+        [_tblFaults beginUpdates];
+        [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:sectionArray.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+        [_tblFaults endUpdates];
+    }
+    else {
+        [_tblFaults reloadData];
+    }
 
 }
 
@@ -211,6 +255,9 @@
 
 - (void)readFaultData
 {
+    if (!canContinueTimer) {
+        return;
+    }
     if (currentIndex > 1000) {
         return;
     }
@@ -218,7 +265,7 @@
     Byte data[20];
     char* bytes = (char*) &currentIndex;
     int convertedLen = sizeof(bytes)/2;
-
+    
     for (int i = 0; i < 20; i++) {
         if (i > 1 && (i-2)<convertedLen) {
             data[i] = (Byte)bytes[i-2];
@@ -232,9 +279,10 @@
     }
     
     NSData *data1 = [NSData dataWithBytes:data length:20];
-    [[LFBluetoothManager sharedManager] writeConfigData:data1];
+//    [[LFBluetoothManager sharedManager] writeConfigData:data1];//Old code
+    [[LFBluetoothManager sharedManager] writeConfigDataForFaultsList:data1]; //New code
     currentIndex += 1;
-
+    
     
 }
 
@@ -262,7 +310,7 @@
     faultDeatil.errorType = dict[FAULT_ERROR];
     faultDeatil.faultData = dict[FAULT_DETAILS];
     faultDeatil.errorDate = dict[FAULT_DATE];
-
+    
     [self.navigationController pushViewController:faultDeatil animated:YES];
 }
 
@@ -271,38 +319,52 @@
     NSString *error = @"";
     switch (code) {
         case 1:
-            error = @"OC";
+            error = @"OCF";
             break;
         case 2:
-            error = @"UC";
+            error = @"UCF";
             break;
         case 3:
-            error = @"CUB";
+            error = @"CUBF";
             break;
         case 4:
-            error = @"CSP";
+            error = @"CSPF";
             break;
         case 5:
-            error = @"CF";
+            error = @"CTCF";
             break;
         case 6:
-            error = @"GF";
+            error = @"GFF";
             break;
         case 7:
-            error = @"HP";
+            error = @"HPF";
             break;
         case 8:
-            error = @"LP";
+            error = @"LPF";
             break;
         case 9:
-            error = @"LCV";
+            error = @"POF";
             break;
         case 10:
-            error = @"PTC";
+            error = @"PTCF";
             break;
-            
-            
+        case 11:
+            error = @"RMTF";
+            break;
+        case 100:
+            error = @"LVH";
+            break;
+        case 101:
+            error = @"HVH";
+            break;
+        case 102:
+            error = @"VUBH";
+            break;
+        case 61166:
+            error = @"UNDEFF";
+            break;
         default:
+            error = @"UNDEFF";
             break;
     }
     return error;
@@ -332,36 +394,34 @@
             error = @"Ground Fault";
             break;
         case 7:
-            error = @"High Power";
+            error = @"High Power Fault";
             break;
         case 8:
-            error = @"Low Power";
+            error = @"Low Power Fault";
             break;
         case 9:
-            error = @"Low Control Voltage";
+            error = @"Power Outage Fault";
             break;
         case 10:
-            error = @"PTC";
+            error = @"PTC Fault";
             break;
-//        case 11:// uncomment data
-//            error = @"PTC";
-//            break;
-//        case 100:
-//            error = @"PTC";
-//            break;
-//        case 101:
-//            error = @"PTC";
-//            break;
-//        case 102:
-//            error = @"PTC";
-//            break;
-//        case 61166:
-//            error = @"PTC";
-//            break;
-//            
-
-    
+        case 11:
+            error = @"Tripped Triggered From Remote Source";
+            break;
+        case 100:
+            error = @"Low Voltage Holdoff";
+            break;
+        case 101:
+            error = @"High Voltage Holdofff";
+            break;
+        case 102:
+            error = @"Voltage Unbalanced Holdoff";
+            break;
+        case 61166:
+            error = @"Undefined trip condition";
+            break;
         default:
+            error = @"Undefined trip condition";
             break;
     }
     return error;
@@ -375,23 +435,31 @@
 {
     NSString *dateStr = [self convertDateToString:_datepicker.date];
     [self.btnSelectedDate setTitle:dateStr forState:UIControlStateNormal];
-
+    
     [_tfPicker resignFirstResponder];
-
+    
     [self fetchDataWithDate:_datepicker.date];
 }
 
 - (void)fetchDataWithDate:(NSDate *)date
 {
     NSDate *tomorrow = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
-
+    
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSIntegerMax fromDate:tomorrow];
     [components setHour:5];
     [components setMinute:30];
     [components setSecond:0];
-
     NSArray *arr = [[LFDataManager sharedManager] getFaultDataForSelectedDate:[components date]];
+    NSInteger faultsCount  = sectionArray.count;
     [sectionArray removeAllObjects];
+    if (faultsCount > 0) {
+//        [_tblFaults beginUpdates];
+//        for (int i = 0; i < faultsCount; i++) {
+//            [_tblFaults deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+//        }
+//        [_tblFaults endUpdates];
+        [_tblFaults reloadData];
+    }
     if (arr.count) {
         for (LFFaultData *fault in arr) {
             [faultDict removeAllObjects];
@@ -400,15 +468,14 @@
         }
         currentIndex = 1;
         [self readFaultData];
-
+        
     } else {
-        [sectionArray removeAllObjects];
+//        [sectionArray removeAllObjects];
         [self.tblFaults reloadData];
-
         currentIndex = 1;
         [self readFaultData];
     }
-
+    
 }
 
 - (IBAction)selectDate:(UIButton *)sender
@@ -416,11 +483,24 @@
     _tfPicker.inputView = _datepicker;
     _tfPicker.inputAccessoryView = _toolBar;
     [_tfPicker becomeFirstResponder];
-
+    
     
 }
 - (IBAction)dateChanged:(UIDatePicker *)sender
 {
     
+}
+
+#pragma mark Device Disconnected Notification
+- (void)peripheralDisconnected {
+    if (!canContinueTimer) {
+        return;
+    }
+    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            [alert dismissViewControllerAnimated:NO completion:nil];
+            [self.navigationController popToRootViewControllerAnimated:NO];
+        }
+    }];
 }
 @end

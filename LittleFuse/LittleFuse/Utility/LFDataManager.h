@@ -43,5 +43,4 @@
 
 - (NSInteger)getTotalFaultsCount;
 
-
 @end

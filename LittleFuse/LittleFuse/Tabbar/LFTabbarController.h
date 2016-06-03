@@ -8,6 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol LFTabbarRefreshDelegate <NSObject>
+
+@optional
+- (void)refreshContentInCurrentController;
+
+@end
+
 @interface LFTabbarController : UITabBarController
+
+@property (nonatomic,assign) BOOL enableRefresh;
+
+@property (weak, nonatomic) id <LFTabbarRefreshDelegate> tabBarDelegate;
 
 @end

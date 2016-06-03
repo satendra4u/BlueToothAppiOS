@@ -21,7 +21,7 @@
 
 - (void)showAlertWithText:(NSString *)msg;
 
-- (void)showOperationCompletedAlert;
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess;
 
 - (void) configureServiceWithValue:(NSData *)data;
 
@@ -54,11 +54,16 @@
 
 @property (strong, nonatomic) LFPeripheral *selectedPeripheral;
 
+@property (strong, nonatomic) LFFaultData *curFaultData;
+@property (nonatomic) NSInteger tCurIndex;
+
 @property (weak, nonatomic) id<BlutoothSharedDataDelegate> delegate;
 
 @property (strong, nonatomic) NSString *selectedDevice;
 
 @property (strong, nonatomic) NSString *selectedTag;
+
+@property (nonatomic) BOOL  canContinueTimer;
 
 @property (assign, nonatomic, getter=isDisplayCharacterstics) BOOL displayCharacterstics;
 
@@ -71,6 +76,7 @@
 + (LFBluetoothManager *)sharedManager;
 
 - (void)createObjects;
+- (void)destroyObjects;
 
 - (void)scan;
 
@@ -81,6 +87,8 @@
 - (void)connectToCharactertics:(CBCharacteristic *)characterstic;
 
 - (void)writeConfigData:(NSData *)data;
+
+- (void)writeConfigDataForFaultsList:(NSData *)data;
 
 - (NSMutableArray *)getcharactersticsList;
 
@@ -93,5 +101,9 @@
 - (void)updateConfig;
 
 - (void)disconnectDevice;
+
+- (void)readFaultData;
+
+- (void)stopFaultTimer;
 
 @end

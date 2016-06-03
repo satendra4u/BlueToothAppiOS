@@ -10,7 +10,7 @@
 #define LFConstants_h
 
 
-#define APP_NAME @"Littlefuse"
+#define APP_NAME @"Littelfuse"
 
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] >>>>" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
@@ -96,6 +96,7 @@
 #define attribute_other     @"other"
 
 #define PeripheralDidDisconnect @"PeripheralDidDisconnectNotification"
+#define PeripheralDidConnect    @"PeripheralDidConnectNotification"
 #define LittleFuseNotificationCenter [NSNotificationCenter defaultCenter]
 
 #endif /* LFConstants_h */

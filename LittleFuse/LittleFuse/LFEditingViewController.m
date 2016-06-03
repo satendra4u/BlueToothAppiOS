@@ -9,7 +9,7 @@
 #import "LFEditingViewController.h"
 #import "LFInfoViewController.h"
 
-@interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate>
+@interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
     NSArray *pickerArr;
     UIPickerView *categoryPickerView;
@@ -70,6 +70,11 @@
         self.lblTitleheader.text = _selectedText;
         [self.view bringSubviewToFront:self.passwordView];
 
+    }
+    _textFiled.delegate = self;
+    _authenticationTextField.delegate = self;
+    if (CGRectGetHeight(self.view.frame) < 568.0f) {
+        [self updateAccessoryViewForTextField:_textFiled];
     }
 }
 
@@ -202,6 +207,13 @@
 
 }
 
+#pragma mark TextField Delegate Methods
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return YES;
+}
+
 #pragma mark UIPickerDelegate & Data Source
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
 {
@@ -223,6 +235,25 @@
     return  pickerArr[row];
 }
 
+#pragma mark Keyboard Methods
+- (void)updateAccessoryViewForTextField:(UITextField *)numberTextField {
+    
+    UIToolbar* numberToolbar = [[UIToolbar alloc]initWithFrame:CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.frame), 50.0f)];
+    numberToolbar.barStyle = UIBarStyleDefault;
+    [numberToolbar setBackgroundColor:[UIColor lightGrayColor]];
+    numberToolbar.items = @[
+                            [[UIBarButtonItem alloc]initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(doneWithNumberPad)]];
+    [numberToolbar sizeToFit];
+    numberTextField.inputAccessoryView = numberToolbar;
+}
+
+- (void)cancelNumberPad {
+    [_textFiled resignFirstResponder];
+}
+
+-(void)doneWithNumberPad {
+    [_textFiled resignFirstResponder];
+}
 
 
 @end
