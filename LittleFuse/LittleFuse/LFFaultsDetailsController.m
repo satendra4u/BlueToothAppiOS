@@ -108,7 +108,6 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tableView dequeueReusableCellWithIdentifier:CHARACTER_DISPLAY_CELL_ID forIndexPath:indexPath];
-    // Configure the cell...
     [cell updateValues:detailsArr[indexPath.section][indexPath.row]];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
@@ -145,7 +144,7 @@
     return aView;
 }
 
-#pragma Conversins
+#pragma mark Conversions
 - (void)convertDataToVoltageDisplay:(NSData *)data
 {
     NSInteger len = 2;

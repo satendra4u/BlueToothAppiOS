@@ -20,18 +20,21 @@
 
 @interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource>
 {
-    NSMutableArray *peripheralsList;
-    NSMutableArray *charactersticsList;
-    __weak IBOutlet UITableView *tblDevices;
-    __weak IBOutlet UILabel *lblScanning;
-    NSInteger selectedIndex;
-    NSInteger refreshTimeInterval;
-    __weak IBOutlet UILabel *lblVersion;
     BOOL isPopupOpened;
     BOOL isInitialLaunch;
     BOOL canRefresh;
     BOOL isDeviceSelected;
     BOOL isScanDataFound;
+    
+    NSInteger selectedIndex;
+    NSInteger refreshTimeInterval;
+    
+    NSMutableArray *peripheralsList;
+    NSMutableArray *charactersticsList;
+    
+    __weak IBOutlet UITableView *tblDevices;
+    __weak IBOutlet UILabel *lblScanning;
+    __weak IBOutlet UILabel *lblVersion;
 }
 @property (strong, nonatomic) CBCentralManager *centralManager;
 
@@ -67,22 +70,37 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
+/**
+ * This method is called when app enters background.
+ */
 - (void)appEnteredBackground {
     [[LFBluetoothManager  sharedManager] disconnectDevice];
 }
 
+/**
+ * This method is called when app comes into active state.
+ */
 - (void)becameActive {
     [self reloadDevicesList];
 }
 
+/**
+ * This method is called when app is going to become active.
+ */
 - (void)willBecomeInActive {
     canRefresh = YES;
 }
 
+/**
+ * This method is called when a peripheral is connected to the mobile device.
+ */
 - (void)peripheralConnected {
     isPopupOpened = YES;
 }
 
+/**
+ * This method is called when device is disconnected from the hardware.
+ */
 - (void)peripheralDisconnnected {
     isPopupOpened = NO;
 }
@@ -183,7 +201,9 @@
 }
 
 #pragma mark - Blutooth Shared Data Delegate -
-
+/**
+ * This method is called to display discovered devices to the user.
+ */
 - (void)showScannedDevices:(NSMutableArray *)devicesArray
 {
     if (devicesArray.count) {
@@ -193,6 +213,9 @@
     [tblDevices reloadData];
 }
 
+/**
+ * This method is called after receiving characteristics from the BLE device.
+ */
 - (void)showCharacterstics:(NSMutableArray *)charactersticsArray
 {
     charactersticsList = charactersticsArray;
@@ -210,6 +233,9 @@
     [[LFBluetoothManager sharedManager] disconnectDevice];
 }
 
+/**
+ * This method checks if there are any devices available to connect.
+ */
 - (void)verifyDeviceCount {
     if (!isScanDataFound) {
         [peripheralsList removeAllObjects];
@@ -301,9 +327,12 @@
     }
 }
 
+/**
+ * This method displays an alert with a given message.
+ */
 - (void)showAlertWithText:(NSString *)msg
 {
-    if ([msg isEqualToString:@"Encryption is insufficient."]) {
+    if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame)) {
         isPopupOpened = NO;
         [self hideAllAlerts];
     }
@@ -315,7 +344,6 @@
     }];
     [self.navigationController popToRootViewControllerAnimated:NO];
 }
-
 
 - (void)hideAllAlerts {
     for (UIWindow* window in [UIApplication sharedApplication].windows) {

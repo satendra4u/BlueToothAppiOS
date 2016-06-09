@@ -27,7 +27,6 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     // Do any additional setup after loading the view.
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    //    [self.topItem setTitleView:imageView];
     self.navigationItem.titleView = imageView;
     
 
@@ -62,13 +61,11 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
             
             [alertcontroller addAction:[UIAlertAction actionWithTitle:cancelTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 alertBlock (alertcontroller, 0);
-//                [alertcontroller dismissViewControllerAnimated:YES completion:nil];
 
             }]];
             for (NSString *button in otherButtons) {
                 [alertcontroller addAction:[UIAlertAction actionWithTitle:button style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     alertBlock (alertcontroller, [otherButtons indexOfObject:button]+1);
-//                    [alertcontroller dismissViewControllerAnimated:YES completion:nil];
                     
                 }]];
             }

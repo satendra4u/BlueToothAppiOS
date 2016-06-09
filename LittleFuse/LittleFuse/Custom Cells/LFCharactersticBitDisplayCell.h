@@ -11,6 +11,10 @@
 
 @protocol ToggleTappedProtocol <NSObject>
 
+/**
+ * This method is called when Feature Enable/Disable or Hardware Configuration fields are toggled.
+ * @param: indexPath: The indexpath for the item tapped.
+ */
 - (void)toggledTappedAtIndexPath:(NSIndexPath *) indexPath;
 
 @end

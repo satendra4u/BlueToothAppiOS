@@ -17,11 +17,14 @@
 {
     
     BOOL canContinueTimer;
-    NSMutableArray *sectionArray;
-    NSData *unbalanceCurrentData;
+    
     __weak IBOutlet UITableView *tblDisplay;
     __weak IBOutlet UILabel *lblDeviceName;
+    
     NSMutableArray *configArr;
+    NSMutableArray *sectionArray;
+    
+    NSData *unbalanceCurrentData;
     NSInteger refreshTimeInterval;
     CGPoint currentContentOffset;
 }
@@ -61,6 +64,10 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
+/**
+ * This method is called when app enters background.
+ * Then, the peripheral is disconnected from the mobile device.
+ */
 - (void)appEnteredBackground {
     [[LFBluetoothManager  sharedManager] disconnectDevice];
 }
@@ -84,6 +91,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
 }
 
+
 - (void)updateFaultData {
     if(canContinueTimer) {
         [LFBluetoothManager sharedManager].tCurIndex = 1;
@@ -95,6 +103,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     }
 }
 
+
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
@@ -102,6 +111,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] stopFaultTimer];
 }
+
 
 - (void)refreshCurrentController {
     if (!canContinueTimer) {
@@ -124,22 +134,34 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 }
 
+/**
+ * This method is called once Voltage data is received from device.
+ */
 - (void)getVoltageData:(NSNotification *)notification
 {
     [self voltageCharcterstics:[notification object]];
 }
 
+/**
+ * This method is called once Current data is received from device.
+ */
 - (void)getCurrentData:(NSNotification *)notification
 {
     [self currentCharcterstics:[notification object]];
     
 }
 
+/**
+ * This method is called once equipment data is received from device.
+ */
 - (void)getEquipmentData:(NSNotification *)notificaition
 {
     [self equipmentStatus:[notificaition object]];
 }
 
+/**
+ * This method is called once power data is received from device.
+ */
 - (void)getPowerData:(NSNotification *)notification
 {
     [self powerCharacterstics:[notification object]];
@@ -197,6 +219,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     NSArray *voltgaeDetails = @[aTob, bToc, cToa, vunbaised];
     [sectionArray replaceObjectAtIndex:0 withObject:voltgaeDetails];
 }
+
 - (void)currentCharcterstics:(NSData *)data
 {
     
@@ -258,6 +281,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [sectionArray replaceObjectAtIndex:1 withObject:currentDetails];
     [sectionArray replaceObjectAtIndex:2 withObject:powerDetails];
 }
+
 - (NSString *)changeCurrentAsRequired:(float)val
 {
     NSString *convertedString;
@@ -313,6 +337,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [powerDetails insertObject:aTob atIndex:0];
     [sectionArray replaceObjectAtIndex:2 withObject:powerDetails];
 }
+
 
 - (void)equipmentStatus:(NSData *)data
 {
@@ -510,13 +535,11 @@ const char realMemFieldLens[] = { 0x02, 0x02};
         }
 
     }
-    // Configure the cell...
     return cell;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    
     UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
     UILabel *aLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, 280, 40)];
     switch (section) {
@@ -573,7 +596,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
 
-
+/**
+ *Calculates timers data received from device.
+ */
 - (void)getTimersData:(NSNotification *)notification
 {
     CBCharacteristic *characteristic = (CBCharacteristic *)notification.object;
@@ -604,7 +629,6 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 }
 
 #pragma mark Peripheral Disconnected Notification
-
 - (void)peripheralDisconnected {
     if (!canContinueTimer) {
         return;

@@ -169,6 +169,10 @@
     }
 }
 
+/**
+ * This method displays the picker view.
+ */
+
 - (void)displayPickerrView
 {
     

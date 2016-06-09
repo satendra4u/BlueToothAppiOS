@@ -98,6 +98,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [[LFBluetoothManager  sharedManager] disconnectDevice];
 }
 
+/**
+ * This method sets up configuration data to display
+ */
 - (void)configArr
 {
     
@@ -200,8 +203,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
         [self readCharactisticsWithIndex:currentIndex];
     }
-//    isAdvanceLoded = NO;
-//    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
 
 }
 
@@ -221,7 +222,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         }
     }
 }
-
 
 - (void)updateFaultData {
     if(canContinueTimer) {
@@ -266,8 +266,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     };
 }
 
-
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (isBasic) {
@@ -302,7 +300,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         [cell.btnRTD addTarget:self action:@selector(showRTD:) forControlEvents:UIControlEventTouchUpInside];
         return cell;
     }
-    
+    //Normal cell
     if (!isBasic && indexPath.section != 0) {
         LFCharactersticBitDisplayCell *cell = (LFCharactersticBitDisplayCell *)[tableView dequeueReusableCellWithIdentifier:TOGGLE_CELL_ID forIndexPath:indexPath];
         cell.path = indexPath;
@@ -317,7 +315,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
             return cell;
         }
     }
-    
+    //Toggle cell
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tableView dequeueReusableCellWithIdentifier:CHARACTER_DISPLAY_CELL_ID forIndexPath:indexPath];
     if (isBasic) {
         NSInteger cont = 0;
@@ -336,11 +334,11 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{ UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
+{
+    UIView *aView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, CGRectGetWidth(tableView.frame), 40)];
     UILabel *aLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, CGRectGetWidth(tableView.frame), 40)];
     
     if (!isBasic) {
-        
         switch (section) {
             case 0:
                 return nil;
@@ -402,7 +400,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     return 44.0;
 }
 
-
+//Displays the popup to enter new value for the selected field.
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    curCell set
@@ -433,7 +431,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     });
 }
 
-
 - (void)toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
     LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
@@ -455,6 +452,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     
 }
 
+/**
+ * This method switches between Basic and Advanced Configuration Screens.
+ */
 - (IBAction)segmentControlAction:(UISegmentedControl *)sender
 {
     [[LFBluetoothManager sharedManager] setDelegate:nil];
@@ -473,6 +473,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     
     [tblConfigDisplay reloadData];
 }
+
+
 
 - (void)configureServiceWithValue:(NSData *)data
 {
@@ -552,7 +554,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)getValuesFromData:(NSData *)data withForamte:(NSString *)formate
 {
-    
     NSUInteger val = [LFUtilities getValueFromHexData:data];
     
     unichar c = [formate characterAtIndex:0];
@@ -915,12 +916,18 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     
 }
 
+/**
+ * Displays the communication controller.
+ */
 - (void)showCommunication:(UIButton *)btn
 {
     LFCommunicationSettingsController *communication = (LFCommunicationSettingsController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFCommunicationSettingsControllerID"];
     [self.navigationController pushViewController:communication animated:YES];
 }
 
+/**
+ * Displays RTD controller.
+ */
 - (void)showRTD:(UIButton *)btn
 {
     LFRTDViewController *rtd = (LFRTDViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFRTDViewControllerID"];

@@ -21,13 +21,13 @@
 
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
 {
+    BOOL canContinueTimer;
+    NSInteger currentIndex;
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
-    NSInteger currentIndex;
     LFFaultData *currentData;
     LFFaultData *prevFaultData;
     NSDate *selectedDate;
-    BOOL canContinueTimer;
     
 }
 @property (strong, nonatomic) IBOutlet UIDatePicker *datepicker;
@@ -83,7 +83,6 @@
     
 }
 
-//Changed code in didappear to will appear.
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
     [[LFBluetoothManager sharedManager] setConfig:NO];
@@ -112,7 +111,6 @@
     [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
 }
 
-//Refreshing the faults.
 - (void)updateFaultData {
     if(!canContinueTimer) {
         return;

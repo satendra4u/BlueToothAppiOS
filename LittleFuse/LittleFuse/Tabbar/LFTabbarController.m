@@ -14,11 +14,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
     [self.tabBar setTintColor:[UIColor whiteColor]];
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    //    [self.topItem setTitleView:imageView];
     self.navigationItem.titleView = imageView;
     self.navigationItem.title = @"";    
 }
@@ -29,6 +27,7 @@
     }
 }
 
+//Setter method hide/unhide refresh button
 - (void)setEnableRefresh:(BOOL)enableRefresh {
     if (!enableRefresh) {
         self.navigationItem.rightBarButtonItems = @[];
