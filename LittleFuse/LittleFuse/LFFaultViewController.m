@@ -16,6 +16,8 @@
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
 
+#define Background_Fault_Refresh_Interval 180
+
 
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
 {
@@ -107,7 +109,7 @@
     NSDate *date = [NSDate date];
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
     [self fetchDataWithDate:date];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
 }
 
 //Refreshing the faults.
@@ -121,7 +123,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[LFBluetoothManager sharedManager] readFaultData];
     });
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
 }
 
 - (void)dealloc {
@@ -453,11 +455,6 @@
     NSInteger faultsCount  = sectionArray.count;
     [sectionArray removeAllObjects];
     if (faultsCount > 0) {
-//        [_tblFaults beginUpdates];
-//        for (int i = 0; i < faultsCount; i++) {
-//            [_tblFaults deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
-//        }
-//        [_tblFaults endUpdates];
         [_tblFaults reloadData];
     }
     if (arr.count) {
@@ -470,7 +467,6 @@
         [self readFaultData];
         
     } else {
-//        [sectionArray removeAllObjects];
         [self.tblFaults reloadData];
         currentIndex = 1;
         [self readFaultData];

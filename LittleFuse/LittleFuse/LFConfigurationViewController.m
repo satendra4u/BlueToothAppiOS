@@ -26,19 +26,21 @@
     __weak IBOutlet UITableView *tblConfigDisplay;
     NSMutableArray *basicConfigDetails;
     NSMutableArray *advanceConfigDetails;
+    NSMutableArray *basicValuesArray;
+
     NSArray  *basicFormateArray;
     NSArray *advancedFormateArray;
-    BOOL isBasic;
-    NSInteger currentIndex;
-    NSMutableArray *basicValuesArray;
     NSArray *basicUnitsArray, *advUnitsArray;
     
-    NSInteger selectedTag;
+    BOOL isBasic;
     BOOL isWrite;
-    NSString *previousSelected;
     BOOL isAdvanceLoded;
     BOOL canContinueTimer;
     BOOL isInitialLaunch;
+    
+    NSInteger currentIndex;
+    NSInteger selectedTag;
+    NSString *previousSelected;
     NSInteger prevEnteredVal;//Used to compare previously entered value.
 }
 @property (nonatomic) NSUInteger hardwareConfigVal;
@@ -395,7 +397,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         return 44.0;
     }
     if (section == 0) {
-        return 0.01f;
+        return 0.01;
     }
     return 44.0;
 }
@@ -474,15 +476,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)configureServiceWithValue:(NSData *)data
 {
-    //    NSLog(@"%s", __func__);
-    
-    //    NSDictionary *dict = notification.object;
-    //    NSString *selectedVal = dict[@"tag"];
-    //    if ([previousSelected isEqualToString:selectedVal]) {
-    //        return;
-    //    }
-    //    previousSelected = selectedVal;
-    //    NSData *data = dict[@"val"];
     NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
     
     NSRange range = NSMakeRange(0, 4);
@@ -553,13 +546,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     else if (dataVal >= 2000) {
         strVal = [NSString stringWithFormat:@"%ld", lroundf(dataVal/100.0f)];
     }
-    NSString *convertedVal;
-//    if (isBasic) {
-//        convertedVal = [NSString stringWithFormat:@"%@ %@", strVal, basicUnitsArray[currentIndex]];
-//    }
-//    else {
-        convertedVal = [NSString stringWithFormat:@"%@", strVal];
-//    }
+    NSString *convertedVal = [NSString stringWithFormat:@"%@", strVal];
     return convertedVal;
 }
 
@@ -576,25 +563,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         case 'B':
             if (isBasic) {
                 if (currentIndex == 3 || currentIndex == 4) {
-                    NSString *strVal;
-                    //New Code after feedback for V0.5
-//                    if (val < 500) {
-//                        strVal = [NSString stringWithFormat:@"%0.2f", val/100.0f];
-//                        
-//                    }
-//                    else if (val >= 500 && val < 2000) {
-//                        strVal = [NSString stringWithFormat:@"%0.1f", val/100.0f];//One decimal place.
-//                        if (val >= 1995) {
-//                            strVal = @"20";
-//                        }
-//                    }
-//                    else if (val >= 2000) {
-//                        //lroundf used to round off the float number to nearest integer.
-//                        strVal = [NSString stringWithFormat:@"%ld", lroundf(val/100.0f)];
-//                    }
-                    strVal = [self getConvertedStringForValue:val];
+                    NSString *strVal = [self getConvertedStringForValue:val];
                     convertedVal = [NSString stringWithFormat:@"%@ %@", strVal, basicUnitsArray[currentIndex]];
-                    //                    }
                 }
                 else {
                     if (currentIndex == 2 || currentIndex == 5) {
@@ -621,20 +591,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
                 }
             } else {
                 if (currentIndex == 5) {
-//                    if (val < 500) {
-//                        convertedVal = [NSString stringWithFormat:@"%0.2f", val/100.0f];//two decimal places.
-//                        
-//                    }
-//                    else if (val >= 500 && val < 2000) {
-//                        convertedVal = [NSString stringWithFormat:@"%0.1f", val/100.0f];//One decimal place.
-//                        if (val >= 1995) {
-//                            convertedVal = @"20";
-//                        }
-//                    }
-//                    else if (val >= 2000) {
-//                        //lroundf used to convert the float number to nearest integer.
-//                        convertedVal = [NSString stringWithFormat:@"%ld", lroundf(val/100.0f)];
-//                    }
                     convertedVal = [self getConvertedStringForValue:val];
                 }
                 else {
@@ -748,10 +704,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         
     }
     
-    DLog(@"currentIndex %lu data %@", (long)currentIndex, data);
-//    if (currentIndex == 28) {
-////        NSLog(@"config data ended");
-//    }
     [tblConfigDisplay reloadData];
     //All the data is fetched after index = 28. Now fault refresh can be started to avoid blocking.
     

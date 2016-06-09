@@ -117,15 +117,6 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:YES];
-//    [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-//    float batteryLevel = [[UIDevice currentDevice] batteryLevel];
-//    if (batteryLevel > 0.20) {
-//        refreshTimeInterval = 5;
-//    }
-//    else {
-//        refreshTimeInterval = 600;
-//    }
-//    [self reloadDevicesList];
 }
 
 

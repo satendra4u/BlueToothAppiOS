@@ -556,7 +556,6 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)readCharactisticsWithIndex:(NSInteger)index
 {
-    //    DLog(@"writing data  to %c %c ", mapArray[currentIndex], basicMemMap[currentIndex], basicMemFieldLens[currentIndex]);
     Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
@@ -595,7 +594,6 @@ const char realMemFieldLens[] = { 0x02, 0x02};
         [configArr addObject:aTob];
         [sectionArray replaceObjectAtIndex:3 withObject:[configArr copy]];
         [configArr removeAllObjects];
-//        [tblDisplay reloadData];
         [tblDisplay beginUpdates];
         [tblDisplay reloadRowsAtIndexPaths:[tblDisplay indexPathsForVisibleRows]
                           withRowAnimation:UITableViewRowAnimationNone];
