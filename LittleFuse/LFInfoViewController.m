@@ -24,7 +24,29 @@
     self.navigationController.navigationBar.topItem.titleView = imageView;
 
     [self.activityIndicator startAnimating];
-    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"]]]; //@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"
+//    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"]]]; //@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"
+    if(_ivIsBasic){
+        switch(_ivSelectedTag){
+            case 0:
+            case 1:
+            case 2:
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"
+                break;
+            default:
+                break;
+        }
+    }
+    else{
+        switch(_ivSelectedTag){
+            case 0:
+            case 1:
+            case 2:
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"
+               break;
+            default:
+                break;
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning {

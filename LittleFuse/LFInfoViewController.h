@@ -10,4 +10,7 @@
 
 @interface LFInfoViewController : LFBaseViewController
 
+@property (nonatomic, assign) NSInteger ivSelectedTag;
+@property (nonatomic, assign) BOOL ivIsBasic;
+
 @end

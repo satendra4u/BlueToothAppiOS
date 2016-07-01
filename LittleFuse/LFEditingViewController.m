@@ -123,6 +123,8 @@
 {
     LFInfoViewController *info = (LFInfoViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFInfoViewControllerID"];
     [self.navigationController pushViewController:info animated:YES];
+    info.ivIsBasic = _evIsBasic;
+    info.ivSelectedTag = _evSelectedTag;
 }
 
 - (IBAction)authenticationCancel:(UIButton *)sender

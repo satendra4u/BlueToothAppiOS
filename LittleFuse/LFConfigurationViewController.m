@@ -425,6 +425,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     editing.selectedText = cell.lblKey.text;
     editing.delegate = self;
     editing.showAuthentication = YES;
+    editing.evSelectedTag = selectedTag;
+    editing.evIsBasic = isBasic;
+    
     [navController setViewControllers:@[editing]];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.navigationController presentViewController:navController animated:NO completion:nil];
@@ -447,6 +450,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     editing.delegate = self;
     editing.showAuthentication = YES;
     editing.isAdvConfig = YES;
+    editing.evSelectedTag = selectedTag;
+    editing.evIsBasic = isBasic;
     [navController setViewControllers:@[editing]];
     [self.navigationController presentViewController:navController animated:NO completion:nil];
     

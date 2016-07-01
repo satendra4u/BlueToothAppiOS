@@ -39,5 +39,7 @@
 @property (nonatomic, assign) BOOL showAuthentication;
 @property (nonatomic,assign) BOOL isAdvConfig;
 
+@property (nonatomic, assign) NSInteger evSelectedTag;
+@property (nonatomic, assign) BOOL evIsBasic;
 
 @end
