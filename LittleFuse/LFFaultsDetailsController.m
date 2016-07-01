@@ -188,7 +188,7 @@
     
     NSInteger Vca = [LFUtilities getValueFromHexData:data4];
     
-    NSInteger tcrVal = [LFUtilities getValueFromHexData:data5];
+    NSInteger tcuVal = [LFUtilities getValueFromHexData:data5];
 //    NSLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
     LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"L1-L2" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vab/100.0f)] Code:@"L1-L2"];
     
@@ -196,11 +196,11 @@
     
     LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vca/100.0f)] Code:@"L3-L1"];
     
-    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCR"];;
+    LFDisplay *tcu = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (tcuVal/100.0)] Code:@"TCU"];;
     
     NSArray *voltgaeDetails = @[aTob, bToc, cToa];
     
-    NSArray *otherDetails = @[tcr];
+    NSArray *otherDetails = @[tcu];
     
     
     [faultDict setValue:faultdate forKey:FAULT_DATE];

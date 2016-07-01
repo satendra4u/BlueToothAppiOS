@@ -398,7 +398,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     NSInteger val2 = [LFUtilities getValueFromHexData:data1];
     NSInteger vunb = [LFUtilities getValueFromHexData:data2];
     
-    LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (vunb/100.0)] Code:@"TCR"];
+    LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (vunb/100.0)] Code:@"TCU"];
     NSInteger hours = val1/3600; //Hours
     NSInteger minutesVal = val1%3600;
     NSInteger minutes = minutesVal/60; //Minutes
