@@ -53,15 +53,8 @@
         }
     }
     else{
-        switch(_ivSelectedTag){
-            case 0:
-            case 1:
-            case 2:
-                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"
-               break;
-            default:
-                break;
-        }
+
+            [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"
     }
 }
 

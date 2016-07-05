@@ -9,6 +9,8 @@
 #import "LFEditingViewController.h"
 #import "LFInfoViewController.h"
 
+extern BOOL userIsAuthorized;
+
 @interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
     NSArray *pickerArr;
@@ -140,6 +142,7 @@
 
 }
 
+
 - (IBAction)authenticationOkAction:(UIButton *)sender
 {
     if (![self.authenticationTextField.text isEqualToString:@"admin"])
@@ -154,6 +157,7 @@
     } else {
         self.authenticationView.hidden = YES;
         self.passwordView.hidden = NO;
+        userIsAuthorized = TRUE;
         
         [self.textFiled becomeFirstResponder];
         self.lblTitleheader.text = _selectedText;

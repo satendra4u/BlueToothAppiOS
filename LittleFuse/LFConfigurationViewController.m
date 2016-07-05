@@ -18,6 +18,8 @@
 #import "LFCharactersticBitDisplayCell.h"
 #import "LFTabbarController.h"
 
+extern BOOL userIsAuthorized;
+
 #define BUTTON_CELL_ID @"LFConfigureButtonsCellID"
 #define TOGGLE_CELL_ID @"LFCharactersticBitDisplayCell"
 @interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol, LFTabbarRefreshDelegate>
@@ -424,7 +426,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     
     editing.selectedText = cell.lblKey.text;
     editing.delegate = self;
-    editing.showAuthentication = YES;
+    if (userIsAuthorized){
+        editing.showAuthentication = NO;
+    }
+    else{
+        editing.showAuthentication = YES;
+    }
     editing.evSelectedTag = selectedTag;
     editing.evIsBasic = isBasic;
     
@@ -448,7 +455,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
     [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
     editing.delegate = self;
-    editing.showAuthentication = YES;
+    if (userIsAuthorized){
+        editing.showAuthentication = NO;
+    }
+    else{
+        editing.showAuthentication = YES;
+    }
     editing.isAdvConfig = YES;
     editing.evSelectedTag = selectedTag;
     editing.evIsBasic = isBasic;
