@@ -32,6 +32,22 @@
             case 2:
                 [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"
                 break;
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_current_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_current_settings.pdf"
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_timer_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_timer_settings.pdf"
+                break;
+            case 11:
+            case 12:
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_restart_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_restart_settings.pdf"
+                break;
             default:
                 break;
         }
@@ -41,7 +57,7 @@
             case 0:
             case 1:
             case 2:
-                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_voltage_settings.pdf"
+                [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"]]]; //@"hhttp://www.littelfuse.com/~/media/protection-relays/product-manuals/motor-protection/mp8000/mobile/littelfuse_protectionrelays_mp8000_manual_advanced_settings.pdf"
                break;
             default:
                 break;
