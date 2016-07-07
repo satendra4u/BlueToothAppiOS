@@ -10,6 +10,9 @@
 #import "LFInfoViewController.h"
 
 extern BOOL userIsAuthorized;
+NSInteger changePW = 0;
+NSString *PW1;
+NSString *resetPW;
 
 @interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
@@ -49,6 +52,7 @@ extern BOOL userIsAuthorized;
 - (IBAction)authenticationCancel:(UIButton *)sender;
 
 - (IBAction)authenticationOkAction:(UIButton *)sender;
+
 @end
 
 @implementation LFEditingViewController
@@ -143,37 +147,99 @@ extern BOOL userIsAuthorized;
 }
 
 
+/**
+ * This method removes the authentication popup and displays parameter to be modified.
+ */
+
+- (void)authorizedForModifications
+{
+    self.authenticationView.hidden = YES;
+    self.passwordView.hidden = NO;
+    userIsAuthorized = TRUE;
+    
+    [self.textFiled becomeFirstResponder];
+    self.lblTitleheader.text = _selectedText;
+    if (_isAdvConfig) {
+        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
+            [_delegate toggleSelectedWithSuccess:YES];
+            [self dismissViewControllerAnimated:NO completion:nil];
+            return;
+        }
+    }
+    [self.view bringSubviewToFront:self.passwordView];
+}
+
+
 - (IBAction)authenticationOkAction:(UIButton *)sender
 {
-    if (![self.authenticationTextField.text isEqualToString:@"admin"])
-    {
+    NSString *password = [[NSUserDefaults standardUserDefaults] stringForKey:@"password"];
+    
+    /*
+     We need to create a unique reset password that only a program at the Littelfuse facility can create. 
+     Probably something based on the MAC plus some hash code.
+     */
+    if (resetPW == nil){
+        // resetPW = MethodToCreateUniquePW();
+        resetPW = @"admin";  // Bogus default PW for development until we implement MethodToCreateUniquePW
+    }
+    // This will populate password with unique factory default the first time configure is run or if factory default is supplied
+    if ((password == nil) || ([self.authenticationTextField.text isEqualToString:resetPW])){
+        password = resetPW;
+        [[NSUserDefaults standardUserDefaults] setValue:resetPW forKey:@"password"];
+    }
+    
+    if ((password == resetPW) && [self.authenticationTextField.text isEqualToString:password]){
+        changePW = 1;
+        [self showAlertViewWithCancelButtonTitle:@"Change Default Password" withMessage:@"" withTitle:NSLocalizedString(@"Do you want to change the password?", (@"Do you want to change the password?", )) otherButtons:@[@"No", @"Cancel"] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if (index != 0){
+                changePW = 0;
+                [self authorizedForModifications];
+            } else {
+                changePW = 2;
+            }
+        }];
+    }
+    
+    if ([self.authenticationTextField.text isEqualToString:password] && !changePW){
+        [self authorizedForModifications];
+    } else if (changePW){
+        if (changePW == 1){
+            self.authenticationTextField.text = @"";
+        } else if (changePW == 2){
+            PW1 = self.authenticationTextField.text;
+            [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please re-enter new password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                self.authenticationTextField.text = @"";
+            }];
+            changePW = 3;
+        } else {
+            if (PW1 == self.authenticationTextField.text) {
+                [[NSUserDefaults standardUserDefaults] setValue:PW1 forKey:@"password"];
+                [self authorizedForModifications];
+                changePW = 0;
+            } else {
+                changePW = 1;
+                self.authenticationTextField.text = @"";
+                [self showAlertViewWithCancelButtonTitle:@"Change Password" withMessage:@"" withTitle:NSLocalizedString(@"New password did not match", (@"New password did not match", )) otherButtons:@[@"No", @"Cancel"] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                    if (index != 0){
+                        changePW = 0;
+                        [self authorizedForModifications];
+                    } else {
+                        changePW = 2;
+                    }
+                }];
+            }
+        }
+    } else {
         [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
             self.authenticationTextField.text = @"";
             if ([alert isKindOfClass:[UIAlertController class]]) {
                 [alert dismissViewControllerAnimated:NO completion:nil];
             }
-        
+            
         }];
-    } else {
-        self.authenticationView.hidden = YES;
-        self.passwordView.hidden = NO;
-        userIsAuthorized = TRUE;
-        
-        [self.textFiled becomeFirstResponder];
-        self.lblTitleheader.text = _selectedText;
-        if (_isAdvConfig) {
-            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
-                [_delegate toggleSelectedWithSuccess:YES];
-                [self dismissViewControllerAnimated:NO completion:nil];
-                return;
-            }
-        }
-        [self.view bringSubviewToFront:self.passwordView];
-
-
-
     }
 }
+
 
 /**
  * This method displays the picker view.

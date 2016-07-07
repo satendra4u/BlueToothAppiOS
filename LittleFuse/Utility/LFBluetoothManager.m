@@ -117,12 +117,17 @@ static LFBluetoothManager *sharedData = nil;
     
 }
 
+extern BOOL userIsAuthorized;
+
 /** This callback comes whenever a peripheral that is advertising the TRANSFER_SERVICE_UUID is discovered.
  *  We check the RSSI, to make sure it's close enough that we're interested in it, and if it is,
  *  we start the connection process
  */
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
 {
+    // We are on the device list (advertising) page. So disable any authorization that was previously granted.
+    userIsAuthorized = FALSE;
+    
     // Reject any where the value is above reasonable range
     
     if (RSSI.integerValue > 0) {
