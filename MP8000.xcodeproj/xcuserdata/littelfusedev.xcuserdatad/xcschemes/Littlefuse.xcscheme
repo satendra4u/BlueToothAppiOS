@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "933600B01C50A81D007CD61A"
-               BuildableName = "Littlefuse.app"
+               BuildableName = "MP8000.app"
                BlueprintName = "Littlefuse"
-               ReferencedContainer = "container:Littlefuse.xcodeproj">
+               ReferencedContainer = "container:MP8000.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "933600C91C50A81D007CD61A"
                BuildableName = "Littlefuse.xctest"
                BlueprintName = "LittleFuseTests"
-               ReferencedContainer = "container:Littlefuse.xcodeproj">
+               ReferencedContainer = "container:MP8000.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "933600D41C50A81D007CD61A"
                BuildableName = "Littlefuse.xctest"
                BlueprintName = "LittleFuseUITests"
-               ReferencedContainer = "container:Littlefuse.xcodeproj">
+               ReferencedContainer = "container:MP8000.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -53,9 +53,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "933600B01C50A81D007CD61A"
-            BuildableName = "Littlefuse.app"
+            BuildableName = "MP8000.app"
             BlueprintName = "Littlefuse"
-            ReferencedContainer = "container:Littlefuse.xcodeproj">
+            ReferencedContainer = "container:MP8000.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -76,9 +76,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "933600B01C50A81D007CD61A"
-            BuildableName = "Littlefuse.app"
+            BuildableName = "MP8000.app"
             BlueprintName = "Littlefuse"
-            ReferencedContainer = "container:Littlefuse.xcodeproj">
+            ReferencedContainer = "container:MP8000.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -95,9 +95,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "933600B01C50A81D007CD61A"
-            BuildableName = "Littlefuse.app"
+            BuildableName = "MP8000.app"
             BlueprintName = "Littlefuse"
-            ReferencedContainer = "container:Littlefuse.xcodeproj">
+            ReferencedContainer = "container:MP8000.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
