@@ -408,9 +408,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		933600B01C50A81D007CD61A /* Littlefuse */ = {
+		933600B01C50A81D007CD61A /* MP8000 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 933600DE1C50A81D007CD61A /* Build configuration list for PBXNativeTarget "Littlefuse" */;
+			buildConfigurationList = 933600DE1C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000" */;
 			buildPhases = (
 				933600AD1C50A81D007CD61A /* Sources */,
 				933600AE1C50A81D007CD61A /* Frameworks */,
@@ -420,14 +420,14 @@
 			);
 			dependencies = (
 			);
-			name = Littlefuse;
+			name = MP8000;
 			productName = LittleFuse;
 			productReference = 933600B11C50A81D007CD61A /* MP8000dbg.app */;
 			productType = "com.apple.product-type.application";
 		};
-		933600C91C50A81D007CD61A /* LittleFuseTests */ = {
+		933600C91C50A81D007CD61A /* MP8000Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 933600E11C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseTests" */;
+			buildConfigurationList = 933600E11C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000Tests" */;
 			buildPhases = (
 				933600C61C50A81D007CD61A /* Sources */,
 				933600C71C50A81D007CD61A /* Frameworks */,
@@ -438,14 +438,14 @@
 			dependencies = (
 				933600CC1C50A81D007CD61A /* PBXTargetDependency */,
 			);
-			name = LittleFuseTests;
+			name = MP8000Tests;
 			productName = LittleFuseTests;
 			productReference = 933600CA1C50A81D007CD61A /* MP8000.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		933600D41C50A81D007CD61A /* LittleFuseUITests */ = {
+		933600D41C50A81D007CD61A /* MP8000UITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 933600E41C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseUITests" */;
+			buildConfigurationList = 933600E41C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000UITests" */;
 			buildPhases = (
 				933600D11C50A81D007CD61A /* Sources */,
 				933600D21C50A81D007CD61A /* Frameworks */,
@@ -456,7 +456,7 @@
 			dependencies = (
 				933600D71C50A81D007CD61A /* PBXTargetDependency */,
 			);
-			name = LittleFuseUITests;
+			name = MP8000UITests;
 			productName = LittleFuseUITests;
 			productReference = 933600D51C50A81D007CD61A /* MP8000.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -502,9 +502,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				933600B01C50A81D007CD61A /* Littlefuse */,
-				933600C91C50A81D007CD61A /* LittleFuseTests */,
-				933600D41C50A81D007CD61A /* LittleFuseUITests */,
+				933600B01C50A81D007CD61A /* MP8000 */,
+				933600C91C50A81D007CD61A /* MP8000Tests */,
+				933600D41C50A81D007CD61A /* MP8000UITests */,
 			);
 		};
 /* End PBXProject section */
@@ -609,12 +609,12 @@
 /* Begin PBXTargetDependency section */
 		933600CC1C50A81D007CD61A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 933600B01C50A81D007CD61A /* Littlefuse */;
+			target = 933600B01C50A81D007CD61A /* MP8000 */;
 			targetProxy = 933600CB1C50A81D007CD61A /* PBXContainerItemProxy */;
 		};
 		933600D71C50A81D007CD61A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 933600B01C50A81D007CD61A /* Littlefuse */;
+			target = 933600B01C50A81D007CD61A /* MP8000 */;
 			targetProxy = 933600D61C50A81D007CD61A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -732,7 +732,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
-				INFOPLIST_FILE = LittleFuse/Info.plist;
+				INFOPLIST_FILE = Littlefuse/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000;
@@ -751,7 +751,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
-				INFOPLIST_FILE = LittleFuse/Info.plist;
+				INFOPLIST_FILE = Littlefuse/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000;
@@ -765,7 +765,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
-				INFOPLIST_FILE = LittleFuseTests/Info.plist;
+				INFOPLIST_FILE = LittelfuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000Tests;
 				PRODUCT_NAME = MP8000;
@@ -778,7 +778,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				INFOPLIST_FILE = LittleFuseTests/Info.plist;
+				INFOPLIST_FILE = LittelfuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000Tests;
 				PRODUCT_NAME = MP8000;
@@ -789,12 +789,12 @@
 		933600E51C50A81D007CD61A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = LittleFuseUITests/Info.plist;
+				INFOPLIST_FILE = LittelfuseUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000UITests;
 				PRODUCT_NAME = MP8000;
 				PROVISIONING_PROFILE = "";
-				TEST_TARGET_NAME = LittleFuse;
+				TEST_TARGET_NAME = MP8000;
 				USES_XCTRUNNER = YES;
 			};
 			name = Debug;
@@ -802,12 +802,12 @@
 		933600E61C50A81D007CD61A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = LittleFuseUITests/Info.plist;
+				INFOPLIST_FILE = LittelfuseUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Littelfuse.MP8000UITests;
 				PRODUCT_NAME = MP8000;
 				PROVISIONING_PROFILE = "";
-				TEST_TARGET_NAME = LittleFuse;
+				TEST_TARGET_NAME = MP8000;
 				USES_XCTRUNNER = YES;
 			};
 			name = Release;
@@ -824,7 +824,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		933600DE1C50A81D007CD61A /* Build configuration list for PBXNativeTarget "Littlefuse" */ = {
+		933600DE1C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				933600DF1C50A81D007CD61A /* Debug */,
@@ -833,7 +833,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		933600E11C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseTests" */ = {
+		933600E11C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				933600E21C50A81D007CD61A /* Debug */,
@@ -842,7 +842,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		933600E41C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseUITests" */ = {
+		933600E41C50A81D007CD61A /* Build configuration list for PBXNativeTarget "MP8000UITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				933600E51C50A81D007CD61A /* Debug */,
