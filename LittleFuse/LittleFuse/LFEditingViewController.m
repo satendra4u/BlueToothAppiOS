@@ -35,6 +35,7 @@
 @property (weak, nonatomic) IBOutlet UIView *btnsView;
 
 @property (weak, nonatomic) IBOutlet UISlider *slider;
+@property (weak, nonatomic) IBOutlet UIButton *infoBtn;
 
 - (IBAction)sliderValueChange:(UISlider *)sender;
 
@@ -73,6 +74,16 @@
     }
     _textFiled.delegate = self;
     _authenticationTextField.delegate = self;
+    if ([_selectedText caseInsensitiveCompare:@"name"] == NSOrderedSame) {
+        _lblrangeTxt.text = @"Note:Enter name between 1-12 characters";
+        _infoBtn.hidden = YES;
+        _lblSelectTxt.text = @"Enter a new name for the device.";
+        _textFiled.keyboardType = UIKeyboardTypeDefault;
+    }
+    else {
+        _infoBtn.hidden = NO;
+        _textFiled.keyboardType = UIKeyboardTypeDecimalPad;
+    }
     if (CGRectGetHeight(self.view.frame) < 568.0f) {
         [self updateAccessoryViewForTextField:_textFiled];
     }
@@ -106,14 +117,15 @@
 - (IBAction)cancelAction:(UIButton *)sender
 {
     [self dismissViewControllerAnimated:NO completion:nil];
-}
+} 
 
 - (IBAction)saveAction:(UIButton *)sender
 {
     
     [self dismissViewControllerAnimated:NO completion:^{
         if (_delegate && [_delegate respondsToSelector:@selector(selectedValue:)]) {
-            [_delegate selectedValue:self.textFiled.text];
+            NSString *newVal = self.textFiled.text;
+            [_delegate selectedValue:newVal];
         }
     }];
 

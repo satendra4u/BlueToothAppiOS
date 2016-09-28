@@ -20,6 +20,11 @@
 
 #define BUTTON_CELL_ID @"LFConfigureButtonsCellID"
 #define TOGGLE_CELL_ID @"LFCharactersticBitDisplayCell"
+
+#define FirstNameRegAddr 0x6A
+#define SecondNameRegAddr 0x72
+#define FirstNameRegLen 0x08
+#define SecondNameRegLen 0x04
 @interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol, LFTabbarRefreshDelegate>
 {
     
@@ -47,6 +52,8 @@
 @property (nonatomic) NSUInteger featureEndisVal;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentControl;
 @property (weak, nonatomic) IBOutlet UILabel *deviceId;
+@property (weak, nonatomic) IBOutlet UIButton *editButton;
+- (IBAction)editAction:(id)sender;
 
 - (IBAction)segmentControlAction:(UISegmentedControl *)sender;
 
@@ -80,11 +87,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     tblConfigDisplay.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     NSString *name = [[LFBluetoothManager sharedManager] selectedDevice];
     name = [name substringToIndex:name.length-4];
-    NSMutableAttributedString * string = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"Device ID: %@", name]];
-    [string addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(10, string.length-10)];
-    [string addAttribute:NSFontAttributeName value:[UIFont fontWithName:AERIAL_REGULAR size:15.0] range:NSMakeRange(0, 10)];
-    _deviceId.attributedText = string;
-    
+    [self setDeviceName:name];
     [self configArr];
     previousSelected = @"";
     [[LFBluetoothManager sharedManager] setDelegate:self];
@@ -93,6 +96,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     isAdvanceLoded = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
+
+- (void)setDeviceName:(NSString *)deviceName {
+    NSMutableAttributedString * string = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"Device ID: %@", deviceName]];
+    [string addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(10, string.length-10)];
+    [string addAttribute:NSFontAttributeName value:[UIFont fontWithName:AERIAL_REGULAR size:15.0] range:NSMakeRange(0, 10)];
+    _deviceId.attributedText = string;}
 
 - (void)appEnteredBackground {
     [[LFBluetoothManager  sharedManager] disconnectDevice];
@@ -422,7 +431,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
     [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
     
-    editing.selectedText = cell.lblKey.text;
+    if (indexPath.row == -1) {
+        editing.selectedText = @"Name";
+    }
+    else {
+        editing.selectedText = cell.lblKey.text;
+    }
     editing.delegate = self;
     editing.showAuthentication = YES;
     [navController setViewControllers:@[editing]];
@@ -439,6 +453,10 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     } else if (indexPath.section == 2) {
         selectedTag = indexPath.row + 21;
     }
+    else if (indexPath.row == -1) {
+        //For edit action.
+        selectedTag = -1;
+    }
     
     self.providesPresentationContextTransitionStyle = YES;
     self.definesPresentationContext = YES;
@@ -449,6 +467,16 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     editing.isAdvConfig = YES;
     [navController setViewControllers:@[editing]];
     [self.navigationController presentViewController:navController animated:NO completion:nil];
+    
+}
+
+
+- (IBAction)editAction:(id)sender {
+    
+    //Show authentication.
+    //passing row as -1 for edit action.
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:-1 inSection:0];
+    [self tableView:tblConfigDisplay didSelectRowAtIndexPath:indexPath];
     
 }
 
@@ -789,13 +817,104 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     }
 }
 
+#pragma mark Name change action.
+- (void)saveNewNameWithValue:(NSString *)txt {
+    if (txt == nil || txt.length == 0) {
+        return;
+    }
+    NSData *data1;
+    if (txt.length > 8) {
+        const char *firstEightBytes = [[txt substringToIndex:8] UTF8String];
+        NSData *firstData = [self getFirstEightBytesOfData:firstEightBytes];
+        [self saveDataToDevice:firstData];
+       const char *lastFourBytes = [[txt substringFromIndex:8] UTF8String];
+        NSData *lastData = [self getLastFourBytesOfData:lastFourBytes];
+        [self saveDataToDevice:lastData];
+    }
+    else {
+        const char *bytes = [txt UTF8String];
+        data1 = [self getFirstEightBytesOfData:bytes];
+        [self saveDataToDevice:data1];
+    }
+    NSString *newName;
+    if (txt.length > 12) {
+        newName = [txt substringToIndex:12];
+    }
+    else {
+        newName = [txt substringToIndex:txt.length];
+    }
+    [LFBluetoothManager sharedManager].selectedDevice = newName;
+    [self setDeviceName:newName];
+    
+}
+
+- (void)saveDataToDevice:(NSData *)data {
+    [[LFBluetoothManager sharedManager] setIsWriting:YES];
+    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] writeConfigData:data];
+    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:1];
+}
+
+- (NSData *)getFirstEightBytesOfData:(const char *)bytes {
+    Byte data[20];
+    for (int i = 0; i < 20; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = FirstNameRegAddr;
+            } else if (i == 10){
+                data[i] = FirstNameRegLen;
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            } else {
+                data[i] = (Byte)0x00;
+            }
+        }
+        
+    }
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    return data1;
+}
+
+- (NSData *)getLastFourBytesOfData:(const char *)bytes {
+    Byte data[20];
+    for (int i = 0; i < 20; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = SecondNameRegAddr;
+            } else if (i == 10){
+                data[i] = SecondNameRegLen;
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            } else {
+                data[i] = (Byte)0x00;
+            }
+        }
+        
+    }
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    return data1;
+}
+
+
 #pragma mark -Editing Delegate
 - (void)selectedValue:(NSString *)txt
 {
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    if (selectedTag == -1) {
+        [self saveNewNameWithValue:txt];
+        return;
+    }
+    
     if (txt.length == 0) {
         txt = @"";
     }
+    //
+   
     
     LFDisplay *display;
     if (isBasic) {
@@ -894,7 +1013,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
 {
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
-    [self readCharactisticsWithIndex:selectedTag];
+    if (selectedTag == -1) {
+        [self readNameValueAfterUpdating];
+    }
+    else {
+        [self readCharactisticsWithIndex:selectedTag];
+    }
     [self removeIndicator];
     if (isSuccess) {
         [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
@@ -915,6 +1039,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     }
     
 }
+
+
 
 /**
  * Displays the communication controller.
@@ -938,6 +1064,31 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+#pragma mark read name after writing
+
+- (void)readNameValueAfterUpdating {
+    [[LFBluetoothManager sharedManager] setDelegate:self];
+    
+    Byte data[20];
+    for (int i=0; i < 20; i++) {
+        if (i== 8) {
+            data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
+        } else if (i == 10){
+            data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
+        } else {
+            data[i] = (Byte)0x00;
+        }
+    }
+    
+    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", (int)index]];
+    [[LFBluetoothManager sharedManager] writeConfigData:data1];
+
 }
 
 #pragma mark Peripheral Disconnected Notification
