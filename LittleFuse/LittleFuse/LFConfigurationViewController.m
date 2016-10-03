@@ -25,6 +25,17 @@
 #define SecondNameRegAddr 0x72
 #define FirstNameRegLen 0x08
 #define SecondNameRegLen 0x04
+
+#pragma mark Info regarding sections in the table.
+
+#define BasicSection0RowsCount 3
+#define BasicSection1RowsCount 4
+#define BasicSection2RowsCount 4
+#define BasicSection3RowsCount 2
+#define AdvancedSection0RowsCount 12
+#define AdvancedSection1RowsCount 7
+#define AdvancedSection2RowsCount 9
+
 @interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol, LFTabbarRefreshDelegate>
 {
     
@@ -67,9 +78,9 @@ const char basicMemMap[] = {0x0A,
 const char basicMemFieldLens[] = { 0x04, 0x04, 0x02, 0x04, 0x04, 0x02, 0x02, 0x04, 0x04, 0x04, 0x04, 0x02, 0x02
 };
 
-const char advance_MemMap[] = {0x06, 0x08, 0x1E, 0x22, 0x24, 0x3A, 0x3E, 0x40,
+const char advance_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0x40,*/
     0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56 ,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A};
-const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04};
+const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04};
 
 
 - (void)viewDidLoad
@@ -114,7 +125,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 {
     
     basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
-    advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""];
+    advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""/*, @"", @""*/];
     
     // Voltage Settings
     LFDisplay *lowVoltage = [[LFDisplay alloc] initWithKey:@"Low Voltage" Value:@"" Code:@"LV"];
@@ -144,12 +155,13 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     LFDisplay *currentTansformer = [[LFDisplay alloc] initWithKey:@"Current Transformer Ratio" Value:@"" Code:@"CT"];
     LFDisplay *pt = [[LFDisplay alloc] initWithKey:@"Potential Transformer Ratio" Value:@"" Code:@"PT"];
     LFDisplay *uctd = [[LFDisplay alloc] initWithKey:@"Undercurrent Trip Delay" Value:@"" Code:@"UCTD"];
-    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
-    
+//    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
+    //Commented as per client requirement .Can be uncommented to add at 4th position.
     LFDisplay *lin = [[LFDisplay alloc] initWithKey:@"Linear Over Current Trip Delay" Value:@"" Code:@"LIN"];
     LFDisplay *gftc = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Current" Value:@"" Code:@"GFTC"];
     LFDisplay *gftd = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Delay" Value:@"" Code:@"GFTD"];
-    LFDisplay *gfib = [[LFDisplay alloc] initWithKey:@"Ground Fault Inhibit Delay" Value:@"" Code:@"GFIB"];
+//    LFDisplay *gfib = [[LFDisplay alloc] initWithKey:@"Ground Fault Inhibit Delay" Value:@"" Code:@"GFIB"];
+    //Commented as per client requirement .Can be uncommented to add at 8th position.
     LFDisplay *lkw = [[LFDisplay alloc] initWithKey:@"Low Power Trip Limit" Value:@"" Code:@"LKW"];
     
     LFDisplay *hkw = [[LFDisplay alloc] initWithKey:@"High Power Trip Limit" Value:@"" Code:@"HKW"];
@@ -180,13 +192,13 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
     
-    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, uctd, cutd, lin, gftc, gftd, gfib, lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
+    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, uctd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
     
     isBasic = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
     basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
-    advancedFormateArray = @[@"B", @"B", @"L", @"Q", @"L", @"H", @"Q", @"L", @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C"];
+    advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C"];
     currentIndex = 0;
     
 }
@@ -279,23 +291,23 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 {
     if (isBasic) {
         if (section == 0) {
-            return 3;
+            return BasicSection0RowsCount;
         } else if (section == 1) {
-            return 4;
+            return BasicSection1RowsCount;
         } else if (section == 2) {
-            return 4;
+            return BasicSection2RowsCount;
         } else if (section == 3) {
-            return 2;
+            return BasicSection3RowsCount;
         }
         return 0;
         
     } else {
         if (section == 0) {
-            return  14;
+            return  AdvancedSection0RowsCount;
         } else if (section == 1) {
-            return 7;
+            return AdvancedSection1RowsCount;
         } else if (section == 2) {
-            return 9;
+            return AdvancedSection2RowsCount;
         }
         return 0;
     }
@@ -316,11 +328,11 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
         cell.toggleDelegate = self;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         if (indexPath.section == 1) {
-            [cell updateValues:advanceConfigDetails[indexPath.row + 14]];
+            [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount]];
             return cell;
         }
         else if(indexPath.section == 2){
-            [cell updateValues:advanceConfigDetails[indexPath.row + 21]];
+            [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount + AdvancedSection1RowsCount]];
             return cell;
         }
     }
@@ -449,9 +461,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
     LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
     if (indexPath.section == 1) {
-        selectedTag = indexPath.row+14;
+        selectedTag = indexPath.row+AdvancedSection0RowsCount;
     } else if (indexPath.section == 2) {
-        selectedTag = indexPath.row + 21;
+        selectedTag = indexPath.row + AdvancedSection0RowsCount + AdvancedSection1RowsCount;
     }
     else if (indexPath.row == -1) {
         //For edit action.
@@ -506,36 +518,47 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 
 - (void)configureServiceWithValue:(NSData *)data
 {
-    NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
-    
-    NSRange range = NSMakeRange(0, 4);
-    
-    data = [data subdataWithRange:range];
-    
-    
-    [self getValuesFromData:data withForamte:formate];
-    
-    if (isWrite) {
-        isWrite = NO;
-        currentIndex = 0;
+    if (currentIndex == -1) {
+        NSRange range = NSMakeRange(0, 8);
+        
+        data = [data subdataWithRange:range];
+        NSString *nameVal = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+        DLog(@"Entered name  is %@", nameVal);
         return;
     }
-    
-    currentIndex = currentIndex + 1;
-    if (isBasic) {
-        if (currentIndex > basicConfigDetails.count - 1) {
+    else {
+        NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
+        
+        NSRange range = NSMakeRange(0, 4);
+        
+        data = [data subdataWithRange:range];
+        
+        
+        [self getValuesFromData:data withForamte:formate];
+        
+        if (isWrite) {
+            isWrite = NO;
             currentIndex = 0;
-            [self removeIndicator];
             return;
         }
-    } else {
-        if (currentIndex > advanceConfigDetails.count - 1) {
-            currentIndex = 0;
-            [self removeIndicator];
-            return;
+        
+        currentIndex = currentIndex + 1;
+        if (isBasic) {
+            if (currentIndex > basicConfigDetails.count - 1) {
+                currentIndex = 0;
+                [self removeIndicator];
+                return;
+            }
+        } else {
+            if (currentIndex > advanceConfigDetails.count - 1) {
+                currentIndex = 0;
+                [self removeIndicator];
+                return;
+            }
         }
+
     }
-    [self readCharactisticsWithIndex:currentIndex];
+        [self readCharactisticsWithIndex:currentIndex];
 }
 
 - (void)readCharactisticsWithIndex:(NSInteger)index;
@@ -619,7 +642,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
                     
                 }
             } else {
-                if (currentIndex == 5) {
+                if (currentIndex == 4) { //if(currentIndex == 5) {
                     convertedVal = [self getConvertedStringForValue:val];
                 }
                 else {
@@ -671,57 +694,57 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     } else {
         LFDisplay *display = [advanceConfigDetails objectAtIndex:currentIndex];
         if (!isBasic) {
-            if (currentIndex == 14 ) {
+            if (currentIndex == AdvancedSection0RowsCount ) {
                 _featureEndisVal = val;
             }
-            else if (currentIndex == 21 ) {
+            else if (currentIndex == AdvancedSection0RowsCount+AdvancedSection1RowsCount ) {
                 _hardwareConfigVal = val;
             }
         }
         switch (currentIndex) {
-            case 14:
+            case AdvancedSection0RowsCount:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
                 break;
-            case 15:
+            case AdvancedSection0RowsCount+1:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 1))? 1:0];
                 break;
-            case 16:
+            case AdvancedSection0RowsCount+2:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 2))? 1:0];
                 break;
-            case 17:
+            case AdvancedSection0RowsCount+3:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 3))? 1:0];
                 break;
-            case 18:
+            case AdvancedSection0RowsCount+4:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 4))? 1:0];
                 break;
-            case 19:
+            case AdvancedSection0RowsCount+5:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 6))? 1:0];
                 break;
-            case 20:
+            case AdvancedSection0RowsCount+6:
                 display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 7))? 1:0];
                 break;
-            case 21:
+            case AdvancedSection0RowsCount+7:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
                 break;
-            case 22:
+            case AdvancedSection0RowsCount+8:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
                 break;
-            case 23:
+            case AdvancedSection0RowsCount+9:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
                 break;
-            case 24:
+            case AdvancedSection0RowsCount+10:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 8))? 1:0];
                 break;
-            case 25:
+            case AdvancedSection0RowsCount+11:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
                 break;
-            case 26:
+            case AdvancedSection0RowsCount+12:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 10))? 1:0];
                 break;
-            case 27:
+            case AdvancedSection0RowsCount+13:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 11))? 1:0];
                 break;
-            case 28:
+            case AdvancedSection0RowsCount+14:
                 display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
                 break;
             default:
@@ -818,33 +841,38 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 }
 
 #pragma mark Name change action.
-- (void)saveNewNameWithValue:(NSString *)txt {
+- (void)saveNewFriendlyNameWithValue:(NSString *)txt {
     if (txt == nil || txt.length == 0) {
         return;
     }
+    currentIndex = -1;
     NSData *data1;
     if (txt.length > 8) {
         const char *firstEightBytes = [[txt substringToIndex:8] UTF8String];
         NSData *firstData = [self getFirstEightBytesOfData:firstEightBytes];
+        selectedTag = -1;
         [self saveDataToDevice:firstData];
        const char *lastFourBytes = [[txt substringFromIndex:8] UTF8String];
         NSData *lastData = [self getLastFourBytesOfData:lastFourBytes];
+        selectedTag = -2;
         [self saveDataToDevice:lastData];
     }
     else {
         const char *bytes = [txt UTF8String];
         data1 = [self getFirstEightBytesOfData:bytes];
+        selectedTag = -1;
         [self saveDataToDevice:data1];
     }
-    NSString *newName;
-    if (txt.length > 12) {
-        newName = [txt substringToIndex:12];
-    }
-    else {
-        newName = [txt substringToIndex:txt.length];
-    }
-    [LFBluetoothManager sharedManager].selectedDevice = newName;
-    [self setDeviceName:newName];
+    //Code to update the new name in UI and local DB.
+//    NSString *newName;
+//    if (txt.length > 12) {
+//        newName = [txt substringToIndex:12];
+//    }
+//    else {
+//        newName = [txt substringToIndex:txt.length];
+//    }
+//    [LFBluetoothManager sharedManager].selectedDevice = newName;
+//    [self setDeviceName:newName];
     
 }
 
@@ -860,7 +888,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     Byte data[20];
     for (int i = 0; i < 20; i++) {
         if (i < 8) {
-            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+            if(strlen(bytes) <= i) {
+                data[i] = 0x00;
+            }
+            else {
+                data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+            }
         } else {
             if (i == 8) {
                 data[i] = FirstNameRegAddr;
@@ -882,7 +915,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     Byte data[20];
     for (int i = 0; i < 20; i++) {
         if (i < 8) {
-            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+            if(strlen(bytes) <= i) {
+                data[i] = 0x00;
+            }
+            else {
+                data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+            }
         } else {
             if (i == 8) {
                 data[i] = SecondNameRegAddr;
@@ -905,8 +943,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (void)selectedValue:(NSString *)txt
 {
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-    if (selectedTag == -1) {
-        [self saveNewNameWithValue:txt];
+    if (selectedTag == -1 || selectedTag == -2) {
+        [self saveNewFriendlyNameWithValue:txt];
         return;
     }
     
@@ -947,57 +985,57 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
     [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
     
     if (!isBasic) {
-        if (selectedTag >= 14 && selectedTag <= 20) {
+        if (selectedTag >= AdvancedSection0RowsCount && selectedTag <= AdvancedSection0RowsCount + AdvancedSection1RowsCount - 1) {
             switch (selectedTag) {
-                case 14:
+                case AdvancedSection0RowsCount:
                     _featureEndisVal  ^= 1 << 0;
                     break;
-                case 15:
+                case AdvancedSection0RowsCount+1:
                     _featureEndisVal  ^= 1 << 1;
                     break;
-                case 16:
+                case AdvancedSection0RowsCount+2:
                     _featureEndisVal  ^= 1 << 2;
                     break;
-                case 17:
+                case AdvancedSection0RowsCount+3:
                     _featureEndisVal  ^= 1 << 3;
                     break;
-                case 18:
+                case AdvancedSection0RowsCount+4:
                     _featureEndisVal  ^= 1 << 4;
                     break;
-                case 19:
+                case AdvancedSection0RowsCount+5:
                     _featureEndisVal  ^= 1 << 6;
                     break;
-                case 20:
+                case AdvancedSection0RowsCount+6:
                     _featureEndisVal  ^= 1 << 7;
                     break;
                 default:
                     break;
             }
             [self writeDataToIndex:selectedTag withValue:(float)_featureEndisVal];
-        } else if (selectedTag >= 21 && selectedTag <= 28) {
+        } else if (selectedTag >= AdvancedSection0RowsCount+AdvancedSection1RowsCount && selectedTag <= AdvancedSection0RowsCount+AdvancedSection1RowsCount+AdvancedSection2RowsCount - 2) {
             switch (selectedTag) {
-                case 21:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount:
                     _hardwareConfigVal  ^= 1 << 5;
                     break;
-                case 22:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+1:
                     _hardwareConfigVal  ^= 1 << 6;
                     break;
-                case 23:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+2:
                     _hardwareConfigVal  ^= 1 << 7;
                     break;
-                case 24:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+3:
                     _hardwareConfigVal  ^= 1 << 8;
                     break;
-                case 25:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+4:
                     _hardwareConfigVal  ^= 1 << 9;
                     break;
-                case 26:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+5:
                     _hardwareConfigVal  ^= 1 << 10;
                     break;
-                case 27:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+6:
                     _hardwareConfigVal  ^= 1 << 11;
                     break;
-                case 28:
+                case AdvancedSection0RowsCount+AdvancedSection1RowsCount+7:
                     _hardwareConfigVal  ^= 1 << 12;
                     break;
                 default:
@@ -1013,7 +1051,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 - (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
 {
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
-    if (selectedTag == -1) {
+    if (selectedTag == -1 || selectedTag == -2) {
         [self readNameValueAfterUpdating];
     }
     else {
@@ -1069,25 +1107,27 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2, 0x2, 0x2, 0x4, 0x2, 0x2, 
 #pragma mark read name after writing
 
 - (void)readNameValueAfterUpdating {
-    [[LFBluetoothManager sharedManager] setDelegate:self];
-    
-    Byte data[20];
-    for (int i=0; i < 20; i++) {
-        if (i== 8) {
-            data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
-        } else if (i == 10){
-            data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
-        } else {
-            data[i] = (Byte)0x00;
-        }
-    }
-    
-    [[LFBluetoothManager sharedManager] setRealtime:NO];
-    [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] setIsWriting:NO];
-    NSData *data1 = [NSData dataWithBytes:data length:20];
-    [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", (int)index]];
-    [[LFBluetoothManager sharedManager] writeConfigData:data1];
+    //Add logic to re read the saved information for friendly name in both the addresses.So there should be two reads.
+//
+//    [[LFBluetoothManager sharedManager] setDelegate:self];
+//    
+//    Byte data[20];
+//    for (int i=0; i < 20; i++) {
+//        if (i== 8) {
+//            data[i] = selectedTag == -1?FirstNameRegAddr:SecondNameRegAddr;
+//        } else if (i == 10){
+//            data[i] = selectedTag == -1?FirstNameRegLen:SecondNameRegLen;
+//        } else {
+//            data[i] = (Byte)0x00;
+//        }
+//    }
+//    
+//    [[LFBluetoothManager sharedManager] setRealtime:NO];
+//    [[LFBluetoothManager sharedManager] setConfig:YES];
+//    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+//    NSData *data1 = [NSData dataWithBytes:data length:20];
+//    [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", selectedTag]];
+//    [[LFBluetoothManager sharedManager] writeConfigData:data1];
 
 }
 
