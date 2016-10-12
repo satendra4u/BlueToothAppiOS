@@ -43,7 +43,7 @@
     self.lblDeviceName.text = [NSString stringWithFormat:@"MAC XXXX%@", [peripheral.name substringFromIndex:peripheral.name.length-4]];
     self.lblDeviceLocalName.text = [peripheral.name substringToIndex:peripheral.name.length-4];
     self.lblPairedStatus.text = peripheral.isPaired ? PAIRED :  UNPAIRED;
-//    if (peripheral.isPaired) {
+    if (peripheral.isPaired) {
         if (peripheral.isConfigured) {
             self.lblPairedStatus.text = CONFIGURED;
             self.bgView.backgroundColor = GREEN_COLOR;
@@ -51,9 +51,10 @@
             self.bgView.backgroundColor = RED_COLOR;
             self.lblPairedStatus.text = NOT_CONFIGURED;
         }
-//    } else {
-////        self.bgView.backgroundColor = BLUE_COLOR;
-////        self.lblPairedStatus.text = UNPAIRED;
+    }
+    else {
+        self.bgView.backgroundColor = BLUE_COLOR;
+        self.lblPairedStatus.text = UNPAIRED;
 //        if (peripheral.isConfigured) {
 //            self.lblPairedStatus.text = CONFIGURED;
 //            self.bgView.backgroundColor = GREEN_COLOR;
@@ -61,7 +62,7 @@
 //            self.bgView.backgroundColor = RED_COLOR;
 //            self.lblPairedStatus.text = NOT_CONFIGURED;
 //        }
-//    }
+    }
     
 }
 

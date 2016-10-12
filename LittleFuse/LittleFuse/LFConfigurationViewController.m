@@ -154,7 +154,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     
     LFDisplay *currentTansformer = [[LFDisplay alloc] initWithKey:@"Current Transformer Ratio" Value:@"" Code:@"CT"];
     LFDisplay *pt = [[LFDisplay alloc] initWithKey:@"Potential Transformer Ratio" Value:@"" Code:@"PT"];
-    LFDisplay *uctd = [[LFDisplay alloc] initWithKey:@"Undercurrent Trip Delay" Value:@"" Code:@"UCTD"];
+    LFDisplay *ultd = [[LFDisplay alloc] initWithKey:@"Under Load Trip Delay" Value:@"" Code:@"ULTD"];
 //    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
     //Commented as per client requirement .Can be uncommented to add at 4th position.
     LFDisplay *lin = [[LFDisplay alloc] initWithKey:@"Linear Over Current Trip Delay" Value:@"" Code:@"LIN"];
@@ -192,7 +192,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
     
-    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, uctd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
+    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
     
     isBasic = YES;
     
@@ -314,6 +314,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    NSLog(@"Cell for row at index path = %ld, section= %ld", (long)indexPath.row, (long)indexPath.section);
     //Last cell to be shown.
     if (!isBasic  && indexPath.section == 2 && indexPath.row == 8) {
         LFConfigureButtonsCell *cell = (LFConfigureButtonsCell *)[tableView dequeueReusableCellWithIdentifier:BUTTON_CELL_ID forIndexPath:indexPath];

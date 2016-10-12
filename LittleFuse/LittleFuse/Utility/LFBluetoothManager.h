@@ -188,4 +188,9 @@
  */
 - (void)stopFaultTimer;
 
+/**
+ * This method gets called whenever pairing is cancelled for a device after tapping.
+ */
+- (void)pairingCancelledForDeviceAtIndex:(NSInteger)indexOfObj;
+
 @end

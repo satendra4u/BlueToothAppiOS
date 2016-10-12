@@ -165,11 +165,11 @@ static LFBluetoothManager *sharedData = nil;
 //    DLog(@"Discovered device property dict = %@", dict);
     LFPeripheral *discoveredDevice = [[LFPeripheral alloc] initWithDict:dict];
     //This code is fetching data from local cache where data is saved.So configuration status is not correct.
-    //    LFPeripheral *savedVal = [[LFDataManager sharedManager] getDeviceWithIdentifier:discoveredDevice];
-    //    if (savedVal) {
-    //        discoveredDevice.paired = savedVal.isPaired;
-    //        discoveredDevice.configured = savedVal.isConfigured;
-    //    }
+        LFPeripheral *savedVal = [[LFDataManager sharedManager] getDeviceWithIdentifier:discoveredDevice];
+        if (savedVal) {
+            discoveredDevice.paired = savedVal.isPaired;
+            discoveredDevice.configured = savedVal.isConfigured;
+        }
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.identifer MATCHES[cd] %@ ", peripheral.identifier.UUIDString];
     NSArray *fileteredArr = [devicesList filteredArrayUsingPredicate:predicate];
@@ -184,9 +184,9 @@ static LFBluetoothManager *sharedData = nil;
         [devicesList addObject:discoveredDevice];
         
     }
+    
     NSArray *sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"rssi" ascending:NO]];
     [devicesList sortUsingDescriptors:sortDescriptors];
-    
     if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
         [_delegate showScannedDevices:devicesList];
     }
@@ -318,6 +318,7 @@ static LFBluetoothManager *sharedData = nil;
     if (error) {
         if (error.code == 15 && [error.localizedDescription isEqualToString:@"Encryption is insufficient."]) {
             if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                NSLog(@"Canncelled pairing of the device");
                 [_delegate showAlertWithText:[error localizedDescription]];
                 [self scan];
                 return;
@@ -553,10 +554,37 @@ static LFBluetoothManager *sharedData = nil;
         
         device.paired = YES;
         [devicesList replaceObjectAtIndex:indexOfObj withObject:device];
+        [[LFDataManager sharedManager] updatePeripheralDetails:selectedPeripheral];
         // And connect
         // // // NSLog(@"Connecting to peripheral %@", peripheral);
         [centralManager connectPeripheral:peripheral options:nil];
     }
+}
+
+- (void)pairingCancelledForDeviceAtIndex:(NSInteger)indexOfObj {
+    
+    if (devicesList.count > indexOfObj) {
+        LFPeripheral *device = devicesList[indexOfObj];
+        device.paired = NO;
+        selectedPeripheral = device;
+        CBPeripheral *peripheral = device.peripheral;
+        self.selectedDevice = device.name;
+        discoveredPeripheral = peripheral;
+        
+        [devicesList replaceObjectAtIndex:indexOfObj withObject:device];
+        // And connect
+        // // // NSLog(@"Connecting to peripheral %@", peripheral);
+//        [[LFDataManager sharedManager] savePeripheralDetails:selectedPeripheral];
+        [[LFDataManager sharedManager] updatePeripheralDetails:selectedPeripheral];
+        // Search only for services that match our UUID
+        //    [peripheral discoverServices:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]]];
+//        [discoveredPeripheral discoverServices:nil];
+
+        if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
+            [_delegate showScannedDevices:devicesList];
+        }
+    }
+
 }
 
 
@@ -621,6 +649,7 @@ static LFBluetoothManager *sharedData = nil;
     selectedPeripheral.configured = YES;
     
     [devicesList replaceObjectAtIndex:index withObject:selectedPeripheral];
+    NSLog(@"Update config");
     [[LFDataManager sharedManager] updatePeripheralDetails:selectedPeripheral];
     
 }

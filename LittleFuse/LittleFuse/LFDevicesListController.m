@@ -68,6 +68,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(becameActive) name:UIApplicationWillEnterForegroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
 }
 
 /**
@@ -104,9 +105,23 @@
 - (void)peripheralDisconnnected {
     isPopupOpened = NO;
 }
+
+- (void)checkForNoDevices {
+    if (!canRefresh) {
+        return;
+    }
+    if (peripheralsList.count == 0) {
+        lblScanning.text = @"No devices found.";
+    }
+    else {
+        lblScanning.text = @"Scanning for MP8000 devices...";
+    }
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+//    NSLog(@"%s",__func__);
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
     isDeviceSelected = NO;
@@ -115,6 +130,7 @@
     [[LFBluetoothManager sharedManager] setDisplayCharacterstics:NO];
     if ([[LFBluetoothManager sharedManager] getDevicesList]) {
         peripheralsList = [[LFBluetoothManager sharedManager] getDevicesList];
+//        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
     canRefresh = YES;
@@ -210,6 +226,7 @@
         isScanDataFound = YES;
     }
     peripheralsList = [devicesArray mutableCopy];
+//    NSLog(@"%s", __func__);
     [tblDevices reloadData];
 }
 
@@ -239,6 +256,7 @@
 - (void)verifyDeviceCount {
     if (!isScanDataFound) {
         [peripheralsList removeAllObjects];
+//        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
 }
@@ -335,6 +353,9 @@
     if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame)) {
         isPopupOpened = NO;
         [self hideAllAlerts];
+        [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
+//        NSLog(@"%s", __func__);
+        [tblDevices reloadData];
     }
     [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {

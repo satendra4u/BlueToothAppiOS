@@ -18,6 +18,7 @@
 @property (nonatomic, assign, getter=isConfigured) BOOL configured;
 @property (nonatomic, copy) CBPeripheral *peripheral;
 @property (nonatomic, copy) NSString *identifer;
+@property (nonatomic, assign) BOOL isDeviceBusy;
 
 - (id)initWithDict:(NSDictionary *)dict;
 - (id)initWithManagedObject:(NSManagedObject *)obj;
