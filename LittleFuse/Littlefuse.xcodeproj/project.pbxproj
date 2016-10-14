@@ -58,6 +58,7 @@
 		93EC63381C9A9424001ACB9C /* LFConfigureButtonsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 93EC63361C9A9424001ACB9C /* LFConfigureButtonsCell.xib */; };
 		93EC633B1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EC633A1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m */; };
 		93EC633E1C9ABB01001ACB9C /* LFRTDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EC633D1C9ABB01001ACB9C /* LFRTDViewController.m */; };
+		CF4C90411DB0FCBC00F3AE56 /* ChangePasswordView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -164,6 +165,7 @@
 		93EC633A1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCommunicationSettingsController.m; sourceTree = "<group>"; };
 		93EC633C1C9ABB01001ACB9C /* LFRTDViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFRTDViewController.h; sourceTree = "<group>"; };
 		93EC633D1C9ABB01001ACB9C /* LFRTDViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFRTDViewController.m; sourceTree = "<group>"; };
+		CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChangePasswordView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,6 +300,7 @@
 		933600B31C50A81D007CD61A /* LittleFuse */ = {
 			isa = PBXGroup;
 			children = (
+				CF4C903F1DB0FC9B00F3AE56 /* Custom Views */,
 				937BFDEB1C5CB84000408EB2 /* LFLittleFuse.xcdatamodeld */,
 				933600B71C50A81D007CD61A /* LFAppDelegate.h */,
 				933600B81C50A81D007CD61A /* LFAppDelegate.m */,
@@ -403,6 +406,14 @@
 				935607E91C72DCCD008C0362 /* UIImage+LFImage.m */,
 			);
 			path = "Custom classes";
+			sourceTree = "<group>";
+		};
+		CF4C903F1DB0FC9B00F3AE56 /* Custom Views */ = {
+			isa = PBXGroup;
+			children = (
+				CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */,
+			);
+			name = "Custom Views";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -528,6 +539,7 @@
 				932EF6DC1C5251DC0098DFD4 /* OpenSans-Bold.ttf in Resources */,
 				933600BF1C50A81D007CD61A /* Main.storyboard in Resources */,
 				21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */,
+				CF4C90411DB0FCBC00F3AE56 /* ChangePasswordView.xib in Resources */,
 				932EF6E51C5251DC0098DFD4 /* OpenSans-SemiboldItalic.ttf in Resources */,
 				932EF6E11C5251DC0098DFD4 /* OpenSans-Light.ttf in Resources */,
 				932EF6E31C5251DC0098DFD4 /* OpenSans-Regular.ttf in Resources */,
@@ -656,8 +668,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -679,7 +691,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -701,8 +713,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -717,7 +729,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -728,8 +740,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -737,7 +749,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -747,8 +759,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -756,7 +768,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -765,12 +777,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Debug;
@@ -779,13 +791,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Purple Talk, Inc.";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Release;

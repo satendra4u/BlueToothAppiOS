@@ -58,6 +58,9 @@
     NSInteger selectedTag;
     NSString *previousSelected;
     NSInteger prevEnteredVal;//Used to compare previously entered value.
+    
+    UIView *changePasswordView;
+    UIButton *changePasswordButton;
 }
 @property (nonatomic) NSUInteger hardwareConfigVal;
 @property (nonatomic) NSUInteger featureEndisVal;
@@ -87,6 +90,11 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 {
     [super viewDidLoad];
     isInitialLaunch = YES;
+    NSArray* nibViews = [[NSBundle mainBundle] loadNibNamed:@"ChangePasswordView"
+                                                      owner:self
+                                                    options:nil];
+    changePasswordView = nibViews[0];
+    [changePasswordView setFrame: CGRectMake(0, 0, CGRectGetWidth(self.view.window.frame), CGRectGetHeight(changePasswordView.frame))];
     // Do any additional setup after loading the view.
     advanceConfigDetails = [[NSMutableArray alloc] initWithCapacity:0];
     basicValuesArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -106,6 +114,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     isAdvanceLoded = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [self setUpTableViewFooter];
+    [tblConfigDisplay reloadData];
 }
 
 - (void)setDeviceName:(NSString *)deviceName {
@@ -224,6 +234,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
         [self readCharactisticsWithIndex:currentIndex];
     }
+
 
 }
 
@@ -422,6 +433,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     return 44.0;
 }
 
+- (void)setUpTableViewFooter {
+    changePasswordButton = [changePasswordView viewWithTag:1];
+    [changePasswordButton addTarget:self action:@selector(changePwdAction:) forControlEvents:UIControlEventTouchUpInside];
+    changePasswordButton.layer.cornerRadius = 4.0f;
+    tblConfigDisplay.tableFooterView = changePasswordView;
+}
 //Displays the popup to enter new value for the selected field.
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -483,6 +500,10 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     
 }
 
+
+- (IBAction)changePwdAction:(id)sender {
+    
+}
 
 - (IBAction)editAction:(id)sender {
     

@@ -10,7 +10,7 @@
 #define LFConstants_h
 
 
-#define APP_NAME @"Littelfuse"
+#define APP_NAME @"MP8000"
 
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] >>>>" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
