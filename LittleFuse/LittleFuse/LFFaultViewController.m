@@ -318,6 +318,9 @@
 {
     NSString *error = @"";
     switch (code) {
+        case 0:
+            error = @"NOFAULT";
+            break;
         case 1:
             error = @"OCF";
             break;
@@ -360,6 +363,9 @@
         case 102:
             error = @"VUBH";
             break;
+        case 103:
+            error = @"PHSQ";
+            break;
         case 61166:
             error = @"UNDEFF";
             break;
@@ -375,6 +381,9 @@
 {
     NSString *error = @"";
     switch (code) {
+        case 0:
+            error = @"No fault or warning condition";
+            break;
         case 1:
             error = @"Over Current";
             break;
@@ -416,6 +425,9 @@
             break;
         case 102:
             error = @"Voltage Unbalanced Holdoff";
+            break;
+        case 103:
+            error = @"Phase Sequence";
             break;
         case 61166:
             error = @"Undefined trip condition";

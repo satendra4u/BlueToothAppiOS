@@ -39,6 +39,7 @@
 #define CURRENT_FAULT_CHARACTERSTIC     @"F303"
 #define POWER_FAULT_CHARACTERSTIC       @"F304"
 #define OTHER_FAULT_CHARACTERSTIC       @"F305"
+#define DEVICE_SERIAL_NUMBER_CHARACTERISTIC @"2A25"
 
 #define DISPLAY_TABBAR                  @"DisplayScreen"
 #define SAVE_CONFIG_VALUES              @"SaveValuesToConfig"

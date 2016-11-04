@@ -458,11 +458,21 @@ const char realMemFieldLens[] = { 0x02, 0x02};
         codeVal = @"High Voltage Holdoff";
     }
     else if ([dataString isEqualToString:@"00040000"]) {
-        codeVal = @"Voltage Unbalanced Holdoff";
+        codeVal = @"Voltage Unbalanced";
     }
     else if ([dataString isEqualToString:@"00008000"]) {
         codeVal = @"Undefined trip condition";
     }
+    else if ([dataString isEqualToString:@"00080000"]) {
+        codeVal = @"Phase Sequence";
+    }
+    else if ([dataString isEqualToString:@"00000800"]) {
+        codeVal = @"Linear Over Current";
+    }
+    else if ([dataString isEqualToString:@"00100000"]) {
+        codeVal = @"Undefined trip condition";
+    }
+    
     return codeVal;
 }
 

@@ -70,6 +70,8 @@
  */
 - (void)getFaultOtherData:(NSData *)data;
 
+- (void)receivedDeviceMacWithData:(NSData*)data;
+
 @end
 
 @interface LFBluetoothManager : NSObject <CBCentralManagerDelegate, CBPeripheralDelegate>
@@ -109,6 +111,10 @@
 @property (assign, nonatomic) BOOL realtime;
 
 @property (assign, nonatomic) BOOL isWriting;
+
+@property (assign, nonatomic) NSData *macData;
+
+@property (assign, nonatomic) BOOL isPasswordVerified;
 
 + (LFBluetoothManager *)sharedManager;
 
@@ -192,5 +198,9 @@
  * This method gets called whenever pairing is cancelled for a device after tapping.
  */
 - (void)pairingCancelledForDeviceAtIndex:(NSInteger)indexOfObj;
+
+- (void)discoverCharacteristicsForAuthentication;
+
+- (void)resetConfigurationCharacteristics;
 
 @end

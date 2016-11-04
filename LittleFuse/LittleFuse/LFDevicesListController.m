@@ -7,6 +7,8 @@
 //
 
 #import "LFDevicesListController.h"
+#import "LFNavigationController.h"
+#import "LFEditingViewController.h"
 #import "LFBluetoothManager.h"
 #import "LFDeviceTableViewCell.h"
 #import "LFTabbarController.h"
@@ -18,7 +20,7 @@
 
 #define kDeviceCellID  @"DeviceCellID"
 
-@interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource>
+@interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource, EditingDelegate>
 {
     BOOL isPopupOpened;
     BOOL isInitialLaunch;
@@ -121,6 +123,10 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    if ([[LFBluetoothManager sharedManager] discoveredPeripheral] != nil) {
+        [[LFBluetoothManager sharedManager]disconnectPeripheral];
+    }
+    [LFBluetoothManager sharedManager].isPasswordVerified = NO;
 //    NSLog(@"%s",__func__);
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
@@ -148,10 +154,11 @@
 }
 
 
-
 - (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:YES];
+    [super viewDidAppear: animated];
+    [LFBluetoothManager sharedManager].isPasswordVerified = NO;
 }
+
 
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -236,7 +243,7 @@
 - (void)showCharacterstics:(NSMutableArray *)charactersticsArray
 {
     charactersticsList = charactersticsArray;
-    CBCharacteristic *charactestic = (CBCharacteristic *)[charactersticsArray firstObject];
+    CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[4];
     [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
     
 }
@@ -266,10 +273,35 @@
     if (!isDeviceSelected) {
         return;
     }
+    
+    
+//    //Display authentication popup.After successfully entering the password, then execute the code below.
+//    LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+//    LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+//    
+//    self.providesPresentationContextTransitionStyle = YES;
+//    self.definesPresentationContext = YES;
+//    [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+//    [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+//    editing.delegate = self;
+//    editing.isFromDevicesList = YES;
+//    editing.showAuthentication = YES;
+//    [navController setViewControllers:@[editing]];
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self.navigationController presentViewController:navController animated:NO completion:nil];
+//    });
+//
+    
+    [self continueAfterPasswordAuthentication];
+    
+   }
+
+
+- (void)continueAfterPasswordAuthentication {
     isPopupOpened = YES;
     LFPeripheral *peripheral = peripheralsList[selectedIndex];
     LFTabbarController *tabbar = (LFTabbarController *)[self.storyboard instantiateViewControllerWithIdentifier:@"TabBarControllerID"];
-
+    
     if (!peripheral.isConfigured) { //(LV > HV)
         NSMutableArray *viewControllers = [tabbar.viewControllers mutableCopy];
         [self showAlertViewWithCancelButtonTitle:@"Configure" withMessage:@"" withTitle:NSLocalizedString(@"This MP8000 has not yet been Configured. Configure this MP8000 now?", (@"This MP8000 has not yet been Configured. Configure this MP8000 now?", )) otherButtons:@[@"No", @"Cancel"] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
@@ -321,7 +353,7 @@
             float width = CGRectGetWidth(self.view.frame)/numberOfControllers;
             
             [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
-
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (![[self.navigationController.viewControllers lastObject] isKindOfClass:[LFTabbarController class]]) {
                     [self.navigationController pushViewController:tabbar animated:YES];
@@ -343,7 +375,9 @@
         [[LFBluetoothManager sharedManager] setDisplayCharacterstics:YES];
         
     }
+
 }
+
 
 /**
  * This method displays an alert with a given message.
@@ -377,6 +411,14 @@
                 }
             }
         }
+    }
+}
+
+
+#pragma mark Authentication Delegate
+- (void)authenticationDoneWithStatus:(BOOL)isSuccess {
+    if (isSuccess) {
+        [self continueAfterPasswordAuthentication];
     }
 }
 

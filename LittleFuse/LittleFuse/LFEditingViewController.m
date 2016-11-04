@@ -8,6 +8,7 @@
 
 #import "LFEditingViewController.h"
 #import "LFInfoViewController.h"
+#import "LFBluetoothManager.h"
 
 @interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
@@ -122,10 +123,18 @@
 - (IBAction)saveAction:(UIButton *)sender
 {
     
+    NSString *password;
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        password = self.authenticationTextField.text;
+    }
+    else {
+        password = nil;
+    }
+
     [self dismissViewControllerAnimated:NO completion:^{
-        if (_delegate && [_delegate respondsToSelector:@selector(selectedValue:)]) {
+        if (_delegate && [_delegate respondsToSelector:@selector(selectedValue: andPassword:)]) {
             NSString *newVal = self.textFiled.text;
-            [_delegate selectedValue:newVal];
+            [_delegate selectedValue:newVal andPassword:password];
         }
     }];
 
@@ -140,8 +149,8 @@
 - (IBAction)authenticationCancel:(UIButton *)sender
 {
     if (_isAdvConfig) {
-        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
-            [_delegate toggleSelectedWithSuccess:NO];
+        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
+            [_delegate toggleSelectedWithSuccess:NO andPassword:nil];
             [self dismissViewControllerAnimated:NO completion:nil];
             return;
         }
@@ -152,33 +161,35 @@
 
 - (IBAction)authenticationOkAction:(UIButton *)sender
 {
-    if (![self.authenticationTextField.text isEqualToString:@"admin"])
-    {
-        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-            self.authenticationTextField.text = @"";
-            if ([alert isKindOfClass:[UIAlertController class]]) {
-                [alert dismissViewControllerAnimated:NO completion:nil];
+
+    NSString *password;
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        password = self.authenticationTextField.text;
+    }
+    else {
+        password = nil;
+    }
+    
+        if (self.isFromDevicesList) { //This condition executes when user tries to connect to device in DevicesList Screen.
+            if (_delegate && [_delegate respondsToSelector:@selector(authenticationDoneWithStatus: andPassword:)]) {
+                [self dismissViewControllerAnimated:NO completion:nil];
+                [_delegate authenticationDoneWithStatus:YES andPassword:password];
+                return;
             }
-        
-        }];
-    } else {
+        }
         self.authenticationView.hidden = YES;
         self.passwordView.hidden = NO;
         
         [self.textFiled becomeFirstResponder];
         self.lblTitleheader.text = _selectedText;
         if (_isAdvConfig) {
-            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
-                [_delegate toggleSelectedWithSuccess:YES];
+            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
+                [_delegate toggleSelectedWithSuccess:YES andPassword:password];
                 [self dismissViewControllerAnimated:NO completion:nil];
                 return;
             }
         }
         [self.view bringSubviewToFront:self.passwordView];
-
-
-
-    }
 }
 
 /**

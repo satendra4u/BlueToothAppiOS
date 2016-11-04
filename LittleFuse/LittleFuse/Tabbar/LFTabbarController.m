@@ -38,5 +38,11 @@
     }
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    NSLog(@"Tab bar view disappeared");
+}
+
+
 
 @end
