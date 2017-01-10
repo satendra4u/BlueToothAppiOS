@@ -51,7 +51,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    currentIndex = 1;
+    currentIndex = 0;
     
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -115,8 +115,8 @@
     if(!canContinueTimer) {
         return;
     }
-    [LFBluetoothManager sharedManager].tCurIndex = 1;
-    currentIndex = 1;
+    [LFBluetoothManager sharedManager].tCurIndex = 0;
+    currentIndex = 0;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[LFBluetoothManager sharedManager] readFaultData];
@@ -187,8 +187,9 @@
         currentData = [[LFFaultData alloc] init];
         [self  readFaultData];
     } else {
-//        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
-        currentIndex = sectionArray.count + 1;
+        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+//        currentIndex = sectionArray.count + 1;;
+//        currentIndex += 1;
         [self readFaultData];
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
@@ -473,12 +474,12 @@
             currentData = fault;
             [self showData:fault.voltage];
         }
-        currentIndex = 1;
+        currentIndex = 0;
         [self readFaultData];
         
     } else {
         [self.tblFaults reloadData];
-        currentIndex = 1;
+        currentIndex = 0;
         [self readFaultData];
     }
     

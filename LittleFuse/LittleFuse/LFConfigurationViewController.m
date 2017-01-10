@@ -22,8 +22,8 @@
 #define BUTTON_CELL_ID @"LFConfigureButtonsCellID"
 #define TOGGLE_CELL_ID @"LFCharactersticBitDisplayCell"
 
-#define FirstNameRegAddr 0x6A
-#define SecondNameRegAddr 0x72
+#define FirstNameRegAddr 0x006A
+#define SecondNameRegAddr 0x0072
 #define FirstNameRegLen 0x08
 #define SecondNameRegLen 0x04
 
@@ -45,7 +45,7 @@
     NSMutableArray *basicConfigDetails;
     NSMutableArray *advanceConfigDetails;
     NSMutableArray *basicValuesArray;
-
+    
     NSArray  *basicFormateArray;
     NSArray *advancedFormateArray;
     NSArray *basicUnitsArray, *advUnitsArray;
@@ -59,11 +59,16 @@
     BOOL isFetchingMacOrSeedData;
     BOOL isReRead;
     BOOL canRefresh;
-    NSData *macData;
+    BOOL isReadingFriendlyName;
+    BOOL isVerifyingPassword;
+    BOOL isChangingPassword;
+    NSInteger curPassWriteIndex;
     NSString *macString;
     NSData *configSeedData;
     NSData *prevWrittenData;
+    NSData *completePasswordData;
     NSString *passwordVal;
+    NSString *friendlyNameStr;
     
     NSInteger currentIndex;
     NSInteger selectedTag;
@@ -72,6 +77,7 @@
     
     UIView *changePasswordView;
     UIButton *changePasswordButton;
+    LFEditingViewController *editing;
     
 }
 @property (nonatomic) NSUInteger hardwareConfigVal;
@@ -97,9 +103,12 @@ const char advance_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0
     0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A};
 const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04,0x04};
 
+const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0x00BC, 0x00C4, 0x00CC};
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    curPassWriteIndex = 0;
     isInitialLaunch = YES;
     NSArray* nibViews = [[NSBundle mainBundle] loadNibNamed:@"ChangePasswordView"
                                                       owner:self
@@ -175,12 +184,12 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     LFDisplay *currentTansformer = [[LFDisplay alloc] initWithKey:@"Current Transformer Ratio" Value:@"" Code:@"CT"];
     LFDisplay *pt = [[LFDisplay alloc] initWithKey:@"Potential Transformer Ratio" Value:@"" Code:@"PT"];
     LFDisplay *ultd = [[LFDisplay alloc] initWithKey:@"Under Load Trip Delay" Value:@"" Code:@"ULTD"];
-//    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
+    //    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
     //Commented as per client requirement .Can be uncommented to add at 4th position.
     LFDisplay *lin = [[LFDisplay alloc] initWithKey:@"Linear Over Current Trip Delay" Value:@"" Code:@"LIN"];
     LFDisplay *gftc = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Current" Value:@"" Code:@"GFTC"];
     LFDisplay *gftd = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Delay" Value:@"" Code:@"GFTD"];
-//    LFDisplay *gfib = [[LFDisplay alloc] initWithKey:@"Ground Fault Inhibit Delay" Value:@"" Code:@"GFIB"];
+    //    LFDisplay *gfib = [[LFDisplay alloc] initWithKey:@"Ground Fault Inhibit Delay" Value:@"" Code:@"GFIB"];
     //Commented as per client requirement .Can be uncommented to add at 8th position.
     LFDisplay *lkw = [[LFDisplay alloc] initWithKey:@"Low Power Trip Limit" Value:@"" Code:@"LKW"];
     
@@ -245,8 +254,8 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
         [self readCharactisticsWithIndex:currentIndex];
     }
-
-
+    
+    
 }
 
 - (void)showCharacterstics:(NSMutableArray *)charactersticsArray
@@ -257,11 +266,11 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 #pragma mark Read Mac Data
 - (void)receivedDeviceMacWithData:(NSData *)data {
+    NSLog(@"%s", __func__);
     [LFBluetoothManager sharedManager].macData = data;
     isFetchingMacOrSeedData = NO;
-    macData = data;
     NSString *tString = [[NSString alloc] initWithData:data
-                                             encoding:NSASCIIStringEncoding];
+                                              encoding:NSASCIIStringEncoding];
     NSMutableString *tMutStr = [[NSMutableString alloc]init];
     for (int i = 0; i < tString.length; i++) {
         NSString *tSubStr = [tString substringWithRange:NSMakeRange(i, 1)];
@@ -275,6 +284,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 }
 
 - (void)getSeedData {
+    NSLog(@"%s", __func__);
     isFetchingMacOrSeedData = YES;
     NSArray *charsArr = [LFBluetoothManager sharedManager].discoveredPeripheral.services[1].characteristics;
     CBCharacteristic *charactestic = (CBCharacteristic *)charsArr[4];
@@ -290,16 +300,19 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         [authUtils initWithPassKey:passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
-
+    
     return authCode;
-
+    
 }
 
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:YES];
     [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
-//    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:2];
+    if (configSeedData != nil) {
+        [self updateFaultData];
+    }
+//    updateFaultData
 }
 
 - (void)stopIndicator {
@@ -315,7 +328,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 - (void)updateFaultData {
     if(canContinueTimer) {
-        [LFBluetoothManager sharedManager].tCurIndex = 1;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
         [LFBluetoothManager sharedManager].canContinueTimer = YES;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [[LFBluetoothManager sharedManager] readFaultData];
@@ -341,7 +354,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     [self readCharactisticsWithIndex:currentIndex];
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
     [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
-
+    
 }
 
 
@@ -383,7 +396,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-//    NSLog(@"Cell for row at index path = %ld, section= %ld", (long)indexPath.row, (long)indexPath.section);
+    //    NSLog(@"Cell for row at index path = %ld, section= %ld", (long)indexPath.row, (long)indexPath.section);
     //Last cell to be shown.
     if (!isBasic  && indexPath.section == 2 && indexPath.row == 8) {
         LFConfigureButtonsCell *cell = (LFConfigureButtonsCell *)[tableView dequeueReusableCellWithIdentifier:BUTTON_CELL_ID forIndexPath:indexPath];
@@ -507,7 +520,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 //Displays the popup to enter new value for the selected field.
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    curCell set
+    //    curCell set
     if (!isBasic && indexPath.section != 0) {
         return;
     }
@@ -519,7 +532,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tblConfigDisplay cellForRowAtIndexPath:indexPath];
     
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
-    LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+    editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
     
     self.providesPresentationContextTransitionStyle = YES;
     self.definesPresentationContext = YES;
@@ -528,6 +541,9 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     
     if (indexPath.row == -1) {
         editing.selectedText = @"Name";
+    }
+    else if (indexPath.row == -3) {
+        editing.selectedText = @"password";
     }
     else {
         editing.selectedText = cell.lblKey.text;
@@ -546,8 +562,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 }
 
 - (void)toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
-    LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
-    LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
     if (indexPath.section == 1) {
         selectedTag = indexPath.row+AdvancedSection0RowsCount;
     } else if (indexPath.section == 2) {
@@ -560,21 +574,23 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     
     [self toggleSelectedWithSuccess:YES andPassword:nil];
     
-//    self.providesPresentationContextTransitionStyle = YES;
-//    self.definesPresentationContext = YES;
-//    [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-//    [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-//    editing.delegate = self;
-//    editing.showAuthentication = NO;
-//    editing.isAdvConfig = YES;
-//    [navController setViewControllers:@[editing]];
-//    [self.navigationController presentViewController:navController animated:NO completion:nil];
+    //    self.providesPresentationContextTransitionStyle = YES;
+    //    self.definesPresentationContext = YES;
+    //    [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+    //    [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+    //    editing.delegate = self;
+    //    editing.showAuthentication = NO;
+    //    editing.isAdvConfig = YES;
+    //    [navController setViewControllers:@[editing]];
+    //    [self.navigationController presentViewController:navController animated:NO completion:nil];
     
 }
 
 
 - (IBAction)changePwdAction:(id)sender {
-    
+    //pass indexpath as -3.
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:-3 inSection:0];
+    [self tableView:tblConfigDisplay didSelectRowAtIndexPath:indexPath];
 }
 
 - (IBAction)editAction:(id)sender {
@@ -614,9 +630,27 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 - (void)configureServiceWithValue:(NSData *)data
 {
+    
+    if (isReadingFriendlyName && !isVerifyingPassword) {
+//        NSLog(@"Friendly name data final = %@", data);
+        if (selectedTag == -2) {
+            isReadingFriendlyName = NO;
+            return;
+        }
+        selectedTag = -2;
+        [self readCharactisticsWithIndex:-2];
+        return;
+    }
+    if (selectedTag == -2 && currentIndex == 0&& !isVerifyingPassword) {
+//        NSLog(@"Friendly name data = %@", data);
+        isReadingFriendlyName = YES;
+        selectedTag = -1;
+        [self readCharactisticsWithIndex:-1];
+        return;
+    }
     NSData *tData = data;
     canRefresh = NO;
-    if (isFetchingMacOrSeedData && currentIndex == 0) {
+    if (isFetchingMacOrSeedData && currentIndex == 0 && !isVerifyingPassword) {
         isFetchingMacOrSeedData = NO;
         NSMutableData *mutData = [[NSMutableData alloc]init];
         for (int i=12; i<=19; i++) {
@@ -629,44 +663,66 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         }
         configSeedData = mutData;
         
-        NSLog(@"Mac Address = %@", macString);
-        NSLog(@"Seed data = %@", configSeedData);
+//        NSLog(@"Mac Address = %@", macString);
+//        NSLog(@"Seed data = %@", configSeedData);
         [self removeIndicator];
+        
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
+//        [self updateFaultData];
         return;
     }
     
-    if (currentIndex == -1) {
+    if (currentIndex == -1 && !isVerifyingPassword) {
+        [authUtils nextAuthCode];
+        [LFBluetoothManager sharedManager].isPasswordVerified = YES;
         isFetchingMacOrSeedData = NO;
         NSRange range = NSMakeRange(0, 8);
         data = [data subdataWithRange:range];
-        NSString *nameVal = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-        DLog(@"Entered name  is %@", nameVal);
+//        NSString *nameVal = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+//        DLog(@"Entered name  is %@", nameVal);
+        NSData *secondStrData;
+        if (friendlyNameStr.length > 8 && selectedTag == -1) {
+            secondStrData = [[friendlyNameStr substringFromIndex:8] dataUsingEncoding:NSUTF8StringEncoding];
+        }
+        else if (selectedTag == -1 && friendlyNameStr.length <= 8) {
+            Byte emptyData[4];
+            for (int i = 0; i<4; i++) {
+                emptyData[i] = 0x00;
+            }
+            secondStrData = [NSData dataWithBytes:emptyData length:4];
+        }
+        NSData *secondData = [self getFriendlyNameData:secondStrData isFirstPart:NO];
+        selectedTag = -2;
+        
+        [self saveDataToDevice:secondData];
+        currentIndex = 0;
         return;
     }
     else {
-        NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
         
-        NSRange range = NSMakeRange(0, 4);
-        
-        data = [data subdataWithRange:range];
-        
-        
-        [self getValuesFromData:data withForamte:formate];
-        
+        if (!isChangingPassword) {
+            NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
+            
+            NSRange range = NSMakeRange(0, 4);
+            
+            data = [data subdataWithRange:range];
+            
+            [self getValuesFromData:data withForamte:formate];
+        }
+      
         if (isWrite && !isReRead) {
             [self removeIndicator];
             isWrite = NO;
-//            currentIndex = 0;
+            //            currentIndex = 0;
             //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
             NSData *stData = [tData subdataWithRange:NSMakeRange(11, 1)];
-            NSLog(@"Full char data = %@", tData);
-            NSLog(@"Write response st data = %@", stData);
+//            NSLog(@"Full char data = %@", tData);
+//            NSLog(@"Write response st data = %@", stData);
             const char *byteVal = [stData bytes];
             Byte stVal = (Byte)byteVal[0];
             switch (stVal) {
                 case 0x01:
-                case 0x11:
+                case 0x00:
                     isReRead = NO;
                     [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Writing data failed." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                         if ([alert isKindOfClass:[UIAlertController class]]) {
@@ -682,7 +738,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
                         }
                     }];
                     return;
-                case 0x00:
+                case 0x11:
                 case 0x10:
                     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
                     isReRead = YES;
@@ -694,9 +750,22 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         }
         if (isReRead) {
             [self removeIndicator];
-            currentIndex = 0;
+//            if (!isChangingPassword) {
+//                currentIndex = 0;
+//            }
             isReRead = NO;
             if (![self isDataUpdatedCorrectlyWithPrevData:prevWrittenData withNewData:tData]) {
+                if (isVerifyingPassword) {
+                    isVerifyingPassword = NO;
+                    [editing authDoneWithStatus:NO];
+                    DLog(@"Authentication failed");
+                    currentIndex = selectedTag;
+                    return;
+                }
+                if (isChangingPassword) {
+                    isChangingPassword = NO;
+                    currentIndex = 0;
+                }
                 [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Writing data failed." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                     if ([alert isKindOfClass:[UIAlertController class]]) {
                         [alert dismissViewControllerAnimated:NO completion:nil];
@@ -704,8 +773,26 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
                 }];
                 return;
             }
-            [LFBluetoothManager sharedManager].isPasswordVerified = YES;
             [authUtils nextAuthCode];
+            if (isVerifyingPassword) {
+                isVerifyingPassword = NO;
+                DLog(@"Authentication done successfully.");
+                [editing authDoneWithStatus:YES];
+                currentIndex = selectedTag;
+                [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+                return;
+            }
+            if (isChangingPassword) {
+                if (curPassWriteIndex < 7) {
+                    curPassWriteIndex += 1;
+                    currentIndex = -3;
+                    [self writeNewPasswordDataWithIndex:curPassWriteIndex];
+                    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+                    return;
+                }
+                [LFBluetoothManager sharedManager].isPasswordVerified = NO;
+                [self removeIndicator];
+            }
             [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                 if ([alert isKindOfClass:[UIAlertController class]]) {
                     [alert dismissViewControllerAnimated:NO completion:nil];
@@ -726,14 +813,14 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
             if (currentIndex > advanceConfigDetails.count - 1) {
                 currentIndex = 0;
                 [self removeIndicator];
-//                [self readDeviceMacAndAuthSeed];
+                //                [self readDeviceMacAndAuthSeed];
                 return;
             }
         }
-
+        
     }
-//    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-        [self readCharactisticsWithIndex:currentIndex];
+    //    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    [self readCharactisticsWithIndex:currentIndex];
 }
 
 - (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
@@ -750,7 +837,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 - (void)readDeviceMacAndAuthSeed {
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-//    [self performSelector:@selector(getMac) withObject:nil afterDelay:1];
+    //    [self performSelector:@selector(getMac) withObject:nil afterDelay:1];
     [self getMac];
 }
 
@@ -767,9 +854,32 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
-            data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
+            if (index == -1) {
+                data[i] = FirstNameRegAddr;
+            }
+            else if (index == -2) {
+                data[i] = SecondNameRegAddr;
+            }
+            else if (index == -3) {
+                data[i] = changePassword_AddrArr[curPassWriteIndex];
+            }
+            else {
+                data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
+            }
         } else if (i == 10){
-            data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
+            if (index == -1) {
+                data[i] = FirstNameRegLen;
+            }
+            else if (index == -2) {
+                data[i] = SecondNameRegLen;
+            }
+            else if (index == -3) {
+                data[i] = (Byte)0x08;
+            }
+            else {
+                data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
+            }
+
         } else {
             data[i] = (Byte)0x00;
         }
@@ -779,6 +889,7 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
     NSData *data1 = [NSData dataWithBytes:data length:20];
+//    NSLog(@"Data while reading back the data = %@ \n at index = %ld", data1, (long)index);
     [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", (int)index]];
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
@@ -963,9 +1074,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 }
 
 
-
-
-
 - (void)writeDataToIndex:(NSInteger)index withValue:(double)val
 {
     isWrite = YES;
@@ -997,8 +1105,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
             break;
     }
     Byte data[20];
-    Byte *byteData= (Byte*)malloc(8);
-    [macData getBytes:byteData length:8];
     NSInteger convertedVal = (NSInteger)val;
     char *bytes = (char *) malloc(8);
     memset(bytes, 0, 8);
@@ -1043,20 +1149,18 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     [[LFBluetoothManager sharedManager] setIsWriting:YES];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] setConfig:YES];
-    NSLog(@"Data writing to device = %@", mutData);
+//    NSLog(@"Data writing to device = %@", mutData);
     prevWrittenData = mutData;
     [[LFBluetoothManager sharedManager] writeConfigData:mutData];
     canRefresh = YES;
     [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:3];
-//    [self checkTimeOut];
+    //    [self checkTimeOut];
     
 }
 
 #pragma mark Writing TimeOut Method.
 - (void)checkTimeOut {
-//    [self removeIndicator];
-//    return;
-    if (!canRefresh) {
+    if (!canRefresh || ((configSeedData == nil) && currentIndex == -1 )) {
         return;
     }
     
@@ -1066,12 +1170,6 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         [self readCharactisticsWithIndex:selectedTag];
         [self removeIndicator];
         isWrite = NO;
-//        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Writing data failed.Please try again." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-//            if ([alert isKindOfClass:[UIAlertController class]]) {
-//                [alert dismissViewControllerAnimated:NO completion:nil];
-//            }
-//            [tblConfigDisplay reloadData];
-//        }];
     }
 }
 
@@ -1080,70 +1178,91 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
     if (txt == nil || txt.length == 0) {
         return;
     }
+    friendlyNameStr = txt;
     currentIndex = -1;
-    NSData *data1;
     if (txt.length > 8) {
-        const char *firstEightBytes = [[txt substringToIndex:8] UTF8String];
-        NSData *firstData = [self getFirstEightBytesOfData:firstEightBytes];
+        NSData *firstStrData = [[txt substringToIndex:8] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *firstData = [self getFriendlyNameData:firstStrData isFirstPart:YES];
         selectedTag = -1;
         [self saveDataToDevice:firstData];
-       const char *lastFourBytes = [[txt substringFromIndex:8] UTF8String];
-        NSData *lastData = [self getLastFourBytesOfData:lastFourBytes];
-        selectedTag = -2;
-        [self saveDataToDevice:lastData];
     }
     else {
-        const char *bytes = [txt UTF8String];
-        data1 = [self getFirstEightBytesOfData:bytes];
+        NSData *firstStrData = [[txt substringToIndex:txt.length] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *firstData = [self getFriendlyNameData:firstStrData isFirstPart:YES];
         selectedTag = -1;
-        [self saveDataToDevice:data1];
+        [self saveDataToDevice:firstData];
     }
     //Code to update the new name in UI and local DB.
-//    NSString *newName;
-//    if (txt.length > 12) {
-//        newName = [txt substringToIndex:12];
-//    }
-//    else {
-//        newName = [txt substringToIndex:txt.length];
-//    }
-//    [LFBluetoothManager sharedManager].selectedDevice = newName;
-//    [self setDeviceName:newName];
+    //    NSString *newName;
+    //    if (txt.length > 12) {
+    //        newName = [txt substringToIndex:12];
+    //    }
+    //    else {
+    //        newName = [txt substringToIndex:txt.length];
+    //    }
+    //    [LFBluetoothManager sharedManager].selectedDevice = newName;
+    //    [self setDeviceName:newName];
     
 }
 
 - (void)saveDataToDevice:(NSData *)data {
+    NSData *lengthVal = [data subdataWithRange:NSMakeRange(10, 1)];
+    char buff;
+    [lengthVal getBytes:&buff length:1];
+    int myLen = buff;
+    NSData *addressVal = [data subdataWithRange:NSMakeRange(8, 1)];
+    char addrBuff;
+    [addressVal getBytes:&addrBuff length:1];
+    int myAddr = addrBuff;
+    NSData *resultData = [self getEncryptedPasswordDataFromString:@"" data:[data subdataWithRange:NSMakeRange(0, 8)] address:myAddr size:myLen];
+    data = [data subdataWithRange:NSMakeRange(0, 12)];
+    NSMutableData *mutData = [NSMutableData dataWithData:data];
+    for (int i = 0; i<8;i++) {
+        NSData *subdata = [resultData subdataWithRange:NSMakeRange(i, 1)];
+        [mutData appendData:subdata];
+    }
+    
     [[LFBluetoothManager sharedManager] setIsWriting:YES];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] writeConfigData:data];
-//    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:1];
+//    NSLog(@"Data writing to device = %@", mutData);
+    prevWrittenData = mutData;
+    canRefresh = YES;
+    //    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:3];
+    [[LFBluetoothManager sharedManager] setIsWriting:YES];
+    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] writeConfigData:mutData];
+    //    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:1];
 }
 
-- (NSData *)getFirstEightBytesOfData:(const char *)bytes {
-    Byte data[20];
-    for (int i = 0; i < 20; i++) {
-        if (i < 8) {
-            if(strlen(bytes) <= i) {
-                data[i] = 0x00;
-            }
-            else {
-                data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
-            }
+- (NSData *)getFriendlyNameData:(NSData *)data isFirstPart:(BOOL)isFirstPart{
+    NSMutableData *mutData = [[NSMutableData alloc]initWithData:data];
+    if (data.length < 8) {
+        for (NSInteger i = data.length; i < 8; i++) {
+            Byte tByte[1];
+            tByte[0]= (Byte)0x00;
+            [mutData appendBytes:tByte length:1];
+            
+        }
+    }
+    Byte finalData[12];
+    for (int i = 8; i < 20; i++) {
+        if (i == 8) {
+            finalData[i-8] = isFirstPart?FirstNameRegAddr:SecondNameRegAddr;
+        } else if (i == 10){
+            finalData[i-8] = isFirstPart?FirstNameRegLen:SecondNameRegLen;
+        } else if (i == 11) {
+            finalData[i-8] = (Byte)0x01;//write byte == 1
         } else {
-            if (i == 8) {
-                data[i] = FirstNameRegAddr;
-            } else if (i == 10){
-                data[i] = FirstNameRegLen;
-            } else if (i == 11) {
-                data[i] = (Byte)0x01;//write byte == 1
-            } else {
-                data[i] = (Byte)0x00;
-            }
+            finalData[i-8] = (Byte)0x00;
         }
         
     }
-    NSData *data1 = [NSData dataWithBytes:data length:20];
-    return data1;
+    
+    [mutData appendBytes:finalData length:12];
+    
+    return mutData;
 }
 
 - (NSData *)getLastFourBytesOfData:(const char *)bytes {
@@ -1175,6 +1294,14 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 
 #pragma mark -Editing Delegate
+
+- (void)checkPassword:(NSString *)passwordStr {
+    isVerifyingPassword = YES;
+    passwordVal = passwordStr;
+    LFDisplay *ctVal = [advanceConfigDetails objectAtIndex:0];
+    [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
+}
+
 - (void)selectedValue:(NSString *)txt andPassword:(NSString *)password
 {
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
@@ -1187,12 +1314,21 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         [self saveNewFriendlyNameWithValue:txt];
         return;
     }
+    else if (selectedTag == -3) {
+//        changePasswordWithNewValue
+        if ((txt.length == 0) || (txt == nil)) {
+            [self showAlertWithText:@"Please enter a valid password"];
+            return;
+        }
+        [self changePasswordWithNewValue:txt];
+        return;
+    }
     
     if (txt.length == 0) {
         txt = @"";
     }
     //
-   
+    
     
     LFDisplay *display;
     if (isBasic) {
@@ -1295,10 +1431,13 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 - (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
 {
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
-       [self removeIndicator];
+    [self removeIndicator];
     if (isSuccess) {
-        if (selectedTag == -1 || selectedTag == -2) {
-            [self readNameValueAfterUpdating];
+        if (isVerifyingPassword) {
+            [self readCharactisticsWithIndex:0];
+        }
+        else if (isChangingPassword) {
+            [self readCharactisticsWithIndex:-3];
         }
         else {
             [self readCharactisticsWithIndex:selectedTag];
@@ -1344,27 +1483,27 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
 
 - (void)readNameValueAfterUpdating {
     //Add logic to re read the saved information for friendly name in both the addresses.So there should be two reads.
-//
-//    [[LFBluetoothManager sharedManager] setDelegate:self];
-//    
-//    Byte data[20];
-//    for (int i=0; i < 20; i++) {
-//        if (i== 8) {
-//            data[i] = selectedTag == -1?FirstNameRegAddr:SecondNameRegAddr;
-//        } else if (i == 10){
-//            data[i] = selectedTag == -1?FirstNameRegLen:SecondNameRegLen;
-//        } else {
-//            data[i] = (Byte)0x00;
-//        }
-//    }
-//    
-//    [[LFBluetoothManager sharedManager] setRealtime:NO];
-//    [[LFBluetoothManager sharedManager] setConfig:YES];
-//    [[LFBluetoothManager sharedManager] setIsWriting:NO];
-//    NSData *data1 = [NSData dataWithBytes:data length:20];
-//    [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", selectedTag]];
-//    [[LFBluetoothManager sharedManager] writeConfigData:data1];
-
+    //
+    //    [[LFBluetoothManager sharedManager] setDelegate:self];
+    //
+    //    Byte data[20];
+    //    for (int i=0; i < 20; i++) {
+    //        if (i== 8) {
+    //            data[i] = selectedTag == -1?FirstNameRegAddr:SecondNameRegAddr;
+    //        } else if (i == 10){
+    //            data[i] = selectedTag == -1?FirstNameRegLen:SecondNameRegLen;
+    //        } else {
+    //            data[i] = (Byte)0x00;
+    //        }
+    //    }
+    //
+    //    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    //    [[LFBluetoothManager sharedManager] setConfig:YES];
+    //    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+    //    NSData *data1 = [NSData dataWithBytes:data length:20];
+    //    [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", selectedTag]];
+    //    [[LFBluetoothManager sharedManager] writeConfigData:data1];
+    
 }
 
 #pragma mark Peripheral Disconnected Notification
@@ -1381,4 +1520,73 @@ const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/*
         }
     }];
 }
+
+
+
+#pragma mark Change Password Methods.
+
+- (void)changePasswordWithNewValue:(NSString *)newPassword {
+    completePasswordData = [authUtils getNewPassKeydata:newPassword];
+    isChangingPassword = YES;
+    curPassWriteIndex = 0;
+    [self writeNewPasswordDataWithIndex:0];
+}
+
+- (void)writeNewPasswordDataWithIndex:(NSInteger)passIndex {
+    NSData *passData = [completePasswordData subdataWithRange:NSMakeRange(passIndex*8, 8)];
+    isWrite = YES;
+    currentIndex = -3;
+    Byte data[20];
+    NSMutableData *data1 = [[NSMutableData alloc]init];
+    
+    for (int i = 0; i < 20; i++) {
+        if (i < 8) {
+            NSData *tData = [passData subdataWithRange:NSMakeRange(i, 1)];
+            const char *tBytes = [tData bytes];
+            data[i] = (Byte)tBytes[0];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = changePassword_AddrArr[curPassWriteIndex];
+            } else if (i == 10){
+                data[i] = 0x08;
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            }
+            else {
+                data[i] = (Byte)0x00;
+            }
+        }
+        
+    }
+    
+    [data1 appendBytes:data length:20];
+    
+    NSData *lengthVal = [data1 subdataWithRange:NSMakeRange(10, 1)];
+    char buff;
+    [lengthVal getBytes:&buff length:1];
+    int myLen = buff;
+    NSData *addressVal = [data1 subdataWithRange:NSMakeRange(8, 1)];
+    char addrBuff;
+    [addressVal getBytes:&addrBuff length:1];
+    int myAddr = addrBuff;
+    NSData *resultData = [self getEncryptedPasswordDataFromString:@"" data:[data1 subdataWithRange:NSMakeRange(0, 8)] address:myAddr size:myLen];
+    data1 = [NSMutableData dataWithData:[data1 subdataWithRange:NSMakeRange(0, 12)]];
+    NSMutableData *mutData = [NSMutableData dataWithData:data1];
+    for (int i = 0; i<8;i++) {
+        NSData *subdata = [resultData subdataWithRange:NSMakeRange(i, 1)];
+        [mutData appendData:subdata];
+    }
+    
+    [[LFBluetoothManager sharedManager] setIsWriting:YES];
+    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+//    NSLog(@"Data writing to device = %@", mutData);
+    prevWrittenData = mutData;
+    [[LFBluetoothManager sharedManager] writeConfigData:mutData];
+    canRefresh = YES;
+    [self performSelector:@selector(checkTimeOut) withObject:nil afterDelay:3];
+    
+}
+
+
 @end

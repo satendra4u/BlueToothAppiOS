@@ -33,6 +33,9 @@
  */
 - (void)authenticationDoneWithStatus:(BOOL)isSuccess andPassword:(NSString *)password;
 
+
+- (void)checkPassword:(NSString *)passwordStr;
+
 @end
 
 @interface LFEditingViewController : LFBaseViewController
@@ -47,6 +50,9 @@
 
 @property (nonatomic, assign) BOOL showAuthentication;
 @property (nonatomic,assign) BOOL isAdvConfig;
+
+
+- (void)authDoneWithStatus:(BOOL)isSuccess;
 
 
 @end

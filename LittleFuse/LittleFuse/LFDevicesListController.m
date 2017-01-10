@@ -123,11 +123,17 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    if ([[LFBluetoothManager sharedManager] discoveredPeripheral] != nil) {
-        [[LFBluetoothManager sharedManager]disconnectPeripheral];
-    }
+//    if ([[LFBluetoothManager sharedManager] discoveredPeripheral] != nil) {
+//        [[LFBluetoothManager sharedManager] disconnectPeripheral];
+//    }
+//    else {
+        [self initialSetup];
+//    }
+   }
+
+- (void)initialSetup{
     [LFBluetoothManager sharedManager].isPasswordVerified = NO;
-//    NSLog(@"%s",__func__);
+    //    NSLog(@"%s",__func__);
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
     isDeviceSelected = NO;
@@ -136,7 +142,7 @@
     [[LFBluetoothManager sharedManager] setDisplayCharacterstics:NO];
     if ([[LFBluetoothManager sharedManager] getDevicesList]) {
         peripheralsList = [[LFBluetoothManager sharedManager] getDevicesList];
-//        NSLog(@"%s", __func__);
+        //        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
     canRefresh = YES;

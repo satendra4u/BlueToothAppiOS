@@ -209,6 +209,36 @@ static LFDataManager *dataManager = nil;
 
 }
 
+- (NSArray *)getAllFaults {
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription
+                                   entityForName:PERIPHERAL_ENTITY inManagedObjectContext:_managedObjectContext];
+    [fetchRequest setEntity:entity];
+    LFPeripheral *peripheral = [[LFBluetoothManager sharedManager] selectedPeripheral];
+    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"identifier matches[c] %@",peripheral.identifer]];
+    NSError *error;
+    NSArray *eventObjects = [_managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    NSMutableArray *faultArr = [[NSMutableArray alloc] initWithCapacity:0];
+    if (eventObjects.count > 0) {
+        NSManagedObject *peripheralObj = [eventObjects firstObject];
+        
+        NSSet *faultList = [peripheralObj valueForKey:PERIPHERAL_FAULT_RELATION];
+//        
+//        NSPredicate *filter = [NSPredicate predicateWithFormat:@"(date <= %@)", date];
+//        
+//        NSSet *filteredSet = [faultList filteredSetUsingPredicate:filter];
+//        
+        for (NSManagedObject *fault in faultList) {
+            LFFaultData *faultData = [[LFFaultData alloc]initWithManagedObject:fault];
+            [faultArr addObject:faultData];
+        }
+//        NSArray *sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO]];
+//        [faultArr sortUsingDescriptors:sortDescriptors];
+        
+    }
+    return faultArr;
+}
+
 
 - (LFFaultData *)getSavedDataWithDate:(NSDate *)date;
 {

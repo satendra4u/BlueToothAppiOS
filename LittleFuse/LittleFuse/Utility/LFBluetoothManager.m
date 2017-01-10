@@ -124,7 +124,7 @@ static LFBluetoothManager *sharedData = nil;
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
 {
     // Reject any where the value is above reasonable range
-    
+//    NSLog(@"The name of the device is = %@", advertisementData[kLocalName]);
     if (RSSI.integerValue > 0) {
         return;
     }
@@ -132,7 +132,9 @@ static LFBluetoothManager *sharedData = nil;
     
     NSArray *peripherals = [self.centralManager retrievePeripheralsWithIdentifiers:@[[CBUUID UUIDWithString:uuidString]]];
     // // // NSLog(@"><><><><><><saved devices identifers %@><><><><><", peripherals);
-    peripheral = [peripherals firstObject];
+    if (peripherals.count > 0) {
+        peripheral = [peripherals firstObject];
+    }
     
     // // // NSLog(@"Discovered %@ %@at %@", peripheral.name, peripheral.identifier, RSSI);
     NSString *name = peripheral.name;
@@ -346,7 +348,6 @@ static LFBluetoothManager *sharedData = nil;
         return;
     }
     NSData *readdata = [characteristic value];
-    NSLog(@"UUID value = %@", characteristic.UUID);
     NSLog(@"data read is %@", readdata);
     if (![self isDisplayCharacterstics]) {
         //        if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
@@ -472,7 +473,7 @@ static LFBluetoothManager *sharedData = nil;
 - (void)readFaultData
 {
     if (!_canContinueTimer) {
-        _tCurIndex = 1;
+        _tCurIndex = 0;
         return;
     }
     [[LFBluetoothManager sharedManager] setConfig:NO];
@@ -504,7 +505,7 @@ static LFBluetoothManager *sharedData = nil;
 }
 
 - (void)restartFaultData {
-    _tCurIndex = 1;
+    _tCurIndex = 0;
     [self readFaultData];
 }
 
@@ -674,7 +675,7 @@ static LFBluetoothManager *sharedData = nil;
     selectedPeripheral.configured = YES;
     
     [devicesList replaceObjectAtIndex:index withObject:selectedPeripheral];
-    NSLog(@"Update config");
+//    NSLog(@"Update config");
     [[LFDataManager sharedManager] updatePeripheralDetails:selectedPeripheral];
     
 }

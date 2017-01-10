@@ -40,7 +40,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    NSLog(@"Tab bar view disappeared");
+//    NSLog(@"Tab bar view disappeared");
 }
 
 

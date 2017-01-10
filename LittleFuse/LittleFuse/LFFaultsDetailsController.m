@@ -320,12 +320,12 @@
     
     
     LFDisplay *phaseSequence = [[LFDisplay alloc] initWithKey:@"Phase Sequence" Value:[NSString stringWithFormat:@"%d", (int)seq] Code:@"PS"];
-    if (seq == 0) {
+//    if (seq == 0) {
         phaseSequence.value = @"ABC";
-    }
-    else {
-        phaseSequence.value = @"CBA";
-    }
+//    }
+//    else {
+//        phaseSequence.value = @"CBA";
+//    }
     
     NSArray *powerDetails = @[aTob, pfa];
     

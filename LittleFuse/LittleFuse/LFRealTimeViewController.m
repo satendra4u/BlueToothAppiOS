@@ -17,6 +17,7 @@
 {
     
     BOOL canContinueTimer;
+//    BOOL
     
     __weak IBOutlet UITableView *tblDisplay;
     __weak IBOutlet UILabel *lblDeviceName;
@@ -94,7 +95,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)updateFaultData {
     if(canContinueTimer) {
-        [LFBluetoothManager sharedManager].tCurIndex = 1;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
         [LFBluetoothManager sharedManager].canContinueTimer = YES;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [[LFBluetoothManager sharedManager] readFaultData];
@@ -139,6 +140,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getVoltageData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self voltageCharcterstics:[notification object]];
 }
 
@@ -147,6 +151,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getCurrentData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self currentCharcterstics:[notification object]];
     
 }
@@ -156,6 +163,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getEquipmentData:(NSNotification *)notificaition
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self equipmentStatus:[notificaition object]];
 }
 
@@ -164,11 +174,17 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getPowerData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self powerCharacterstics:[notification object]];
 }
 
 - (void)voltageCharcterstics:(NSData *)data
 {
+    if (!canContinueTimer) {
+        return;
+    }
     //Reverse the data
     
     NSInteger len = 4;
@@ -222,7 +238,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)currentCharcterstics:(NSData *)data
 {
-    
+    if (!canContinueTimer) {
+        return;
+    }
     NSInteger len = 4;
     NSData *data0, *data1, *data2, *data3, *data4, *data5;
     NSRange range = NSMakeRange(0, len);
@@ -301,6 +319,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)powerCharacterstics:(NSData *)data
 {
+    if (!canContinueTimer) {
+        return;
+    }
     NSInteger len = 4;
     NSData *data0, *data1, *data2, *data3, *data4;
     NSRange range = NSMakeRange(0, len);
@@ -341,6 +362,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)equipmentStatus:(NSData *)data
 {
+    if (!canContinueTimer) {
+        return;
+    }
     DLog(@"Equipment data = %@", data);
     BOOL isFaultPresent = YES;
     NSString *dataString = [self getDataStringFromData:[data subdataWithRange:NSMakeRange(0, 4)]];
@@ -589,6 +613,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)readCharactisticsWithIndex:(NSInteger)index
 {
+    if (!canContinueTimer) {
+        return;
+    }
     Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
@@ -611,6 +638,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getTimersData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     CBCharacteristic *characteristic = (CBCharacteristic *)notification.object;
     NSData *data = characteristic.value;
     
