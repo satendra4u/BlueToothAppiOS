@@ -100,4 +100,39 @@
 #define PeripheralDidConnect    @"PeripheralDidConnectNotification"
 #define LittleFuseNotificationCenter [NSNotificationCenter defaultCenter]
 
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert titles *****
+// ------------------------------------------------------------------------------------------
+
+#pragma mark Alert Titles
+
+#define  kApp_Name  @"Littelfuse"
+#define  kConfigure @"Configure"
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert body constants *****
+// ------------------------------------------------------------------------------------------
+
+
+#pragma mark Alert Body
+
+#define  kDevice_Disconnected @"Device Disconnected"
+#define  kWriting_Failed @"Writing data failed."
+#define  kEnter_Correct_Password @"Please enter correct password and try again."
+#define  kSave_Success @"Data saved successfully."
+#define  kProblem_Saving @"There is a problem saving data."
+#define  kNot_Configured @"This MP8000 has not yet been Configured. Configure this MP8000 now?"
+#define  kEnter_Valid_Password @"Please enter valid password"
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert button titles *****
+// ------------------------------------------------------------------------------------------
+
+#pragma mark Alert Button Titles
+
+#define kOK  @"OK"
+#define kNo @"No"
+#define kCancel @"Cancel"
+
+
+
+
 #endif /* LFConstants_h */

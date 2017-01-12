@@ -62,14 +62,14 @@
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(navigateToDislay:) name:DISPLAY_TABBAR object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(navigateToDislay:) name:DISPLAY_TABBAR object:nil];
     lblVersion.text = [NSString stringWithFormat:@"Version:%@",  [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(peripheralConnected) name:PeripheralDidConnect object:nil];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(peripheralDisconnnected) name:PeripheralDidDisconnect object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralConnected) name:PeripheralDidConnect object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnnected) name:PeripheralDidDisconnect object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(becameActive) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(becameActive) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
 }
 
@@ -310,7 +310,7 @@
     
     if (!peripheral.isConfigured) { //(LV > HV)
         NSMutableArray *viewControllers = [tabbar.viewControllers mutableCopy];
-        [self showAlertViewWithCancelButtonTitle:@"Configure" withMessage:@"" withTitle:NSLocalizedString(@"This MP8000 has not yet been Configured. Configure this MP8000 now?", (@"This MP8000 has not yet been Configured. Configure this MP8000 now?", )) otherButtons:@[@"No", @"Cancel"] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        [self showAlertViewWithCancelButtonTitle:kConfigure withMessage:@"" withTitle:kNot_Configured otherButtons:@[kNo, kCancel] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
             NSInteger numberOfControllers = 3;
             switch (index) {
                 case 2:
@@ -397,7 +397,7 @@
 //        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:YES completion:nil];
             

@@ -40,7 +40,7 @@
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
 
     [self convertFaultData];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)appEnteredBackground {
@@ -196,7 +196,7 @@
     
     LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vca/100.0f)] Code:@"L3-L1"];
     
-    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCR"];;
+    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCU"];;
     
     NSArray *voltgaeDetails = @[aTob, bToc, cToa];
     
@@ -401,7 +401,7 @@
     if (!canContinueTimer) {
         return;
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
             [self.navigationController popToRootViewControllerAnimated:NO];

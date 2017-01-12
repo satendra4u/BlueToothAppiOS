@@ -133,7 +133,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     isAdvanceLoded = NO;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [self setUpTableViewFooter];
     [tblConfigDisplay reloadData];
 }
@@ -186,7 +186,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     LFDisplay *ultd = [[LFDisplay alloc] initWithKey:@"Under Load Trip Delay" Value:@"" Code:@"ULTD"];
     //    LFDisplay *cutd = [[LFDisplay alloc] initWithKey:@"Current Unbalance Trip Delay" Value:@"" Code:@"CUTD"];
     //Commented as per client requirement .Can be uncommented to add at 4th position.
-    LFDisplay *lin = [[LFDisplay alloc] initWithKey:@"Linear Over Current Trip Delay" Value:@"" Code:@"LIN"];
+    LFDisplay *lin = [[LFDisplay alloc] initWithKey:@"Linear Over Current Trip Delay" Value:@"" Code:@"LINTD"];
     LFDisplay *gftc = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Current" Value:@"" Code:@"GFTC"];
     LFDisplay *gftd = [[LFDisplay alloc] initWithKey:@"Ground Fault Trip Delay" Value:@"" Code:@"GFTD"];
     //    LFDisplay *gfib = [[LFDisplay alloc] initWithKey:@"Ground Fault Inhibit Delay" Value:@"" Code:@"GFIB"];
@@ -217,7 +217,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     LFDisplay *configBitNine = [[LFDisplay alloc] initWithKey:@"Low Control voltage trip" Value:@"" Code:@"LCVT"];
     LFDisplay *configBitTen = [[LFDisplay alloc] initWithKey:@"Stall 1" Value:@"" Code:@"STAL"];
     LFDisplay *configBitEleven = [[LFDisplay alloc] initWithKey:@"Low KV mode" Value:@"" Code:@"LKV"];
-    LFDisplay *configBitTwelve = [[LFDisplay alloc] initWithKey:@"CBA Phase Rotation" Value:@"" Code:@"CBA"];
+    LFDisplay *configBitTwelve = [[LFDisplay alloc] initWithKey:@"Enable ACB phase rotation" Value:@"" Code:@"ACB"];
     
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
@@ -226,7 +226,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     
     isBasic = YES;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
     basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
     advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C"];
     currentIndex = 0;
@@ -720,11 +720,13 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 //            NSLog(@"Write response st data = %@", stData);
             const char *byteVal = [stData bytes];
             Byte stVal = (Byte)byteVal[0];
+            //TODO: check error status
+            
             switch (stVal) {
                 case 0x01:
                 case 0x00:
                     isReRead = NO;
-                    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Writing data failed." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kWriting_Failed withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                         if ([alert isKindOfClass:[UIAlertController class]]) {
                             [alert dismissViewControllerAnimated:NO completion:nil];
                         }
@@ -732,7 +734,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                     return;
                 case 0x02:
                     isReRead = NO;
-                    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter correct password and try again." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Correct_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                         if ([alert isKindOfClass:[UIAlertController class]]) {
                             [alert dismissViewControllerAnimated:NO completion:nil];
                         }
@@ -766,7 +768,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                     isChangingPassword = NO;
                     currentIndex = 0;
                 }
-                [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Writing data failed." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                [self showAlertViewWithCancelButtonTitle:kOK withMessage:kWriting_Failed withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                     if ([alert isKindOfClass:[UIAlertController class]]) {
                         [alert dismissViewControllerAnimated:NO completion:nil];
                     }
@@ -793,7 +795,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 [LFBluetoothManager sharedManager].isPasswordVerified = NO;
                 [self removeIndicator];
             }
-            [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Data saved successfully." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            [self showAlertViewWithCancelButtonTitle:kOK withMessage:kSave_Success withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                 if ([alert isKindOfClass:[UIAlertController class]]) {
                     [alert dismissViewControllerAnimated:NO completion:nil];
                 }
@@ -1445,7 +1447,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     }
     else {
         //Error occured while writing data to device.
-        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"There is a problem saving data." withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kProblem_Saving withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
             if ([alert isKindOfClass:[UIAlertController class]]) {
                 [alert dismissViewControllerAnimated:NO completion:nil];
             }
@@ -1476,7 +1478,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [LittleFuseNotificationCenter removeObserver:self];
 }
 
 #pragma mark read name after writing
@@ -1513,7 +1515,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     if (!canContinueTimer) {
         return;
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
             [self.navigationController popToRootViewControllerAnimated:NO];

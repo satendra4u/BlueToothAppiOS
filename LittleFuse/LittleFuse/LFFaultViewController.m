@@ -69,7 +69,7 @@
     _datepicker.maximumDate = [NSDate date];
     canContinueTimer = YES;
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)appEnteredBackground {
@@ -127,7 +127,7 @@
 - (void)dealloc {
     sectionArray = nil;
     faultDict = nil;
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    [LittleFuseNotificationCenter removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -491,7 +491,6 @@
     _tfPicker.inputAccessoryView = _toolBar;
     [_tfPicker becomeFirstResponder];
     
-    
 }
 - (IBAction)dateChanged:(UIDatePicker *)sender
 {
@@ -503,7 +502,7 @@
     if (!canContinueTimer) {
         return;
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
             [self.navigationController popToRootViewControllerAnimated:NO];

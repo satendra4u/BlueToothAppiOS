@@ -17,7 +17,6 @@
 {
     
     BOOL canContinueTimer;
-//    BOOL
     
     __weak IBOutlet UITableView *tblDisplay;
     __weak IBOutlet UILabel *lblDeviceName;
@@ -56,13 +55,13 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [tblDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [tblDisplay setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getCurrentData:) name:CURRENT_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getPowerData:) name:POWER_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getVoltageData:) name:VOLTAGE_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getTimersData:) name:REAL_TIME_CONFIGURATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getCurrentData:) name:CURRENT_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getPowerData:) name:POWER_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getVoltageData:) name:VOLTAGE_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getTimersData:) name:REAL_TIME_CONFIGURATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 /**
@@ -441,59 +440,41 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     NSString *codeVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
         codeVal = @"OK";
-    }
-    else if ([dataString isEqualToString:@"00000001"]) {
+    } else if ([dataString isEqualToString:@"00000001"]) {
         codeVal = @"Over Current";
-    }
-    else if ([dataString isEqualToString:@"00000002"]) {
+    } else if ([dataString isEqualToString:@"00000002"]) {
         codeVal = @"Under Current";
-    }
-    else if ([dataString isEqualToString:@"00000004"]) {
+    } else if ([dataString isEqualToString:@"00000004"]) {
         codeVal = @"Current Unbalance";
-    }
-    else if ([dataString isEqualToString:@"00000008"]) {
+    } else if ([dataString isEqualToString:@"00000008"]) {
         codeVal = @"Current Single Phasing";
-    }
-    else if ([dataString isEqualToString:@"00000010"]) {
+    } else if ([dataString isEqualToString:@"00000010"]) {
         codeVal = @"Contactor Failure";
-    }
-    else if ([dataString isEqualToString:@"00000020"]) {
+    } else if ([dataString isEqualToString:@"00000020"]) {
         codeVal = @"Ground Fault";
-    }
-    else if ([dataString isEqualToString:@"00000040"]) {
+    } else if ([dataString isEqualToString:@"00000040"]) {
         codeVal = @"High Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000080"]) {
+    } else if ([dataString isEqualToString:@"00000080"]) {
         codeVal = @"Low Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000100"]) {
+    } else if ([dataString isEqualToString:@"00000100"]) {
         codeVal = @"Power Outage Fault";
-    }
-    else if ([dataString isEqualToString:@"00000200"]) {
+    } else if ([dataString isEqualToString:@"00000200"]) {
         codeVal = @"Trip or holdoff due to PTC fault";
-    }
-    else if ([dataString isEqualToString:@"00000400"]) {
+    } else if ([dataString isEqualToString:@"00000400"]) {
         codeVal = @"Tripped triggered from remote source";
-    }
-    else if ([dataString isEqualToString:@"00010000"]) {
+    } else if ([dataString isEqualToString:@"00010000"]) {
         codeVal = @"Low Voltage Holdoff";
-    }
-    else if ([dataString isEqualToString:@"00020000"]) {
+    } else if ([dataString isEqualToString:@"00020000"]) {
         codeVal = @"High Voltage Holdoff";
-    }
-    else if ([dataString isEqualToString:@"00040000"]) {
+    } else if ([dataString isEqualToString:@"00040000"]) {
         codeVal = @"Voltage Unbalanced";
-    }
-    else if ([dataString isEqualToString:@"00008000"]) {
+    } else if ([dataString isEqualToString:@"00008000"]) {
         codeVal = @"Undefined trip condition";
-    }
-    else if ([dataString isEqualToString:@"00080000"]) {
+    } else if ([dataString isEqualToString:@"00080000"]) {
         codeVal = @"Phase Sequence";
-    }
-    else if ([dataString isEqualToString:@"00000800"]) {
+    } else if ([dataString isEqualToString:@"00000800"]) {
         codeVal = @"Linear Over Current";
-    }
-    else if ([dataString isEqualToString:@"00100000"]) {
+    } else if ([dataString isEqualToString:@"00100000"]) {
         codeVal = @"Undefined trip condition";
     }
     
@@ -504,26 +485,19 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     NSString *errorVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
         errorVal = @"OK";
-    }
-    else if ([dataString isEqualToString:@"00000001"]) {
+    } else if ([dataString isEqualToString:@"00000001"]) {
         errorVal = @"Warning on overcurrent";
-    }
-    else if ([dataString isEqualToString:@"00000002"]) {
+    } else if ([dataString isEqualToString:@"00000002"]) {
         errorVal = @"Warning on undercurrent ";
-    }
-    else if ([dataString isEqualToString:@"00000004"]) {
+    } else if ([dataString isEqualToString:@"00000004"]) {
         errorVal = @"Warning on current unbalance";
-    }
-    else if ([dataString isEqualToString:@"00000020"]) {
+    } else if ([dataString isEqualToString:@"00000020"]) {
         errorVal = @"Warning on ground fault";
-    }
-    else if ([dataString isEqualToString:@"00000040"]) {
+    } else if ([dataString isEqualToString:@"00000040"]) {
         errorVal = @"Warning on High Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000080"]) {
+    } else if ([dataString isEqualToString:@"00000080"]) {
         errorVal = @"Warning on low power fault ";
-    }
-    else if ([dataString isEqualToString:@"00008000"]) {
+    } else if ([dataString isEqualToString:@"00008000"]) {
         errorVal = @"Undefined Warning condition";
     }
     return errorVal;
@@ -608,7 +582,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 {
     configArr = nil;
     sectionArray = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [LittleFuseNotificationCenter removeObserver:self];
 }
 
 - (void)readCharactisticsWithIndex:(NSInteger)index
@@ -673,7 +647,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     if (!canContinueTimer) {
         return;
     }
- [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+ [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
      if ([alert isKindOfClass:[UIAlertController class]]) {
          [alert dismissViewControllerAnimated:NO completion:nil];
          [self.navigationController popToRootViewControllerAnimated:NO];

@@ -188,7 +188,7 @@
     
     
     if (!self.authenticationTextField.text.length) {
-        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Valid_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                         if ([alert isKindOfClass:[UIAlertController class]]) {
                             [alert dismissViewControllerAnimated:NO completion:nil];
                         }
@@ -253,7 +253,7 @@
         [self.view bringSubviewToFront:self.passwordView];
     }
     else {
-        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Valid_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
             self.authenticationTextField.text = @"";
             if ([alert isKindOfClass:[UIAlertController class]]) {
                 [alert dismissViewControllerAnimated:NO completion:nil];

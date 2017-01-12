@@ -215,7 +215,7 @@ static LFBluetoothManager *sharedData = nil;
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
 //    NSLog(@"Peripheral Connected");
-    [[NSNotificationCenter defaultCenter] postNotificationName:PeripheralDidConnect object:nil];
+    [LittleFuseNotificationCenter postNotificationName:PeripheralDidConnect object:nil];
     // Stop scanning
     [centralManager stopScan];
     // // // NSLog(@"Scanning stopped");
@@ -245,7 +245,7 @@ static LFBluetoothManager *sharedData = nil;
     //    // We're disconnected, so start scanning again
     [self scan];
     //    [centralManager connectPeripheral:discoveredPeripheral options:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:PeripheralDidDisconnect object:nil];
+    [LittleFuseNotificationCenter postNotificationName:PeripheralDidDisconnect object:nil];
     
 }
 
@@ -351,24 +351,24 @@ static LFBluetoothManager *sharedData = nil;
     NSLog(@"data read is %@", readdata);
     if (![self isDisplayCharacterstics]) {
         //        if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
-        //            [[NSNotificationCenter defaultCenter] postNotificationName:SAVE_CONFIG_VALUES object:readdata];
+        //            [LittleFuseNotificationCenter postNotificationName:SAVE_CONFIG_VALUES object:readdata];
         //        } else {
-        [[NSNotificationCenter defaultCenter] postNotificationName:DISPLAY_TABBAR object:nil];
+        [LittleFuseNotificationCenter postNotificationName:DISPLAY_TABBAR object:nil];
        
         //        }
         return;
     }
     if ([characteristic.UUID.UUIDString containsString:VOLTAGE_CHARACTERSTICS]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:VOLTAGE_NOTIFICATION object:readdata];
+        [LittleFuseNotificationCenter postNotificationName:VOLTAGE_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:CURRENT_CHARACTERSTICS]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:CURRENT_NOTIFICATION object:readdata];
+        [LittleFuseNotificationCenter postNotificationName:CURRENT_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:POWER_CHARACTERSTICS]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:POWER_NOTIFICATION object:readdata];
+        [LittleFuseNotificationCenter postNotificationName:POWER_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:STATUS_CHARACTERSTICS]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:EQUIPMENT_NOTIFICATION object:readdata];
+        [LittleFuseNotificationCenter postNotificationName:EQUIPMENT_NOTIFICATION object:readdata];
         
     } else if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
         if (_delegate && [_delegate respondsToSelector:@selector(configureServiceWithValue:)]) {
