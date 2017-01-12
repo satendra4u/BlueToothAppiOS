@@ -12,6 +12,7 @@
 
 - (void)awakeFromNib {
     // Initialization code
+    [super awakeFromNib];
     _btnCommunication.titleLabel.numberOfLines = 0;
     [_btnCommunication.titleLabel setTextAlignment:NSTextAlignmentCenter];
 }

@@ -537,6 +537,7 @@
 				TargetAttributes = {
 					933600B01C50A81D007CD61A = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = TV8M2M4B6L;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -920,6 +921,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				DEVELOPMENT_TEAM = TV8M2M4B6L;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -927,7 +929,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "473288f6-58a1-4093-9e3d-2fe3db2b4d29";
+				PROVISIONING_PROFILE_SPECIFIER = "PurpleTalk Development";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -940,6 +943,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				DEVELOPMENT_TEAM = TV8M2M4B6L;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
@@ -947,7 +951,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "473288f6-58a1-4093-9e3d-2fe3db2b4d29";
+				PROVISIONING_PROFILE_SPECIFIER = "PurpleTalk Development";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
