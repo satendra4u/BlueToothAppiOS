@@ -35,7 +35,7 @@
 #define BasicSection3RowsCount 2
 #define AdvancedSection0RowsCount 12
 #define AdvancedSection1RowsCount 8
-#define AdvancedSection2RowsCount 9
+#define AdvancedSection2RowsCount 5
 
 @interface LFConfigurationViewController () < EditingDelegate, BlutoothSharedDataDelegate, ToggleTappedProtocol, LFTabbarRefreshDelegate>
 {
@@ -210,25 +210,27 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     LFDisplay *bitFive = [[LFDisplay alloc] initWithKey:@"Linear Overcurrent Trip" Value:@"" Code:@"LINT"];
     LFDisplay *bitSix = [[LFDisplay alloc] initWithKey:@"LPR Trip" Value:@"" Code:@"LPRT"];
     LFDisplay *bitSeven = [[LFDisplay alloc] initWithKey:@"HPR Trip" Value:@"" Code:@"HPRT"];
-    LFDisplay *configBitFive = [[LFDisplay alloc] initWithKey:@"Single Phase Motor" Value:@"" Code:@"SPM"];
-    LFDisplay *configBitSix = [[LFDisplay alloc] initWithKey:@"Single PT Connected" Value:@"" Code:@"SPTC"];
-    LFDisplay *configBitSeven = [[LFDisplay alloc] initWithKey:@"Single Phase current" Value:@"" Code:@"SPC"];
-    LFDisplay *configBitEight = [[LFDisplay alloc] initWithKey:@"Disable RP" Value:@"" Code:@"RP"];
-    LFDisplay *configBitNine = [[LFDisplay alloc] initWithKey:@"Low Control voltage trip" Value:@"" Code:@"LCVT"];
-    LFDisplay *configBitTen = [[LFDisplay alloc] initWithKey:@"Stall 1" Value:@"" Code:@"STAL"];
-    LFDisplay *configBitEleven = [[LFDisplay alloc] initWithKey:@"Low KV mode" Value:@"" Code:@"LKV"];
-    LFDisplay *configBitTwelve = [[LFDisplay alloc] initWithKey:@"Enable ACB phase rotation" Value:@"" Code:@"ACB"];
+    LFDisplay *spm = [[LFDisplay alloc] initWithKey:@"Single Phase Motor" Value:@"" Code:@"SPM"];
+    //LFDisplay *configBitSix = [[LFDisplay alloc] initWithKey:@"Single PT Connected" Value:@"" Code:@"SPTC"];
+    //LFDisplay *configBitSeven = [[LFDisplay alloc] initWithKey:@"Single Phase current" Value:@"" Code:@"SPC"];
+    //LFDisplay *configBitEight = [[LFDisplay alloc] initWithKey:@"Disable RP" Value:@"" Code:@"RP"];
+    //LFDisplay *configBitNine = [[LFDisplay alloc] initWithKey:@"Low Control voltage trip" Value:@"" Code:@"LCVT"];
+    //LFDisplay *configBitTen = [[LFDisplay alloc] initWithKey:@"Stall 1" Value:@"" Code:@"STAL"];
+    //LFDisplay *configBitEleven = [[LFDisplay alloc] initWithKey:@"Low KV mode" Value:@"" Code:@"LKV"];
+    LFDisplay *ptc = [[LFDisplay alloc] initWithKey:@"PTC Enabled" Value:@"" Code:@"PTC"];
+    LFDisplay *acb = [[LFDisplay alloc] initWithKey:@"Enable ACB phase rotation" Value:@"" Code:@"ACB"];
+    LFDisplay *gmft = [[LFDisplay alloc] initWithKey:@"Ground Fault Motor Trip OR Alarm" Value:@"" Code:@"GMFT"];
     
     
     //"Stall Percentage", "Stall Trip Delay", "Stall Inhibit Delay", "Feature enable/disable Mask"
     
-    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven, configBitFive, configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven, configBitTwelve, nil];
+    advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven, spm, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
     
     isBasic = YES;
     
     [LittleFuseNotificationCenter addObserver:self selector:@selector(configureServiceWithValue:) name:CONFIGURATION_NOTIFICATION object:nil];
     basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
-    advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C"];
+    advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", /*@"C",@"C", @"C",@"C", @"C",@"C",*/ @"C"];
     currentIndex = 0;
     
 }
@@ -430,7 +432,11 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
         [cell updateValues:[basicConfigDetails objectAtIndex:cont]];
         
     } else {
-        [cell updateValues:[advanceConfigDetails objectAtIndex:indexPath.row]];
+        LFDisplay *display = [advanceConfigDetails objectAtIndex:indexPath.row];
+        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
+            display.key = @"0=Off";
+        }
+        [cell updateValues:display];
     }
     // Configure the cell...
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -720,10 +726,8 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 //            NSLog(@"Write response st data = %@", stData);
             const char *byteVal = [stData bytes];
             Byte stVal = (Byte)byteVal[0];
-            //TODO: check error status
             
             switch (stVal) {
-                case 0x01:
                 case 0x00:
                     isReRead = NO;
                     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kWriting_Failed withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
@@ -732,6 +736,18 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                         }
                     }];
                     return;
+                    
+                case 0x01:
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kSave_Success withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
+                    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+                    isReRead = YES;
+                    [self readCharactisticsWithIndex:currentIndex];
+                    return;
+                    
                 case 0x02:
                     isReRead = NO;
                     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Correct_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
@@ -740,6 +756,35 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                         }
                     }];
                     return;
+                    
+                case 0x03:
+                    isReRead = NO;
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kPermision_Error withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
+                    return;
+
+                case 0x04:
+                    isReRead = NO;
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kOutOf_Range withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
+                    return;
+
+                case 0x05:
+                    
+                    isReRead = NO;
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kPassword_Changed withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
+                    return;
+                    
                 case 0x11:
                 case 0x10:
                     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
@@ -1590,5 +1635,14 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     
 }
 
+- (BOOL) isNeedToRemoveFeatureEnableMaskSection {
+    BOOL status = NO;
+    for (LFDisplay *display in advanceConfigDetails) {
+        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
+            status = YES;
+        } else status = NO;
+    }
+    return status;
+}
 
 @end

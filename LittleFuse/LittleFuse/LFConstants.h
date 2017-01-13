@@ -122,6 +122,9 @@
 #define  kProblem_Saving @"There is a problem saving data."
 #define  kNot_Configured @"This MP8000 has not yet been Configured. Configure this MP8000 now?"
 #define  kEnter_Valid_Password @"Please enter valid password"
+#define  kPermision_Error @"Read or Write Permission Error"
+#define  kOutOf_Range @"Out of Range Error"
+#define  kPassword_Changed @"Password Changed Successfully"
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert button titles *****
 // ------------------------------------------------------------------------------------------
