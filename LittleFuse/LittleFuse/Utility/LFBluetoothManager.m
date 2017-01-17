@@ -332,6 +332,7 @@ static LFBluetoothManager *sharedData = nil;
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
 {
 //           NSLog(@"%s", __func__);
+    // called on read response
     if (error) {
         if (error.code == 15 && [error.localizedDescription isEqualToString:@"Encryption is insufficient."]) {
             if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
@@ -526,10 +527,10 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)peripheral:(CBPeripheral *)peripheral didWriteValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
 {
-//       NSLog(@"%s", __func__);
+    // this method call after peripheral write response
+//       NSLog(@" %s", __func__);
     
     if (error) {
-        // // // NSLog(@"error %@", error.localizedDescription);
         if (_isWriting) {
             DLog(@"Error occured while writing data to hardware. Error is = %@", error);
             if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
@@ -549,15 +550,13 @@ static LFBluetoothManager *sharedData = nil;
         [discoveredPeripheral readValueForCharacteristic:characteristic];
     }
     
-    
-    
-    
 }
 #pragma mark Custom methods
 - (NSMutableArray *)getcharactersticsList
 {
     return charactersticsList;
 }
+
 - (void)connectToCharactertics:(CBCharacteristic *)characterstic
 {
     discoveredPeripheral.delegate = self;
@@ -614,7 +613,7 @@ static LFBluetoothManager *sharedData = nil;
 - (void)writeConfigData:(NSData *)data
 {
     //    // // // NSLog(@"=======================================================");
-    //    // // // NSLog(@"%s data-->%@", __func__, data);
+           NSLog(@"Writing data %@\n",  data);
     
     
     dispatch_async(dispatch_get_main_queue(), ^{
