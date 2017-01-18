@@ -1850,7 +1850,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                        display.value = @"0=Off";
                    }
                    break;
-                   case Advanced_LINT:
+                   case Advanced_LINTD:
                    if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
                        display.value = @"0=Off";
                    }
@@ -1860,6 +1860,13 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                        display.value = @"0=Off";
                    }
                    break;
+               case Advanced_STLP:
+                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
+                       display.value = @"0=Off";
+                   }
+                   break;
+                   
+                   
                default:
                    break;
            }
@@ -1873,7 +1880,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     if (!((basicConfigDetails != nil && basicConfigDetails.count > 0) && (advanceConfigDetails != nil && advanceConfigDetails.count > 0))) {
         return NO;
     }
-    BOOL status = NO;
+    BOOL basicStatus = YES;
     for (int index = 0; index < 3; index++) {
         LFDisplay *display;
         switch (index) {
@@ -1889,12 +1896,12 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             default:
                 break;
         }
-        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-            status = YES;
-        } else status = NO;
+        if (!((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"])) {
+            basicStatus = NO;
+        }
     }
-    
-    for (int index = 0; index < 4; index++) {
+    BOOL advancedStatus = YES;
+    for (int index = 0; index < 5; index++) {
         LFDisplay *display;
         switch (index) {
             case 0:
@@ -1904,20 +1911,25 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 display = advanceConfigDetails[Advanced_LKW];
                 break;
             case 2:
-                display = advanceConfigDetails[Advanced_LINT];
+                display = advanceConfigDetails[Advanced_LINTD];
                 break;
             case 3:
                 display = advanceConfigDetails[Advanced_HKW];
                 break;
+            case 4:
+                display = advanceConfigDetails[Advanced_STLP];
+                break;
             default:
                 break;
+                
+
         }
-        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-            status = YES;
-        } else status = NO;
+        if (!((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"])) {
+            advancedStatus = NO;
+        }
     }
     
-    return status;
+    return (basicStatus && advancedStatus);
 }
 
 #pragma mark Setter Methods
