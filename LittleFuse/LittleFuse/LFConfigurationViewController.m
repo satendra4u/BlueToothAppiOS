@@ -698,29 +698,32 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 
 - (void) updateCharactersticsData:(NSData *) data {
     
-    if (isReadingFriendlyName && !isVerifyingPassword) {
-        if (selectedTag == FriendlyNameSecondWrite) {
-            selectedTag = FriendlyNameThirdWrite;
-            [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
-            return;
-        } if (selectedTag == FriendlyNameThirdWrite) {
-            isReadingFriendlyName = NO;
-            NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
-            [self setDeviceName:friendlyNameStr];
-            [self removeIndicator];
-            return;
-        }
-        selectedTag = FriendlyNameSecondWrite;
-        [self readCharactisticsWithIndex:FriendlyNameSecondWrite];
-        return;
-    }
-    if (selectedTag == FriendlyNameSecondWrite && currentIndex == 0 && !isVerifyingPassword) {
-        isReadingFriendlyName = YES;
-       // selectedTag = FriendlyNameFirstWrite;
-        [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
-        return;
-    }
-    canRefresh = NO;
+    
+    
+    
+//    if (isReadingFriendlyName && !isVerifyingPassword) {
+//        if (selectedTag == FriendlyNameSecondWrite) {
+//            selectedTag = FriendlyNameThirdWrite;
+//            [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
+//            return;
+//        } if (selectedTag == FriendlyNameThirdWrite) {
+//            isReadingFriendlyName = NO;
+//            NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
+//            [self setDeviceName:friendlyNameStr];
+//            [self removeIndicator];
+//            return;
+//        }
+//        selectedTag = FriendlyNameSecondWrite;
+//        [self readCharactisticsWithIndex:FriendlyNameSecondWrite];
+//        return;
+//    }
+//    if (selectedTag == FriendlyNameSecondWrite && currentIndex == 0 && !isVerifyingPassword) {
+//        isReadingFriendlyName = YES;
+//       // selectedTag = FriendlyNameFirstWrite;
+//        [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
+//        return;
+//    }
+//    canRefresh = NO;
     
     NSData *tData = data;
     if (isFetchingMacOrSeedData && currentIndex == 0 && !isVerifyingPassword) {
@@ -740,44 +743,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
         return;
     }
     
-    ////////////////// this part is for friendly name second write START /////////////
-    
-    if (currentIndex == FriendlyNameFirstWrite && !isVerifyingPassword) {
-        [authUtils nextAuthCode];
-        [LFBluetoothManager sharedManager].isPasswordVerified = YES;
-        isFetchingMacOrSeedData = NO;
-        NSRange range = NSMakeRange(0, 8);
-        data = [data subdataWithRange:range];
-        NSData *secondStrData;
-        if (friendlyNameStr.length > 8 && selectedTag == FriendlyNameFirstWrite) {
-            secondStrData = [[friendlyNameStr substringFromIndex:8] dataUsingEncoding:NSUTF8StringEncoding];
-        } else if (selectedTag == FriendlyNameFirstWrite && friendlyNameStr.length <= 8) {
-            Byte emptyData[4];
-            for (int i = 0; i<4; i++) {
-                emptyData[i] = 0x00;
-            }
-            secondStrData = [NSData dataWithBytes:emptyData length:4];
-        }
-        NSData *secondData = [self getFriendlyNameData:secondStrData isFirstPart:NO];
-        selectedTag = FriendlyNameSecondWrite;
-        [self saveFriendlyNameDataToDevice:secondData];
-        currentIndex = 0;
-        return;
-        
-        ////////////////// this part is for friendly name second write END /////////////
-    } else {
-        
-        if (!isChangingPassword) {
-            NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
-            
-            NSRange range = NSMakeRange(0, 4);
-            
-            data = [data subdataWithRange:range];
-            
-            [self getValuesFromData:data withForamte:formate];
-        }
-        
-        if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
+            if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
             [self removeIndicator];
             isWrite = NO;
             NSData *stData = [tData subdataWithRange:NSMakeRange(11, 1)];
@@ -805,6 +771,24 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                     }
                     break;
                 case 1:
+                    if (isReadingFriendlyName && !isVerifyingPassword) {
+                        if (selectedTag == FriendlyNameSecondWrite) {
+                            selectedTag = FriendlyNameThirdWrite;
+                            [self changeFriendlyNameProcess];
+                            return;
+                        } if (selectedTag == FriendlyNameThirdWrite) {
+                            isReadingFriendlyName = NO;
+                            NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
+                            [self setDeviceName:friendlyNameStr];
+                            return;
+                        }
+                    }
+                    if (isReadingFriendlyName && currentIndex == FriendlyNameFirstWrite && !isVerifyingPassword) {
+                        selectedTag = FriendlyNameSecondWrite;
+                        [self changeFriendlyNameProcess];
+                        return;
+                    }
+                    
                     self.isSTFieldSuccess = NO;
                     alertMessage = kSave_Success;
                     isReRead = YES;
@@ -840,7 +824,16 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             return;
         }
         
+    if (!isChangingPassword && currentIndex >= 0) {
+        NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
         
+        NSRange range = NSMakeRange(0, 4);
+        
+        data = [data subdataWithRange:range];
+        
+        [self getValuesFromData:data withForamte:formate];
+    }
+    
         //////////////////////////////   re reading process   starts /////////////////////////
         if (isReRead) {
             [self removeIndicator];
@@ -907,7 +900,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 return;
             }
         }
-    }
     [self readCharactisticsWithIndex:currentIndex];
 }
 
@@ -953,6 +945,8 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 data[i] = ThirdNameRegAddr;
             } else if (index == ChangePasswordWrite) {
                 data[i] = changePassword_AddrArr[curPassWriteIndex];
+            } else if (index == ResetPasswordWrite) {
+                
             } else {
                 data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
             }
@@ -961,10 +955,12 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 data[i] = FirstNameRegLen;
             } else if (index == FriendlyNameSecondWrite) {
                 data[i] = SecondNameRegLen;
-            }  else if(index == FriendlyNameThirdWrite) {
+            } else if(index == FriendlyNameThirdWrite) {
                 data[i] = ThirdNameRegLen;
             } else if (index == ChangePasswordWrite) {
                 data[i] = (Byte)0x08;
+            } else if (index == ResetPasswordWrite) {
+                
             } else {
                 data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
             }
@@ -1273,12 +1269,14 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     }
     friendlyNameStr = txt;
     currentIndex = -1;
+    isReadingFriendlyName = YES;
     selectedTag = FriendlyNameFirstWrite;
     [self changeFriendlyNameProcess];
     
 }
 
 - (void)saveFriendlyNameDataToDevice:(NSData *)data {
+    isWrite = YES;
     NSData *lengthVal = [data subdataWithRange:NSMakeRange(10, 1)];
     char buff;
     [lengthVal getBytes:&buff length:1];
@@ -1302,7 +1300,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     [[LFBluetoothManager sharedManager] setRealtime:NO];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [[LFBluetoothManager sharedManager] writeConfigData:mutData];
-    [[LFBluetoothManager sharedManager] setIsWriting:NO];
 }
 
 
@@ -1323,8 +1320,55 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             
             break;
         case FriendlyNameSecondWrite:
+            
+        {
+            [authUtils nextAuthCode];
+            [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+            isFetchingMacOrSeedData = NO;
+            NSData *secondStrData;
+            if (friendlyNameStr.length > 8 ) {
+                secondStrData = [[friendlyNameStr substringFromIndex:8] dataUsingEncoding:NSUTF8StringEncoding];
+            } else if (friendlyNameStr.length <= 8) {
+                Byte emptyData[4];
+                for (int i = 0; i<4; i++) {
+                    emptyData[i] = 0x00;
+                }
+                secondStrData = [NSData dataWithBytes:emptyData length:4];
+            }
+            NSData *secondData = [self getFriendlyNameData:secondStrData isFirstPart:NO];
+            [self saveFriendlyNameDataToDevice:secondData];
+            
+        }
             break;
         case FriendlyNameThirdWrite:
+        {
+            Byte data[20];
+            NSInteger convertedVal = 83;
+            char *bytes = (char *) malloc(8);
+            memset(bytes, 0, 8);
+            memcpy(bytes, (char *) &convertedVal, 8);
+            
+            for (int i = 0; i < 20; i++) {
+                if (i < 8) {
+                    data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+                } else {
+                    if (i == 8) {
+                        data[i] = ThirdNameRegAddr;
+                    } else if (i == 10){
+                        data[i] = ThirdNameRegLen;
+                    } else if (i == 11) {
+                        data[i] = (Byte)0x01;//write byte == 1
+                    }
+                    else {
+                        data[i] = (Byte)0x00;
+                    }
+                }
+            }
+            
+            NSData *data1 = [NSData dataWithBytes:data length:20];
+            [self saveFriendlyNameDataToDevice:data1];
+            
+        }
             break;
             
         default:
