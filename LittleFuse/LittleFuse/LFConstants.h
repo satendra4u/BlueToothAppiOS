@@ -127,6 +127,7 @@
 #define  kPassword_Changed @"Password Changed Successfully"
 #define  kAuthenticationFailed @"User Authorization Failed"
 #define  kUpdateFailed @"Update Failed due to Timeout"
+#define  kResetRelay_motorStarts @"Caution: Motor May Start!"
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert button titles *****
 // ------------------------------------------------------------------------------------------
