@@ -196,7 +196,7 @@
     
     LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vca/100.0f)] Code:@"L3-L1"];
     
-    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCU"];;
+    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCU"];;
     
     NSArray *voltgaeDetails = @[aTob, bToc, cToa];
     
@@ -320,12 +320,11 @@
     
     
     LFDisplay *phaseSequence = [[LFDisplay alloc] initWithKey:@"Phase Sequence" Value:[NSString stringWithFormat:@"%d", (int)seq] Code:@"PS"];
-//    if (seq == 0) {
+    if (seq == 0) {
         phaseSequence.value = @"ABC";
-//    }
-//    else {
-//        phaseSequence.value = @"CBA";
-//    }
+    } else {
+        phaseSequence.value = @"ACB";
+    }
     
     NSArray *powerDetails = @[aTob, pfa];
     

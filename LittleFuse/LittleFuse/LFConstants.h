@@ -125,6 +125,8 @@
 #define  kPermision_Error @"Read or Write Permission Error"
 #define  kOutOf_Range @"Out of Range Error"
 #define  kPassword_Changed @"Password Changed Successfully"
+#define  kAuthenticationFailed @"User Authorization Failed"
+#define  kUpdateFailed @"Update Failed due to Timeout"
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert button titles *****
 // ------------------------------------------------------------------------------------------

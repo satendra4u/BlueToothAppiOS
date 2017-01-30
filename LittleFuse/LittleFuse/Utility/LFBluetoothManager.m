@@ -11,10 +11,17 @@
 #define DEVICE_UUID @"6D70"
 #define kLocalName  @"kCBAdvDataLocalName"
 #define kAdvertiseData @"kCBAdvDataManufacturerData"
+#import "LFAuthUtils.h"
 
 static LFBluetoothManager *sharedData = nil;
 
-
+@interface LFBluetoothManager() {
+    LFAuthUtils *authUtils;
+    NSString *macString;
+    NSData *configSeedData;
+    NSString *password;
+}
+@end
 @implementation LFBluetoothManager
 
 @synthesize discoveredPeripheral;
@@ -349,7 +356,7 @@ static LFBluetoothManager *sharedData = nil;
         return;
     }
     NSData *readdata = [characteristic value];
-    NSLog(@"data read is %@", readdata);
+    NSLog(@"Reading data %@\n", readdata);
     if (![self isDisplayCharacterstics]) {
         //        if ([characteristic.UUID.UUIDString containsString:CONFIGURATION_CHARACTERSTICS]) {
         //            [LittleFuseNotificationCenter postNotificationName:SAVE_CONFIG_VALUES object:readdata];
@@ -543,7 +550,9 @@ static LFBluetoothManager *sharedData = nil;
     discoveredPeripheral = peripheral;
     discoveredPeripheral.delegate = self;
     if (_isWriting) {
-        if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
+        if (_isPassWordChange) {
+            [discoveredPeripheral readValueForCharacteristic:characteristic];
+        } else if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
             [_delegate showOperationCompletedAlertWithStatus:YES];
         }
     } else {
@@ -724,4 +733,59 @@ static LFBluetoothManager *sharedData = nil;
     }
 }
 
+
+#pragma Mark - Data Conversion Methods
+
+
+- (NSData *)getEncryptedPasswordData:(NSData *)writeData address:(short)address size:(short)size {
+    if (authUtils == nil) {
+        authUtils = [[LFAuthUtils alloc]init];
+    }
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        [authUtils initWithPassKey:password andMacAddress:macString andSeed:configSeedData.bytes];
+    }
+    NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
+    
+    return authCode;
+}
+
+- (NSData *) getCommandEncriptedDataWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length {
+   
+    Byte data[12];
+    const char *bytes = [valueData bytes];
+    
+    for (int i = 0; i < 12; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = address;
+            } else if (i == 10){
+                data[i] = length;
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            } else {
+                data[i] = (Byte)0x00;
+            }
+        }
+    }
+    
+    NSData *data1 = [NSData dataWithBytes:data length:12];
+    NSData *resultData = [self getEncryptedPasswordData:[data1 subdataWithRange:NSMakeRange(0, 8)] address:address size:length];
+    NSMutableData *mutData = [NSMutableData dataWithData:data1];
+    for (int i = 0; i<8;i++) {
+        NSData *subdata = [resultData subdataWithRange:NSMakeRange(i, 1)];
+        [mutData appendData:subdata];
+    }
+    return mutData;
+}
+- (void) setPasswordString:(NSString *) passwordString {
+    password = passwordString;
+}
+- (void) setConfigSeedData:(NSData *) seedData {
+    configSeedData = seedData;
+}
+- (void) setMacString:(NSString *) macStr {
+    macString = macStr;
+}
 @end

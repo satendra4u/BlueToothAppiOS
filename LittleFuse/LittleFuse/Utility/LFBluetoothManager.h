@@ -112,6 +112,8 @@
 
 @property (assign, nonatomic) BOOL isWriting;
 
+@property (assign, nonatomic) BOOL isPassWordChange;
+
 @property (assign, nonatomic) NSData *macData;
 
 @property (assign, nonatomic) BOOL isPasswordVerified;
@@ -202,5 +204,18 @@
 - (void)discoverCharacteristicsForAuthentication;
 
 - (void)resetConfigurationCharacteristics;
+
+
+#pragma Mark Data Conversion Methods
+
+/**
+ @discussion this method will gives you the encripted data include the password
+ @param  Command value and address, lenght of the command , and comand value bytes
+ @returns    Encripted Data type NSData
+ */
+- (NSData *) getCommandEncriptedDataWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length;
+- (void) setPasswordString:(NSString *) passwordString;
+- (void) setConfigSeedData:(NSData *) seedData;
+- (void) setMacString:(NSString *) macStr;
 
 @end

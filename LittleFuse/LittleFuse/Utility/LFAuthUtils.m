@@ -67,7 +67,8 @@ NSMutableData* mMacAddress;
 
 - (NSMutableData *)dataFromHexString:(NSString *)hexString {
     const char *chars = [hexString UTF8String];
-    int i = 0, len = hexString.length;
+    int i = 0;
+    NSUInteger len = hexString.length;
     
     NSMutableData *data = [NSMutableData dataWithCapacity:len / 2];
     char byteChars[3] = {'\0','\0','\0'};
