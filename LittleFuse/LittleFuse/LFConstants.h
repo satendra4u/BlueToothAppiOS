@@ -136,6 +136,8 @@
 #define kOK  @"OK"
 #define kNo @"No"
 #define kCancel @"Cancel"
+#define kContinue @"Continue"
+
 
 
 

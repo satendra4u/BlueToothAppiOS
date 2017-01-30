@@ -38,7 +38,7 @@
 #define BasicSectionRestartAttemptsSetting 2
 #define AdvancedSection0RowsCount 12
 #define AdvancedSectionFeaturesCount 8
-#define AdvancedSectionHardwareConfigurationCount 4
+#define AdvancedSectionHardwareConfigurationCount 5
 
 typedef enum : NSInteger {
     FriendlyNameFirstWrite = -1,
@@ -72,6 +72,7 @@ typedef enum : NSUInteger {
     Advanced_HPRT,
     // hardware Configuration
     Advanced_SPM,
+    Advanced_SPT,
     Advanced_PTC,
     Advanced_ACB,
     Advanced_GMFT,
@@ -105,10 +106,13 @@ typedef enum : NSUInteger {
     __weak IBOutlet UITableView *tblConfigDisplay;
     NSMutableArray *basicConfigDetails;
     NSMutableArray *advanceConfigDetails;
+    NSMutableArray *advanceConfigFeatureDetails;
     NSMutableArray *basicValuesArray;
     
     NSArray  *basicFormateArray;
     NSArray *advancedFormateArray;
+    NSArray *advancedFormateWithoutMaskArray;
+    
     NSArray *basicUnitsArray, *advUnitsArray;
     NSArray *characteristicsList;
     
@@ -187,6 +191,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     [changePasswordView setFrame: CGRectMake(0, 0, CGRectGetWidth(self.view.window.frame), CGRectGetHeight(changePasswordView.frame))];
     // Do any additional setup after loading the view.
     advanceConfigDetails = [[NSMutableArray alloc] initWithCapacity:0];
+    advanceConfigFeatureDetails = [[NSMutableArray alloc] initWithCapacity:0];
     basicValuesArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     [tblConfigDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
@@ -199,8 +204,8 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     [self setDeviceName:name];
     [self configArr];
     previousSelected = @"";
-    [[LFBluetoothManager sharedManager] setDelegate:nil];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
+   // [[LFBluetoothManager sharedManager] setDelegate:nil];
+   // [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     isAdvanceLoded = NO;
@@ -274,6 +279,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     LFDisplay *bitSix = [[LFDisplay alloc] initWithKey:@"LPR Trip" Value:@"" Code:@"LPRT"];
     LFDisplay *bitSeven = [[LFDisplay alloc] initWithKey:@"HPR Trip" Value:@"" Code:@"HPRT"];
     LFDisplay *spm = [[LFDisplay alloc] initWithKey:@"Single Phase Motor" Value:@"" Code:@"SPM"];
+     LFDisplay *spt = [[LFDisplay alloc] initWithKey:@"Single PT" Value:@"" Code:@"SPT"];
     LFDisplay *ptc = [[LFDisplay alloc] initWithKey:@"PTC Enabled" Value:@"" Code:@"PTC"];
     LFDisplay *acb = [[LFDisplay alloc] initWithKey:@"Enable ACB phase rotation" Value:@"" Code:@"ACB"];
     LFDisplay *gmft = [[LFDisplay alloc] initWithKey:@"Ground Fault Motor Trip OR Alarm" Value:@"" Code:@"GMFT"];
@@ -291,9 +297,11 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     basicConfigDetails = [[NSMutableArray alloc] initWithObjects:lowVoltage, highVoltage, voltageUnb, overCurrent, underCurrent, currentUnb, tripClass, powerUpTimer, rapidTimer, motorCoolDown,  dryWellRecover,restartAttemptsUCTrips,restartAttemptsOtherTrips,nil];
     
     advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven, spm, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
+    advanceConfigFeatureDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, /*bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven,*/ spm,spt, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
     
     basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
-    advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C"];
+    advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C"/*,@"C", @"C",@"C", @"C"*/];
+    advancedFormateWithoutMaskArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", /*@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",*/@"C",@"C", @"C",@"C", @"C"/*,@"C", @"C",@"C", @"C"*/];
     
     basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
     advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""/*, @"", @""*/];
@@ -310,6 +318,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     canContinueTimer = NO;
     [self removeIndicator];
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+    //[[LFBluetoothManager sharedManager] setDelegate:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -318,6 +327,8 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     [tabBarController setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
     [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     canContinueTimer = YES;
     if (isInitialLaunch) {
         isInitialLaunch = NO;
@@ -364,11 +375,13 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 #pragma mark Generate Excrypted Data
 
 - (NSData *)getEncryptedPasswordDataFromString:(NSString *)newPassword data:(NSData *)writeData address:(short)address size:(short)size{
-    if (authUtils == nil) {
+    if (authUtils == nil) { 
         authUtils = [[LFAuthUtils alloc]init];
     }
+    NSLog(@"Password is %@",[LFBluetoothManager sharedManager].passwordVal );
+
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
-        [authUtils initWithPassKey:passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
+        [authUtils initWithPassKey:[LFBluetoothManager sharedManager].passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
     
@@ -464,7 +477,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         } else if (section == 1) {
             BOOL status = [self isNeedToRemoveFeatureEnableMaskSection];
             if (status) {
-                return AdvancedSectionHardwareConfigurationCount;
+                return AdvancedSectionHardwareConfigurationCount+1;
             }
             return AdvancedSectionFeaturesCount;
         } else if (section == 2) {
@@ -476,7 +489,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     //Last cell to be shown.
-    if (!isBasic  && indexPath.section == 2 && indexPath.row == 8) {
+    if (!isBasic  && indexPath.section == 1 && indexPath.row == AdvancedSectionHardwareConfigurationCount   ) {
         LFConfigureButtonsCell *cell = (LFConfigureButtonsCell *)[tableView dequeueReusableCellWithIdentifier:BUTTON_CELL_ID forIndexPath:indexPath];
         [cell.btnCommunication addTarget:self action:@selector(showCommunication:) forControlEvents:UIControlEventTouchUpInside];
         [cell.btnRTD addTarget:self action:@selector(showRTD:) forControlEvents:UIControlEventTouchUpInside];
@@ -488,14 +501,23 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         cell.path = indexPath;
         cell.toggleDelegate = self;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        if (indexPath.section == 1) {
-            [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount]];
-            return cell;
+        if ([self isNeedToRemoveFeatureEnableMaskSection]) {
+            if (indexPath.section == 1) {
+                [cell updateValues:advanceConfigFeatureDetails[indexPath.row + AdvancedSection0RowsCount]];
+                return cell;
+            }
         }
-        else if(indexPath.section == 2){
-            [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount]];
-            return cell;
+        else{
+            if (indexPath.section == 1) {
+                [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount]];
+                return cell;
+            }
+            else if(indexPath.section == 2){
+                [cell updateValues:advanceConfigDetails[indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount]];
+                return cell;
+            }
         }
+       
     }
     //Normal cell
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tableView dequeueReusableCellWithIdentifier:CHARACTER_DISPLAY_CELL_ID forIndexPath:indexPath];
@@ -510,7 +532,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         
     } else {
         [self checkFeatureValuesWith:NO andIndex:indexPath.row];
-        LFDisplay *display = [advanceConfigDetails objectAtIndex:indexPath.row];
+        LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:indexPath.row] : [advanceConfigDetails objectAtIndex:indexPath.row]);
         [cell updateValues:display];
     }
     // Configure the cell...
@@ -604,6 +626,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 //Displays the popup to enter new value for the selected field.
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    isToggleCell = NO;
     //    curCell set
     if (!isBasic && indexPath.section != 0) {
         return;
@@ -645,17 +668,47 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 // toggeling delegate
 
 - (void)toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 1) {
-        selectedTag = indexPath.row + AdvancedSection0RowsCount;
-    } else if (indexPath.section == 2) {
-        selectedTag = indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount;
-    }
-    else if (indexPath.row == -1) {
-        //For edit action.
-        selectedTag = -1;
+    
+    isToggleCell = YES;
+       if ([LFBluetoothManager sharedManager].isPasswordVerified) {
+        if (indexPath.section == 1) {
+            selectedTag = indexPath.row + AdvancedSection0RowsCount;
+        } else if (indexPath.section == 2) {
+            selectedTag = indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount;
+        }
+        else if (indexPath.row == -1) {
+            //For edit action.
+            selectedTag = -1;
+        }
+        
+        [self toggleSelectedWithSuccess:YES andPassword:nil];
+    } else {
+        LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+        editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+        
+        self.providesPresentationContextTransitionStyle = YES;
+        self.definesPresentationContext = YES;
+        [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        
+        LFCharactersticBitDisplayCell *cell = (LFCharactersticBitDisplayCell *)[tblConfigDisplay cellForRowAtIndexPath:indexPath];
+        
+        editing.selectedText = cell.lblKey.text;
+        editing.delegate = self;
+
+        
+        editing.showAuthentication = YES;//YES to show the password screen.
+        [navController setViewControllers:@[editing]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.navigationController presentViewController:navController animated:NO completion:nil];
+        });
     }
     
-    [self toggleSelectedWithSuccess:YES andPassword:nil];
+
+    
+    
+    
+    
     
 }
 
@@ -826,7 +879,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         }
         
     if (!isChangingPassword && currentIndex >= 0) {
-        NSString *formate = isBasic ? basicFormateArray[currentIndex] : advancedFormateArray[currentIndex];
+        NSString *formate = isBasic ? basicFormateArray[currentIndex] : ([self isNeedToRemoveFeatureEnableMaskSection] ? advancedFormateWithoutMaskArray[currentIndex] :  advancedFormateArray[currentIndex]);
         
         NSRange range = NSMakeRange(0, 4);
         
@@ -842,7 +895,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             if (![self isDataUpdatedCorrectlyWithPrevData:prevWrittenData withNewData:tData]) { /// if authentication fails
                 if (isVerifyingPassword) {
                     isVerifyingPassword = NO;
-                    [editing authDoneWithStatus:NO];
+                    [editing authDoneWithStatus:NO shouldDismissView:NO];
                     DLog(@"Authentication failed");
                     currentIndex = selectedTag;
                     return;
@@ -863,7 +916,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
                 isVerifyingPassword = NO;
                 isFirstTimeAuthenticate = YES;
                 DLog(@"Authentication done successfully.");
-                [editing authDoneWithStatus:YES];
+                [editing authDoneWithStatus:YES shouldDismissView:isToggleCell];
                 currentIndex = selectedTag;
                 [LFBluetoothManager sharedManager].isPasswordVerified = YES;
                 return;
@@ -883,11 +936,21 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
                 return;
             }
         } else {
-            if (currentIndex > advanceConfigDetails.count - 1) {
-                currentIndex = 0;
-                [self removeIndicator];
-                return;
+            if ([self isNeedToRemoveFeatureEnableMaskSection]) {
+                if (currentIndex > advanceConfigFeatureDetails.count - 1) {
+                    currentIndex = 0;
+                    [self removeIndicator];
+                    return;
+                }
             }
+            else{
+                if (currentIndex > advanceConfigDetails.count - 1) {
+                    currentIndex = 0;
+                    [self removeIndicator];
+                    return;
+                }
+            }
+            
         }
     [self readCharactisticsWithIndex:currentIndex];
 }
@@ -897,7 +960,6 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     [self updateCharactersticsData:data];
     return;
 }
-
 
 - (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
     NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
@@ -937,7 +999,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             } else if (index == ResetPasswordWrite) {
                 
             } else {
-                data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
+                data[i] = isBasic ? basicMemMap[index] :([self isNeedToRemoveFeatureEnableMaskSection] ? advance_feature_MemMap[index] : advance_MemMap[index]);
             }
         } else if (i == 10){
             if (index == FriendlyNameFirstWrite) {
@@ -951,7 +1013,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             } else if (index == ResetPasswordWrite) {
                 
             } else {
-                data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
+                data[i] = isBasic ? basicMemFieldLens[index] : ([self isNeedToRemoveFeatureEnableMaskSection] ? advance_feature_MemMapFieldLens[index]:  advance_MemMapFieldLens[index]);
             }
 
         } else {
@@ -1050,7 +1112,13 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             break;
         case 'Q' :
         {
-            convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
+            if (currentIndex == Advanced_GFTD) {
+                convertedVal = [NSString stringWithFormat:@"%.1f sec", (float)val/10.0];
+            }
+            else{
+              convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
+            }
+            
         }
             
             break;
@@ -1072,82 +1140,118 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         display.value = convertedVal;
         [basicConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
     } else {
-        LFDisplay *display = [advanceConfigDetails objectAtIndex:currentIndex];
+        LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:currentIndex] :[advanceConfigDetails objectAtIndex:currentIndex]);
         if (!isBasic) {
             if (currentIndex == AdvancedSection0RowsCount ) {
-                _featureEndisVal = val;
+                if ([self isNeedToRemoveFeatureEnableMaskSection]) {
+                    _hardwareConfigVal = val;
+                }
+                else{
+                    _featureEndisVal = val;
+                }
             } else if (currentIndex == AdvancedSection0RowsCount + AdvancedSectionFeaturesCount ) {
                 _hardwareConfigVal = val;
             }
         }
-        switch ((AdvancedConfiguration)currentIndex) {
-            case Advanced_GFT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
-                break;
-            case Advanced_VUBT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 1))? 1:0];
-                break;
-            case Advanced_CUBT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 2))? 1:0];
-                break;
-            case Advanced_UCT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 3))? 1:0];
-                break;
-            case Advanced_OCT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 4))? 1:0];
-                break;
-            case Advanced_LINT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 5))? 1:0];
-                break;
-            case Advanced_LPRT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 6))? 1:0];
-                break;
-            case Advanced_HPRT:
-                display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 7))? 1:0];
-                break;
-            case Advanced_SPM:
-                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
-                break;
-            case Advanced_PTC:
-                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
-                break;
-            case Advanced_ACB:
-                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
-                break;
-            case Advanced_GMFT:
-                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 0))? 1:0];
-                break;
-                
-//            case AdvancedSection0RowsCount+9:
-//                //ptc
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+10:
-//                //ACB
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+11:
-//                // GMFT
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 8))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+12:
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+13:
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 10))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+14:
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 11))? 1:0];
-//                break;
-//            case AdvancedSection0RowsCount+15:
-//                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
-//                break;
-            default:
-                display.value = convertedVal;
-                break;
+        if ([self isNeedToRemoveFeatureEnableMaskSection]) {
+            switch ((AdvancedConfiguration)currentIndex+AdvancedSectionFeaturesCount) {
+                case Advanced_SPM:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
+                    break;
+                case Advanced_SPT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                    break;
+                case Advanced_PTC:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
+                    break;
+                case Advanced_ACB:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
+                    break;
+                case Advanced_GMFT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 0))? 1:0];
+                    break;
+                    
+                default:
+                    display.value = convertedVal;
+                    break;
+            }
+
+        }
+        else{
+            switch ((AdvancedConfiguration)currentIndex) {
+                case Advanced_GFT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
+                    break;
+                case Advanced_VUBT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 1))? 1:0];
+                    break;
+                case Advanced_CUBT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 2))? 1:0];
+                    break;
+                case Advanced_UCT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 3))? 1:0];
+                    break;
+                case Advanced_OCT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 4))? 1:0];
+                    break;
+                case Advanced_LINT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 5))? 1:0];
+                    break;
+                case Advanced_LPRT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 6))? 1:0];
+                    break;
+                case Advanced_HPRT:
+                    display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 7))? 1:0];
+                    break;
+                case Advanced_SPM:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
+                    break;
+                case Advanced_SPT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                    break;
+                case Advanced_PTC:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
+                    break;
+                case Advanced_ACB:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
+                    break;
+                case Advanced_GMFT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 0))? 1:0];
+                    break;
+                    
+                    //            case AdvancedSection0RowsCount+9:
+                    //                //ptc
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+10:
+                    //                //ACB
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+11:
+                    //                // GMFT
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 8))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+12:
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+13:
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 10))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+14:
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 11))? 1:0];
+                    //                break;
+                    //            case AdvancedSection0RowsCount+15:
+                    //                display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 12))? 1:0];
+                    //                break;
+                default:
+                    display.value = convertedVal;
+                    break;
+            }
+ 
         }
         
-        [advanceConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
+        
+        ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails replaceObjectAtIndex:currentIndex withObject:display] : [advanceConfigDetails replaceObjectAtIndex:currentIndex withObject:display]);
         
     }
     
@@ -1161,7 +1265,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 {
     isWrite = YES;
     currentIndex = index;
-    NSString *formate = isBasic ? basicFormateArray[currentIndex]: advancedFormateArray[currentIndex];
+    NSString *formate = isBasic ? basicFormateArray[currentIndex]: ([self isNeedToRemoveFeatureEnableMaskSection] ? advancedFormateWithoutMaskArray[currentIndex]: advancedFormateArray[currentIndex]);
     unichar c = [formate characterAtIndex:0];
     
     switch (c) {
@@ -1198,9 +1302,9 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
         } else {
             if (i == 8) {
-                data[i] = isBasic ? basicMemMap[index] : advance_MemMap[index];
+                data[i] = isBasic ? basicMemMap[index] : ([self isNeedToRemoveFeatureEnableMaskSection] ? advance_feature_MemMap[index] : advance_MemMap[index]);
             } else if (i == 10){
-                data[i] = isBasic ? basicMemFieldLens[index] : advance_MemMapFieldLens[index];
+                data[i] = isBasic ? basicMemFieldLens[index] : ([self isNeedToRemoveFeatureEnableMaskSection] ? advance_feature_MemMapFieldLens[index] :advance_MemMapFieldLens[index]);
             } else if (i == 11) {
                 data[i] = (Byte)0x01;//write byte == 1
             } else {
@@ -1425,7 +1529,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 - (void)checkPassword:(NSString *)passwordStr {
     // for authentication process we need to write any data to hardware on on success we need to check authentication process.
     isVerifyingPassword = YES;
-    passwordVal = passwordStr;
+    [LFBluetoothManager sharedManager].passwordVal = passwordStr;
     LFDisplay *ctVal = [advanceConfigDetails objectAtIndex:0];
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
@@ -1467,9 +1571,13 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         }
         [basicConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
     } else {
-        display = [advanceConfigDetails objectAtIndex:selectedTag];
+        display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:selectedTag] : [advanceConfigDetails objectAtIndex:selectedTag]);
+        if (selectedTag == Advanced_GFTD) {
+            txt = [NSString stringWithFormat:@"%ld",[txt integerValue] * 10] ;
+        }
         display.value = txt;
-        [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
+        
+        ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails replaceObjectAtIndex:selectedTag withObject:display] : [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display]);
     }
     
     [self writeDataToIndex:selectedTag withValue:txt.doubleValue];
@@ -1481,84 +1589,116 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         return;
     }
     
-    LFDisplay *display = advanceConfigDetails[selectedTag];
+    LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? advanceConfigFeatureDetails[selectedTag] :advanceConfigDetails[selectedTag]);
     display.value = [NSString stringWithFormat:@"%d", !display.value.boolValue];
-    [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
+    ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails replaceObjectAtIndex:selectedTag withObject:display] :[advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display]);
     
     if (!isBasic) {
-        if (selectedTag >= AdvancedSection0RowsCount && selectedTag <= AdvancedSection0RowsCount + AdvancedSectionFeaturesCount - 1) {
-            switch (selectedTag) {
-                case Advanced_GFT:
-                    _featureEndisVal  ^= 1 << 0;
-                    break;
-                case Advanced_VUBT:
-                    _featureEndisVal  ^= 1 << 1;
-                    break;
-                case Advanced_CUBT:
-                    _featureEndisVal  ^= 1 << 2;
-                    break;
-                case Advanced_UCT:
-                    _featureEndisVal  ^= 1 << 3;
-                    break;
-                case Advanced_OCT:
-                    _featureEndisVal  ^= 1 << 4;
-                    break;
-                case Advanced_LINT:
-                    _featureEndisVal  ^= 1 << 5;
-                    break;
-                case Advanced_LPRT:
-                    _featureEndisVal  ^= 1 << 6;
-                    break;
-                case Advanced_HPRT:
-                    _featureEndisVal  ^= 1 << 7;
-                    break;
-                default:
-                    break;
+        if ([self isNeedToRemoveFeatureEnableMaskSection]) {
+               if (selectedTag >= AdvancedSection0RowsCount && selectedTag <= AdvancedSection0RowsCount + AdvancedSectionHardwareConfigurationCount - 1){// here 1 for last index for buttons cell
+                switch (selectedTag + AdvancedSectionFeaturesCount) {
+                    case Advanced_SPM:
+                        _hardwareConfigVal  ^= 1 << 5;
+                        break;
+                    case Advanced_SPT:
+                        _hardwareConfigVal  ^= 1 << 7;
+                        break;
+                    case Advanced_PTC:
+                        _hardwareConfigVal  ^= 1 << 9;
+                        break;
+                    case Advanced_ACB:
+                        _hardwareConfigVal  ^= 1 << 12;
+                        break;
+                    case Advanced_GMFT:
+                        _hardwareConfigVal  ^= 1 << 0;
+                        break;
+                     default:
+                        break;
+                }
+                [self writeDataToIndex:selectedTag withValue:(float)_hardwareConfigVal];
             }
-            [self writeDataToIndex:selectedTag withValue:(float)_featureEndisVal];
-        } else if (selectedTag >= AdvancedSection0RowsCount+AdvancedSectionFeaturesCount && selectedTag <= AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+AdvancedSectionHardwareConfigurationCount - 1) {// here 1 for last index for buttons cell
-            switch (selectedTag) {
-                case Advanced_SPM:
-                    _hardwareConfigVal  ^= 1 << 5;
-                    break;
-                case Advanced_PTC:
-                    _hardwareConfigVal  ^= 1 << 9;
-                    break;
-                case Advanced_ACB:
-                    _hardwareConfigVal  ^= 1 << 12;
-                    break;
-                case Advanced_GMFT:
-                    _hardwareConfigVal  ^= 1 << 0;
-                    break;
-                    
-     // below fields will be enable in future
-                    
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+1:
-//                    _hardwareConfigVal  ^= 1 << 6;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+2:
-//                    _hardwareConfigVal  ^= 1 << 7;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+3:
-//                    _hardwareConfigVal  ^= 1 << 8;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+4:
-//                    _hardwareConfigVal  ^= 1 << 9;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+5:
-//                    _hardwareConfigVal  ^= 1 << 10;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+6:
-//                    _hardwareConfigVal  ^= 1 << 11;
-//                    break;
-//                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+7:
-//                    _hardwareConfigVal  ^= 1 << 12;
-//                    break;
-                default:
-                    break;
-            }
-            [self writeDataToIndex:selectedTag withValue:(float)_hardwareConfigVal];
         }
+        else{
+            
+            if (selectedTag >= AdvancedSection0RowsCount && selectedTag <= AdvancedSection0RowsCount + AdvancedSectionFeaturesCount - 1) {
+                switch (selectedTag) {
+                    case Advanced_GFT:
+                        _featureEndisVal  ^= 1 << 0;
+                        break;
+                    case Advanced_VUBT:
+                        _featureEndisVal  ^= 1 << 1;
+                        break;
+                    case Advanced_CUBT:
+                        _featureEndisVal  ^= 1 << 2;
+                        break;
+                    case Advanced_UCT:
+                        _featureEndisVal  ^= 1 << 3;
+                        break;
+                    case Advanced_OCT:
+                        _featureEndisVal  ^= 1 << 4;
+                        break;
+                    case Advanced_LINT:
+                        _featureEndisVal  ^= 1 << 5;
+                        break;
+                    case Advanced_LPRT:
+                        _featureEndisVal  ^= 1 << 6;
+                        break;
+                    case Advanced_HPRT:
+                        _featureEndisVal  ^= 1 << 7;
+                        break;
+                    default:
+                        break;
+                }
+                [self writeDataToIndex:selectedTag withValue:(float)_featureEndisVal];
+            }
+            else if (selectedTag >= AdvancedSection0RowsCount+AdvancedSectionFeaturesCount && selectedTag <= AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+AdvancedSectionHardwareConfigurationCount - 1) {// here 1 for last index for buttons cell
+                switch (selectedTag) {
+                    case Advanced_SPM:
+                        _hardwareConfigVal  ^= 1 << 5;
+                        break;
+                    case Advanced_SPT:
+                        _hardwareConfigVal  ^= 1 << 7;
+                        break;
+                    case Advanced_PTC:
+                        _hardwareConfigVal  ^= 1 << 9;
+                        break;
+                    case Advanced_ACB:
+                        _hardwareConfigVal  ^= 1 << 12;
+                        break;
+                    case Advanced_GMFT:
+                        _hardwareConfigVal  ^= 1 << 0;
+                        break;
+                        
+                        // below fields will be enable in future
+                        
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+1:
+                        //                    _hardwareConfigVal  ^= 1 << 6;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+2:
+                        //                    _hardwareConfigVal  ^= 1 << 7;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+3:
+                        //                    _hardwareConfigVal  ^= 1 << 8;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+4:
+                        //                    _hardwareConfigVal  ^= 1 << 9;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+5:
+                        //                    _hardwareConfigVal  ^= 1 << 10;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+6:
+                        //                    _hardwareConfigVal  ^= 1 << 11;
+                        //                    break;
+                        //                case AdvancedSection0RowsCount+AdvancedSectionFeaturesCount+7:
+                        //                    _hardwareConfigVal  ^= 1 << 12;
+                        //                    break;
+                    default:
+                        break;
+                }
+                [self writeDataToIndex:selectedTag withValue:(float)_hardwareConfigVal];
+            }
+        }
+       
     }
     
     [tblConfigDisplay reloadData];
@@ -1607,7 +1747,6 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
 {
     LFRTDViewController *rtd = (LFRTDViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFRTDViewControllerID"];
     [self.navigationController pushViewController:rtd animated:YES];
-    
 }
 
 - (void)dealloc
@@ -1677,7 +1816,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
         
     } else {
         
-        LFDisplay *display = advanceConfigDetails[index];
+        LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? advanceConfigFeatureDetails[index] : advanceConfigDetails[index]);
            switch (index) {
                case Advanced_GFTC:
                    if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
@@ -1689,7 +1828,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
                        display.value = @"0=Off";
                    }
                    break;
-                   case Advanced_LINT:
+                   case Advanced_LINTD:
                    if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
                        display.value = @"0=Off";
                    }
@@ -1699,20 +1838,27 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
                        display.value = @"0=Off";
                    }
                    break;
+               case Advanced_STLP:
+                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
+                       display.value = @"0=Off";
+                   }
+                   break;
                default:
                    break;
            }
-        [advanceConfigDetails replaceObjectAtIndex:index withObject:display];
+        ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails replaceObjectAtIndex:index withObject:display] : [advanceConfigDetails replaceObjectAtIndex:index withObject:display]);
     }
 }
 
 - (BOOL) isNeedToRemoveFeatureEnableMaskSection {
+    
+    return YES;  //Please remove return if client ask for feature enabled disabled section
     // FIXME: refacter this code
     /* THIS METHOD CHECKING CONFIGURATION FEATURED VALUES EXCEPT */
     if (!((basicConfigDetails != nil && basicConfigDetails.count > 0) && (advanceConfigDetails != nil && advanceConfigDetails.count > 0))) {
         return NO;
     }
-    BOOL status = NO;
+    BOOL basicStatus = YES;
     for (int index = 0; index < 3; index++) {
         LFDisplay *display;
         switch (index) {
@@ -1728,12 +1874,12 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
             default:
                 break;
         }
-        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-            status = YES;
-        } else status = NO;
+        if (!((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"])) {
+            basicStatus = NO;
+        }
     }
-    
-    for (int index = 0; index < 4; index++) {
+    BOOL advancedStatus = YES;
+    for (int index = 0; index < 5; index++) {
         LFDisplay *display;
         switch (index) {
             case 0:
@@ -1743,20 +1889,25 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
                 display = advanceConfigDetails[Advanced_LKW];
                 break;
             case 2:
-                display = advanceConfigDetails[Advanced_LINT];
+                display = advanceConfigDetails[Advanced_LINTD];
                 break;
             case 3:
                 display = advanceConfigDetails[Advanced_HKW];
                 break;
+            case 4:
+                display = advanceConfigDetails[Advanced_STLP];
+                break;
             default:
                 break;
+                
+
         }
-        if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-            status = YES;
-        } else status = NO;
+        if (!((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"])) {
+            advancedStatus = NO;
+        }
     }
     
-    return status;
+    return (basicStatus && advancedStatus);
 }
 
 #pragma mark Setter Methods
@@ -1800,6 +1951,7 @@ const char changePassword_AddrArr[] = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4,
     if (!canContinueTimer) {
         return;
     }
+    [editing authDoneWithStatus:YES shouldDismissView:YES];
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];

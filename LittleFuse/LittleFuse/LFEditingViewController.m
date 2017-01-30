@@ -227,7 +227,11 @@
 }
 
 
-- (void)authDoneWithStatus:(BOOL)isSuccess {
+- (void)authDoneWithStatus:(BOOL)isSuccess shouldDismissView:(BOOL)dismissView {
+    if (dismissView) {
+        [self dismissViewControllerAnimated:NO completion:nil];
+        return;
+    }
     
     NSString *password;
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {

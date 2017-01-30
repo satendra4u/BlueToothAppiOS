@@ -115,8 +115,13 @@
 @property (assign, nonatomic) BOOL isPassWordChange;
 
 @property (assign, nonatomic) NSData *macData;
+@property (strong, nonatomic) NSString *macString;
+@property (strong, nonatomic) NSString *passwordVal;
+
 
 @property (assign, nonatomic) BOOL isPasswordVerified;
+@property (assign, nonatomic) NSData *configSeedData;
+
 
 + (LFBluetoothManager *)sharedManager;
 

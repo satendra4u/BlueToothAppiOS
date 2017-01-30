@@ -52,7 +52,7 @@
 @property (nonatomic,assign) BOOL isAdvConfig;
 
 
-- (void)authDoneWithStatus:(BOOL)isSuccess;
+- (void)authDoneWithStatus:(BOOL)isSuccess shouldDismissView:(BOOL)dismissView;
 
 
 @end
