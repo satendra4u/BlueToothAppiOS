@@ -38,7 +38,7 @@
 #define BasicSectionRestartAttemptsSetting 2
 #define AdvancedSection0RowsCount 12
 #define AdvancedSectionFeaturesCount 8
-#define AdvancedSectionHardwareConfigurationCount 4
+#define AdvancedSectionHardwareConfigurationCount 5
 
 typedef enum : NSInteger {
     FriendlyNameFirstWrite = -1,
@@ -72,6 +72,7 @@ typedef enum : NSUInteger {
     Advanced_HPRT,
     // hardware Configuration
     Advanced_SPM,
+    Advanced_SPT,
     Advanced_PTC,
     Advanced_ACB,
     Advanced_GMFT,
@@ -131,7 +132,7 @@ typedef enum : NSUInteger {
     NSData *configSeedData;
     NSData *prevWrittenData;
     NSData *completePasswordData;
-    NSString *passwordVal;
+    //NSString *passwordVal;
     NSString *friendlyNameStr;
     
     NSInteger currentIndex;
@@ -172,8 +173,8 @@ const char advance_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0
     0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x5A,0x5A,0x5A,0x5A/*,0x5A,0x5A,0x5A,0x5A*/};
 const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04/*,0x04, 0x04,0x04,0x04*/};
 const char advance_feature_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0x40,*/
-    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50,/* 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,*/0x5A,0x5A,0x5A,0x5A/*,0x5A,0x5A,0x5A,0x5A*/};
-const char advance_feature_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2,/* 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,*/0x04, 0x04,0x04, 0x04/*,0x04, 0x04,0x04,0x04*/};
+    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50,/* 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,*/0x5A,0x5A,0x5A,0x5A,0x5A/*,0x5A,0x5A,0x5A,0x5A*/};
+const char advance_feature_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2,/* 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,*/0x04, 0x04,0x04, 0x04, 0x04/*,0x04, 0x04,0x04,0x04*/};
 const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0x00BC, 0x00C4, 0x00CC};
 
 - (void)viewDidLoad
@@ -203,8 +204,8 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     [self setDeviceName:name];
     [self configArr];
     previousSelected = @"";
-    [[LFBluetoothManager sharedManager] setDelegate:nil];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
+   // [[LFBluetoothManager sharedManager] setDelegate:nil];
+   // [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     isAdvanceLoded = NO;
@@ -278,6 +279,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     LFDisplay *bitSix = [[LFDisplay alloc] initWithKey:@"LPR Trip" Value:@"" Code:@"LPRT"];
     LFDisplay *bitSeven = [[LFDisplay alloc] initWithKey:@"HPR Trip" Value:@"" Code:@"HPRT"];
     LFDisplay *spm = [[LFDisplay alloc] initWithKey:@"Single Phase Motor" Value:@"" Code:@"SPM"];
+     LFDisplay *spt = [[LFDisplay alloc] initWithKey:@"Single PT" Value:@"" Code:@"SPT"];
     LFDisplay *ptc = [[LFDisplay alloc] initWithKey:@"PTC Enabled" Value:@"" Code:@"PTC"];
     LFDisplay *acb = [[LFDisplay alloc] initWithKey:@"Enable ACB phase rotation" Value:@"" Code:@"ACB"];
     LFDisplay *gmft = [[LFDisplay alloc] initWithKey:@"Ground Fault Motor Trip OR Alarm" Value:@"" Code:@"GMFT"];
@@ -295,11 +297,11 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     basicConfigDetails = [[NSMutableArray alloc] initWithObjects:lowVoltage, highVoltage, voltageUnb, overCurrent, underCurrent, currentUnb, tripClass, powerUpTimer, rapidTimer, motorCoolDown,  dryWellRecover,restartAttemptsUCTrips,restartAttemptsOtherTrips,nil];
     
     advanceConfigDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven, spm, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
-    advanceConfigFeatureDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, /*bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven,*/ spm, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
+    advanceConfigFeatureDetails = [[NSMutableArray alloc] initWithObjects:currentTansformer, pt, ultd/*, cutd*/, lin, gftc, gftd,/* gfib,*/ lkw, hkw, hptd, stallPercenage, stallTripDelay, stallInhibt, /*bitZero, bitOne, bitTwo, bitThree, bitFour, bitFive, bitSix, bitSeven,*/ spm,spt, /*configBitSix, configBitSeven, configBitEight, configBitNine, configBitTen, configBitEleven,*/ ptc, acb, gmft, nil];
     
     basicFormateArray = @[@"H", @"H", @"G", @"B", @"B", @"G",  @"B",  @"L", @"L", @"L", @"L",@"B",@"B"];
     advancedFormateArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", @"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C"/*,@"C", @"C",@"C", @"C"*/];
-    advancedFormateWithoutMaskArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", /*@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",*/@"C", @"C",@"C", @"C"/*,@"C", @"C",@"C", @"C"*/];
+    advancedFormateWithoutMaskArray = @[@"B", @"B", @"L",/* @"Q",*/ @"L", @"H", @"Q",/* @"L",*/ @"K", @"K", @"L", @"B", @"Q", @"Q", /*@"C", @"C",@"C", @"C",@"C", @"C",@"C", @"C",*/@"C",@"C", @"C",@"C", @"C"/*,@"C", @"C",@"C", @"C"*/];
     
     basicUnitsArray = @[@"VAC", @"VAC", @"%", @"amps", @"amps", @"%", @"",@"sec", @"sec", @"sec", @"sec",@"",@""];
     advUnitsArray = @[@"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @"", @""/*, @"", @""*/];
@@ -316,6 +318,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     canContinueTimer = NO;
     [self removeIndicator];
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+    //[[LFBluetoothManager sharedManager] setDelegate:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -324,6 +327,8 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     [tabBarController setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
     [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     canContinueTimer = YES;
     if (isInitialLaunch) {
         isInitialLaunch = NO;
@@ -369,11 +374,13 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 #pragma mark Generate Excrypted Data
 
 - (NSData *)getEncryptedPasswordDataFromString:(NSString *)newPassword data:(NSData *)writeData address:(short)address size:(short)size{
-    if (authUtils == nil) {
+    if (authUtils == nil) { 
         authUtils = [[LFAuthUtils alloc]init];
     }
+    NSLog(@"Password is %@",[LFBluetoothManager sharedManager].passwordVal );
+
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
-        [authUtils initWithPassKey:passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
+        [authUtils initWithPassKey:[LFBluetoothManager sharedManager].passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
     
@@ -468,7 +475,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
         } else if (section == 1) {
             BOOL status = [self isNeedToRemoveFeatureEnableMaskSection];
             if (status) {
-                return AdvancedSectionHardwareConfigurationCount;
+                return AdvancedSectionHardwareConfigurationCount+1;
             }
             return AdvancedSectionFeaturesCount;
         } else if (section == 2) {
@@ -480,7 +487,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     //Last cell to be shown.
-    if (!isBasic  && indexPath.section == 2 && indexPath.row == 8) {
+    if (!isBasic  && indexPath.section == 1 && indexPath.row == AdvancedSectionHardwareConfigurationCount   ) {
         LFConfigureButtonsCell *cell = (LFConfigureButtonsCell *)[tableView dequeueReusableCellWithIdentifier:BUTTON_CELL_ID forIndexPath:indexPath];
         [cell.btnCommunication addTarget:self action:@selector(showCommunication:) forControlEvents:UIControlEventTouchUpInside];
         [cell.btnRTD addTarget:self action:@selector(showRTD:) forControlEvents:UIControlEventTouchUpInside];
@@ -747,9 +754,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 
 - (void) updateCharactersticsData:(NSData *) data {
     
-    
-    
-    
 //    if (isReadingFriendlyName && !isVerifyingPassword) {
 //        if (selectedTag == FriendlyNameSecondWrite) {
 //            selectedTag = FriendlyNameThirdWrite;
@@ -787,6 +791,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             [mutData appendBytes:zeroBytes length:1];
         }
         configSeedData = mutData;
+        [[LFBluetoothManager sharedManager] setConfigSeedData:configSeedData];
         [self removeIndicator];
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
         return;
@@ -968,7 +973,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     return;
 }
 
-
 - (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
     NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
     NSData *newVal = [newData subdataWithRange:NSMakeRange(0, 8)];
@@ -1120,7 +1124,13 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             break;
         case 'Q' :
         {
-            convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
+            if (currentIndex == Advanced_GFTD) {
+                convertedVal = [NSString stringWithFormat:@"%.1f sec", (float)val/10.0];
+            }
+            else{
+              convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
+            }
+            
         }
             
             break;
@@ -1159,6 +1169,9 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
             switch ((AdvancedConfiguration)currentIndex+AdvancedSectionFeaturesCount) {
                 case Advanced_SPM:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
+                    break;
+                case Advanced_SPT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
                     break;
                 case Advanced_PTC:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
@@ -1204,6 +1217,9 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                     break;
                 case Advanced_SPM:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
+                    break;
+                case Advanced_SPT:
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
                     break;
                 case Advanced_PTC:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
@@ -1527,7 +1543,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 - (void)checkPassword:(NSString *)passwordStr {
     // TODO: Ask aswin to y it is
     isVerifyingPassword = YES;
-    passwordVal = passwordStr;
+    [LFBluetoothManager sharedManager].passwordVal = passwordStr;
     LFDisplay *ctVal = [advanceConfigDetails objectAtIndex:0];
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
@@ -1536,7 +1552,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 {
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
         if (password != nil) {
-            passwordVal = password;
+            [LFBluetoothManager sharedManager].passwordVal = password;
         }
     }
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
@@ -1569,7 +1585,11 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
         [basicConfigDetails replaceObjectAtIndex:selectedTag withObject:display];
     } else {
         display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:selectedTag] : [advanceConfigDetails objectAtIndex:selectedTag]);
+        if (selectedTag == Advanced_GFTD) {
+            txt = [NSString stringWithFormat:@"%ld",[txt integerValue] * 10] ;
+        }
         display.value = txt;
+        
         ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails replaceObjectAtIndex:selectedTag withObject:display] : [advanceConfigDetails replaceObjectAtIndex:selectedTag withObject:display]);
     }
     
@@ -1592,6 +1612,9 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 switch (selectedTag + AdvancedSectionFeaturesCount) {
                     case Advanced_SPM:
                         _hardwareConfigVal  ^= 1 << 5;
+                        break;
+                    case Advanced_SPT:
+                        _hardwareConfigVal  ^= 1 << 7;
                         break;
                     case Advanced_PTC:
                         _hardwareConfigVal  ^= 1 << 9;
@@ -1645,6 +1668,9 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                 switch (selectedTag) {
                     case Advanced_SPM:
                         _hardwareConfigVal  ^= 1 << 5;
+                        break;
+                    case Advanced_SPT:
+                        _hardwareConfigVal  ^= 1 << 7;
                         break;
                     case Advanced_PTC:
                         _hardwareConfigVal  ^= 1 << 9;
@@ -1734,7 +1760,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 {
     LFRTDViewController *rtd = (LFRTDViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFRTDViewControllerID"];
     [self.navigationController pushViewController:rtd animated:YES];
-    
 }
 
 - (void)dealloc
@@ -1865,8 +1890,6 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
                        display.value = @"0=Off";
                    }
                    break;
-                   
-                   
                default:
                    break;
            }
@@ -1875,6 +1898,8 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
 }
 
 - (BOOL) isNeedToRemoveFeatureEnableMaskSection {
+    
+    return YES;  //Please remove return if client ask for feature enabled disabled section
     // FIXME: refacter this code
     /* THIS METHOD CHECKING CONFIGURATION FEATURED VALUES EXCEPT */
     if (!((basicConfigDetails != nil && basicConfigDetails.count > 0) && (advanceConfigDetails != nil && advanceConfigDetails.count > 0))) {
@@ -1973,6 +1998,7 @@ const char changePassword_AddrArr[] = {0x0094, 0x009C, 0x00A4, 0x00AC, 0x00B4, 0
     if (!canContinueTimer) {
         return;
     }
+    [editing authDoneWithStatus:YES shouldDismissView:YES];
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];

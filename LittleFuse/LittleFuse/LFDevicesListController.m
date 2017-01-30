@@ -191,7 +191,8 @@
     if (!isPopupOpened) {
         [self scanAction:nil];
     }
-    [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
+    
+   // [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
 }
 
 - (void)didReceiveMemoryWarning
@@ -206,8 +207,6 @@
     lblScanning.hidden = [peripheralsList count] ? YES : NO;
     return peripheralsList.count;
 }
-
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     LFDeviceTableViewCell *cell = (LFDeviceTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDeviceCellID];
@@ -216,10 +215,9 @@
     cell.tag = indexPath.row;
     cell.selectionStyle = UITableViewCellSelectionStyleDefault;
     [cell updateCellWithDict:dict];
+    
     return cell;
 }
-
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     selectedIndex = indexPath.row;
@@ -227,6 +225,7 @@
     isDeviceSelected = YES;
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
 }
 
 #pragma mark - Blutooth Shared Data Delegate -

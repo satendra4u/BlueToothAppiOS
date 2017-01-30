@@ -300,7 +300,6 @@ static LFBluetoothManager *sharedData = nil;
         [self cleanup];
         return;
     }
-    
     discoveredPeripheral = peripheral;
     discoveredPeripheral.delegate = self;
     

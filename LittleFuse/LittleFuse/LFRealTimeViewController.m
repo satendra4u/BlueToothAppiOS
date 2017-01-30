@@ -12,8 +12,11 @@
 #import "LFBluetoothManager.h"
 #import "LFNavigationBar.h"
 #import "LFDisplay.h"
+#import "LFNavigationController.h"
+#import "LFEditingViewController.h"
+#import "LFAuthUtils.h"
 
-@interface LFRealTimeViewController () <UIScrollViewDelegate, UITableViewDataSource, UITableViewDelegate, BlutoothSharedDataDelegate>
+@interface LFRealTimeViewController () <UIScrollViewDelegate, UITableViewDataSource, UITableViewDelegate, BlutoothSharedDataDelegate,EditingDelegate>
 {
     
     BOOL canContinueTimer;
@@ -27,14 +30,30 @@
     NSData *unbalanceCurrentData;
     NSInteger refreshTimeInterval;
     CGPoint currentContentOffset;
+    
+    //NSString *passwordVal;
+    //NSString *macString;
+    
+    //NSData *configSeedData;
+    NSData *prevWrittenData;
+
+
+    BOOL isFetchingMacOrSeedData;
+    BOOL isWrite;
+    BOOL isReRead;
+    BOOL isVerifyingPassword;
+
+
+    LFAuthUtils *authUtils;
+    
+    LFEditingViewController *editing;
 }
 @end
 
 @implementation LFRealTimeViewController
 
-const char realMemMap[] = { 0x56, 0x5e};
-
-const char realMemFieldLens[] = { 0x02, 0x02};
+const char realMemMap[] = { 0x56, 0x5e,0x0076};
+const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 
 - (void)viewDidLoad
@@ -52,6 +71,10 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     lblDeviceName.attributedText = string;
 
     _lblSystemStatus.adjustsFontSizeToFitWidth = YES;
+    
+    
+   // [self readCharactisticsWithIndex:2];
+
     [tblDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [tblDisplay setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
     
@@ -86,9 +109,16 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     else {
         refreshTimeInterval = 600;
     }
+    refreshTimeInterval = 600;
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:10];
+   /* if ([LFBluetoothManager sharedManager].macData) {
+        [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
+    }*/
+   
 }
 
 
@@ -109,14 +139,20 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     canContinueTimer = NO;
     [[LFBluetoothManager sharedManager] setRealtime:NO];
+
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+   //
+}
+- (void)viewDidDisappear:(BOOL)animated
+{
+   // [[LFBluetoothManager sharedManager] setDelegate:nil];
 }
 
 
 - (void)refreshCurrentController {
-    if (!canContinueTimer) {
+    /*if (!canContinueTimer) {
         return;
-    }
+    }*/
     currentContentOffset = tblDisplay.contentOffset;
     [[LFBluetoothManager sharedManager] fetchRealTimeValues];
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
@@ -127,6 +163,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     else {
         refreshTimeInterval = 600;
     }
+     refreshTimeInterval = 600;
     if (!canContinueTimer) {
         return;
     }
@@ -587,22 +624,22 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)readCharactisticsWithIndex:(NSInteger)index
 {
-    if (!canContinueTimer) {
+    
+    /*if (!canContinueTimer) {
         return;
-    }
+    }*/
     Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
             data[i] = realMemMap[index];
         } else if (i == 10){
             data[i] = realMemFieldLens[index];
-        } else {
+        }  else {
             data[i] = (Byte)0x00;
         }
     }
     
     [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] setRealtime:YES];
     NSData *data1 = [NSData dataWithBytes:data length:20];
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
@@ -655,5 +692,368 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  }];
 }
 
+#pragma mark Action Methods
+
+- (IBAction)resetRelayAction:(id)sender {
+    canContinueTimer = NO;
+    [[LFBluetoothManager sharedManager] stopFaultTimer];
+    
+    if (![LFBluetoothManager sharedManager].isPasswordVerified) {
+        isVerifyingPassword = YES;
+        LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+        editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+        
+        self.providesPresentationContextTransitionStyle = YES;
+        self.definesPresentationContext = YES;
+        [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        
+       // editing.selectedText = cell.lblKey.text;
+        editing.delegate = self;
+        
+        
+        editing.showAuthentication = YES;//YES to show the password screen.
+        [navController setViewControllers:@[editing]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.navigationController presentViewController:navController animated:NO completion:nil];
+        });
+    }
+    else{
+        
+        [self writeRelayData];
+    }
+}
+#pragma mark -Editing Delegate
+
+- (void)checkPassword:(NSString *)passwordStr {
+    // TODO: Ask aswin to y it is
+   // isVerifyingPassword = YES;
+    if (passwordStr != nil) {
+        [LFBluetoothManager sharedManager].passwordVal = passwordStr;
+    }
+    
+    
+    if(! ([LFBluetoothManager sharedManager].configSeedData && [LFBluetoothManager sharedManager].macData) ){
+        [self readDeviceMacAndAuthSeed];
+    }
+    else{
+        
+        [editing authDoneWithStatus:YES shouldDismissView:YES];
+        
+        [self showAlertToResetRelay];
+
+       // [self writeRelayData];
+        
+       // [self showAlertToResetRelay];
+       
+    }
+}
+- (void)showAlertToResetRelay{
+    [self showAlertViewWithCancelButtonTitle:kCancel withMessage:kResetRelay_motorStarts withTitle:APP_NAME otherButtons:@[kContinue] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            if (index == 1) {
+                
+                 [self writeRelayData];
+            }
+            else{
+                canContinueTimer = YES;
+                [self refreshCurrentController];
+                
+            }
+            [alert dismissViewControllerAnimated:NO completion:nil];
+        }
+    }];
+}
+
+-(void)writeRelayData
+{
+    Byte data[20];
+    NSInteger convertedVal = 9;
+    char *bytes = (char *) malloc(8);
+    memset(bytes, 0, 8);
+    memcpy(bytes, (char *) &convertedVal, 2);//8
+    
+    for (int i = 0; i < 20; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = 0x0076;//register address
+            } else if (i == 10){
+                data[i] = 0x02;//length of the data
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            }
+            else {
+                data[i] = (Byte)0x00;
+            }
+        }
+    }
+    
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    
+    
+    NSData *lengthVal = [data1 subdataWithRange:NSMakeRange(10, 1)];
+    char buff;
+    [lengthVal getBytes:&buff length:1];
+    int myLen = buff;
+    NSData *addressVal = [data1 subdataWithRange:NSMakeRange(8, 1)];
+    char addrBuff;
+    [addressVal getBytes:&addrBuff length:1];
+    int myAddr = addrBuff;
+    NSData *resultData = [self getEncryptedPasswordDataFromString:@"" data:[data1 subdataWithRange:NSMakeRange(0, 8)] address:myAddr size:myLen];
+    data1 = [data1 subdataWithRange:NSMakeRange(0, 12)];
+    NSMutableData *mutData = [NSMutableData dataWithData:data1];
+    for (int i = 0; i< 8;i++) {
+        NSData *subdata = [resultData subdataWithRange:NSMakeRange(i, 1)];
+        [mutData appendData:subdata];
+    }
+    
+    isWrite = YES;
+    
+    [[LFBluetoothManager sharedManager] setIsWriting:YES];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] writeConfigData:mutData];
+    prevWrittenData = mutData;
+
+}
+
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
+{
+    //isWrite = NO;
+    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+    [self removeIndicator];
+    if (isSuccess) {
+        [self readCharactisticsWithIndex:2];//2 for index of reset relay address and length
+        //canContinueTimer = YES;
+
+        }
+    else {
+        //Error occured while writing data to device.
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kProblem_Saving withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+        }];
+    }
+}
+#pragma mark Generate Excrypted Data
+
+- (NSData *)getEncryptedPasswordDataFromString:(NSString *)newPassword data:(NSData *)writeData address:(short)address size:(short)size{
+    
+    if (authUtils == nil) {
+        authUtils = [[LFAuthUtils alloc]init];
+    }
+    NSLog(@"Password is %@",[LFBluetoothManager sharedManager].passwordVal );
+    NSLog(@"mac string is %@",[LFBluetoothManager sharedManager].macString );
+    NSLog(@"configseed data is %@",[LFBluetoothManager sharedManager].configSeedData.bytes );
+
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+
+        [authUtils initWithPassKey:[LFBluetoothManager sharedManager].passwordVal andMacAddress:[LFBluetoothManager sharedManager].macString andSeed:[LFBluetoothManager sharedManager].configSeedData.bytes];
+    }
+    NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
+    
+    return authCode;
+}
+
+- (void)showCharacterstics:(NSMutableArray *)charactersticsArray
+{
+    CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[2];
+    [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
+}
+#pragma mark Read Mac Data
+
+- (void)receivedDeviceMacWithData:(NSData *)data {
+    [LFBluetoothManager sharedManager].macData = data;
+    isFetchingMacOrSeedData = NO;
+    NSString *tString = [[NSString alloc] initWithData:data
+                                              encoding:NSASCIIStringEncoding];
+    NSMutableString *tMutStr = [[NSMutableString alloc]init];
+    for (int i = 0; i < tString.length; i++) {
+        NSString *tSubStr = [tString substringWithRange:NSMakeRange(i, 1)];
+        [tMutStr appendString:tSubStr];
+        if (i != 0 && i % 2 != 0 && i != tString.length-1) {
+            [tMutStr appendString:@":"];
+        }
+    }
+    [LFBluetoothManager sharedManager].macString = tString;
+    [self performSelector:@selector(getSeedData) withObject:nil afterDelay:2];
+}
+- (void)getSeedData {
+    isFetchingMacOrSeedData = YES;
+    NSArray *charsArr = [LFBluetoothManager sharedManager].discoveredPeripheral.services[1].characteristics;
+    CBCharacteristic *charactestic = (CBCharacteristic *)charsArr[4];
+    [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
+}
+
+#pragma mark read value delegate
+
+- (void)configureServiceWithValue:(NSData *)data
+{
+     [self updateCharactersticsData:data];
+    return;
+}
+- (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
+    NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
+    NSData *newVal = [newData subdataWithRange:NSMakeRange(0, 8)];
+    if ([prevVal isEqualToData:newVal]) {
+        return YES;
+    }
+    return NO;
+}
+
+- (void)readDeviceMacAndAuthSeed {
+    isFetchingMacOrSeedData = YES;
+
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+ [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
+
+}
+
+- (void) updateCharactersticsData:(NSData *) data {
+    
+    NSData *tData = data;
+      
+    if (isFetchingMacOrSeedData) {
+        isFetchingMacOrSeedData = NO;
+        NSMutableData *mutData = [[NSMutableData alloc]init];
+        for (int i=12; i<=19; i++) {
+            [mutData appendData:[data subdataWithRange:NSMakeRange(i, 1)]];
+        }
+        for (int j = 0; j<24; j++) {
+            NSInteger convertedVal = 0;
+            char* zeroBytes = (char*) &convertedVal;
+            [mutData appendBytes:zeroBytes length:1];
+        }
+        [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
+        [self removeIndicator];
+        [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
+        [self performSelector:@selector(writeRelayData) withObject:nil afterDelay:2];
+        return;
+    }
+    
+    if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
+        [self removeIndicator];
+        isWrite = NO;
+        NSData *stData = [tData subdataWithRange:NSMakeRange(11, 1)];
+        const char *byteVal = [stData bytes];
+        
+        int stVal = 0x0000000F & ((Byte)byteVal[0] >> 4); // this for getting response st val
+        NSString *alertMessage;
+        
+        switch (stVal) {
+            case 0:
+                isReRead = NO;
+                isWrite = YES;
+               /*
+                // run timer for sending 10 times read for isSTFieldSuccess set to YES
+                // set stFieldSuccessCount  set 0 on every write
+                if (stFieldSuccessCount == 10) {
+                    self.isSTFieldSuccess = NO;
+                    stFieldSuccessCount = 0;
+                    return;
+                }
+                alertMessage = kWriting_Failed;
+                if (isVerifyingPassword && isFirstTimeAuthenticate) {
+                    self.isSTFieldSuccess = YES;
+                    return;
+                }*/
+                break;
+            case 1:
+              /*  if (isReadingFriendlyName && !isVerifyingPassword) {
+                    if (selectedTag == FriendlyNameSecondWrite) {
+                        selectedTag = FriendlyNameThirdWrite;
+                        [self changeFriendlyNameProcess];
+                        return;
+                    } if (selectedTag == FriendlyNameThirdWrite) {
+                        isReadingFriendlyName = NO;
+                        NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
+                        [self setDeviceName:friendlyNameStr];
+                        return;
+                    }
+                }
+                if (isReadingFriendlyName && currentIndex == FriendlyNameFirstWrite && !isVerifyingPassword) {
+                    selectedTag = FriendlyNameSecondWrite;
+                    [self changeFriendlyNameProcess];
+                    return;
+                }
+                
+                self.isSTFieldSuccess = NO;*/
+                alertMessage = kSave_Success;
+               // isReRead = YES;
+                [authUtils nextAuthCode];
+                isVerifyingPassword = NO;
+               // DLog(@"Authentication done successfully.");
+                //[editing authDoneWithStatus:YES shouldDismissView:YES];
+                [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+                
+                //[self showAlertToResetRelay];
+
+                break;
+            case 2:
+                alertMessage = kEnter_Correct_Password;
+                isReRead = NO;
+                break;
+            case 3:
+                isReRead = NO;
+                alertMessage = kPermision_Error;
+                break;
+            case 4:
+                isReRead = NO;
+                alertMessage = kOutOf_Range;
+                break;
+            case 5:
+                isReRead = NO;
+                alertMessage = kPassword_Changed;
+                break;
+                
+            default:
+                break;
+        }
+        if (stVal != 0) {
+            [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                if ([alert isKindOfClass:[UIAlertController class]]) {
+                    [alert dismissViewControllerAnimated:NO completion:nil];
+                }
+            }];
+        }
+        //[self readCharactisticsWithIndex:2];
+        return;
+    }
+    
+    
+    //////////////////////////////   re reading process   starts /////////////////////////
+    if (isReRead) {
+        [self removeIndicator];
+        isReRead = NO;
+
+        if (![self isDataUpdatedCorrectlyWithPrevData:prevWrittenData withNewData:tData]) { /// if authentication fails
+            if (isVerifyingPassword) {
+                isVerifyingPassword = NO;
+                [editing authDoneWithStatus:NO shouldDismissView:NO];
+                DLog(@"Authentication failed");
+                return;
+            }
+            
+            return;
+        }
+       // [authUtils nextAuthCode];
+        if (isVerifyingPassword) {
+            isVerifyingPassword = NO;
+            DLog(@"Authentication done successfully.");
+            [editing authDoneWithStatus:YES shouldDismissView:YES];
+            [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+            
+            [self showAlertToResetRelay];
+            return;
+        }
+        [self readCharactisticsWithIndex:2];
+        return;
+    }
+    //////////////////////////////   re reading process   ends /////////////////////////
+    
+    
+}
 
 @end

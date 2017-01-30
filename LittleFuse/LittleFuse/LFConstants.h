@@ -125,6 +125,7 @@
 #define  kPermision_Error @"Read or Write Permission Error"
 #define  kOutOf_Range @"Out of Range Error"
 #define  kPassword_Changed @"Password Changed Successfully"
+#define  kResetRelay_motorStarts @"Caution: Motor May Start!"
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert button titles *****
 // ------------------------------------------------------------------------------------------
@@ -134,6 +135,8 @@
 #define kOK  @"OK"
 #define kNo @"No"
 #define kCancel @"Cancel"
+#define kContinue @"Continue"
+
 
 
 
