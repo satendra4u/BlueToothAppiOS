@@ -127,6 +127,7 @@ typedef enum : NSUInteger {
     BOOL isReadingFriendlyName;
     BOOL isVerifyingPassword;
     BOOL isChangingPassword;
+    BOOL isResettingSeed;
     NSInteger curPassWriteIndex;
     NSString *macString;
     NSData *configSeedData;
@@ -771,6 +772,10 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
         [self removeIndicator];
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
+        if (isResettingSeed) {
+            [authUtils initWithPassKey:newPasswordStr andMacAddress:macString andSeed:configSeedData.bytes];
+            isResettingSeed = NO;
+        }
         return;
     }
     
@@ -858,17 +863,16 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     break;
                 case 5:
                     curPassWriteIndex = 0;
-                    if ([[LFBluetoothManager sharedManager] isPasswordVerified]) {
-                        [authUtils initWithPassKey:newPasswordStr andMacAddress:macString andSeed:configSeedData.bytes];
-                    }
                     [authUtils nextAuthCode];
                     isReRead = YES;
+                    isResettingSeed = YES;
                     isChangingPassword = NO;
                     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
                     alertMessage = kPassword_Changed;
                     [[LFBluetoothManager sharedManager] setPasswordString:newPasswordStr];
                     passwordVal = newPasswordStr;
                     [self removeIndicator];
+                     [self readDeviceMacAndAuthSeed];
                     break;
                     
                 default:
