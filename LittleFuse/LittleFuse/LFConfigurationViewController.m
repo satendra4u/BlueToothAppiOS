@@ -171,8 +171,8 @@ const char basicMemFieldLens[] = { 0x04, 0x04, 0x02, 0x04, 0x04, 0x02, 0x02, 0x0
 };
 
 const char advance_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0x40,*/
-    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x5A,0x5A,0x5A,0x5A/*,0x5A,0x5A,0x5A,0x5A*/};
-const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04/*,0x04, 0x04,0x04,0x04*/};
+    0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50, 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A,0x5A};
+const char advance_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2, 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04,0x04};
 const char advance_feature_MemMap[] = {0x06, 0x08, 0x1E,/* 0x22,*/ 0x24, 0x3A, 0x3E,/* 0x40,*/
     0x42, 0x46, 0x4A, 0x4C, 0x4E, 0x50,/* 0x56,0x56,0x56,0x56,0x56,0x56,0x56,0x56,*/0x5A,0x5A,0x5A,0x5A,0x5A/*,0x5A,0x5A,0x5A,0x5A*/};
 const char advance_feature_MemMapFieldLens[] = {0x2, 0x2, 0x2,/* 0x2,*/ 0x2, 0x4, 0x2,/* 0x2,*/ 0x4, 0x4, 0x2, 0x2, 0x2, 0x2,/* 0x04, 0x04,0x04, 0x04,0x04, 0x04,0x04, 0x04,*/0x04, 0x04,0x04, 0x04, 0x04/*,0x04, 0x04,0x04,0x04*/};
@@ -207,8 +207,8 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [self setDeviceName:name];
     [self configArr];
     previousSelected = @"";
-   // [[LFBluetoothManager sharedManager] setDelegate:nil];
-   // [[LFBluetoothManager sharedManager] setDelegate:self];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] setConfig:YES];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     isAdvanceLoded = NO;
@@ -321,7 +321,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     canContinueTimer = NO;
     [self removeIndicator];
     [[LFBluetoothManager sharedManager] stopFaultTimer];
-    //[[LFBluetoothManager sharedManager] setDelegate:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -330,11 +329,10 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [tabBarController setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
     [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] setDelegate:nil];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
     canContinueTimer = YES;
     if (isInitialLaunch) {
         isInitialLaunch = NO;
+       // isReadingData = YES;
         [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
         [self readCharactisticsWithIndex:currentIndex];
     }
@@ -378,13 +376,11 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 #pragma mark Generate Excrypted Data
 
 - (NSData *)getEncryptedPasswordDataFromString:(NSString *)newPassword data:(NSData *)writeData address:(short)address size:(short)size{
-    if (authUtils == nil) { 
+    if (authUtils == nil) {
         authUtils = [[LFAuthUtils alloc]init];
     }
-    NSLog(@"Password is %@",[LFBluetoothManager sharedManager].passwordVal );
-
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
-        [authUtils initWithPassKey:[LFBluetoothManager sharedManager].passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
+        [authUtils initWithPassKey:passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
     
@@ -437,6 +433,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
     canContinueTimer = YES;
     currentIndex = 0;
+    //isReadingData = YES;
     [self removeIndicator];
     [self readCharactisticsWithIndex:currentIndex];
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
@@ -480,7 +477,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         } else if (section == 1) {
             BOOL status = [self isNeedToRemoveFeatureEnableMaskSection];
             if (status) {
-                return AdvancedSectionHardwareConfigurationCount+1;
+                return AdvancedSectionHardwareConfigurationCount + 1;
             }
             return AdvancedSectionFeaturesCount;
         } else if (section == 2) {
@@ -619,6 +616,10 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     UIButton *friendlyNameButton = [changePasswordView viewWithTag:2];
     [friendlyNameButton addTarget:self action:@selector(editAction:) forControlEvents:UIControlEventTouchUpInside];
     [changePasswordButton addTarget:self action:@selector(changePwdAction:) forControlEvents:UIControlEventTouchUpInside];
+    // adding longpress for reset password
+    UILongPressGestureRecognizer *passwordResetGesture = [[UILongPressGestureRecognizer alloc] init];
+    [passwordResetGesture addTarget:self action:@selector(resetPasswordction:)];
+    [changePasswordButton addGestureRecognizer:passwordResetGesture];
     changePasswordButton.layer.cornerRadius = 4.0f;
     if (!isBasic) {
         tblConfigDisplay.tableFooterView = changePasswordView;
@@ -639,6 +640,12 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         cont += [tableView numberOfRowsInSection:i];
     }
     selectedTag = cont + indexPath.row; // this is for knowing current cell
+    
+    [self showPasswordScreenWithIndexpath:indexPath];
+}
+
+- (void) showPasswordScreenWithIndexpath:(NSIndexPath *) indexPath {
+    
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tblConfigDisplay cellForRowAtIndexPath:indexPath];
     
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
@@ -686,36 +693,24 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         
         [self toggleSelectedWithSuccess:YES andPassword:nil];
     } else {
-        LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
-        editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
-        
-        self.providesPresentationContextTransitionStyle = YES;
-        self.definesPresentationContext = YES;
-        [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-        [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
-        
-        LFCharactersticBitDisplayCell *cell = (LFCharactersticBitDisplayCell *)[tblConfigDisplay cellForRowAtIndexPath:indexPath];
-        
-        editing.selectedText = cell.lblKey.text;
-        editing.delegate = self;
-
-        
-        editing.showAuthentication = YES;//YES to show the password screen.
-        [navController setViewControllers:@[editing]];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.navigationController presentViewController:navController animated:NO completion:nil];
-        });
+        [self showPasswordScreenWithIndexpath:indexPath];
     }
-    
 
-    
-    
-    
-    
     
 }
 
-
+- (void) resetPasswordction:(id) sender {
+    [self showAlertViewWithCancelButtonTitle:kCancel withMessage:@"Are you want to Reset Password" withTitle:kApp_Name otherButtons:@[kOK] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if (index == 1) {
+            //send reset command
+            //[self writeDataToIndex:<#(NSInteger)#> withValue:<#(double)#>]
+        }
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            [alert dismissViewControllerAnimated:NO completion:nil];
+        }
+    }];
+    
+}
 - (IBAction)changePwdAction:(id)sender {
     //pass indexpath as -4.
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ChangePasswordWrite inSection:0];
@@ -750,6 +745,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
             [self readCharactisticsWithIndex:currentIndex];
             isAdvanceLoded = YES;
+           // isReadingData = YES;
         }
     }
     
@@ -758,30 +754,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 - (void) updateCharactersticsData:(NSData *) data {
-    
-//    if (isReadingFriendlyName && !isVerifyingPassword) {
-//        if (selectedTag == FriendlyNameSecondWrite) {
-//            selectedTag = FriendlyNameThirdWrite;
-//            [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
-//            return;
-//        } if (selectedTag == FriendlyNameThirdWrite) {
-//            isReadingFriendlyName = NO;
-//            NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
-//            [self setDeviceName:friendlyNameStr];
-//            [self removeIndicator];
-//            return;
-//        }
-//        selectedTag = FriendlyNameSecondWrite;
-//        [self readCharactisticsWithIndex:FriendlyNameSecondWrite];
-//        return;
-//    }
-//    if (selectedTag == FriendlyNameSecondWrite && currentIndex == 0 && !isVerifyingPassword) {
-//        isReadingFriendlyName = YES;
-//       // selectedTag = FriendlyNameFirstWrite;
-//        [self readCharactisticsWithIndex:FriendlyNameThirdWrite];
-//        return;
-//    }
-//    canRefresh = NO;
     
     NSData *tData = data;
     if (isFetchingMacOrSeedData && currentIndex == 0 && !isVerifyingPassword) {
@@ -825,11 +797,13 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     }
                     alertMessage = kUpdateFailed;
                     if (isVerifyingPassword && isFirstTimeAuthenticate) {
+                        [self removeIndicator];
                         self.isSTFieldSuccess = YES;
                         return;
                     }
                     break;
                 case 1:
+                     [authUtils nextAuthCode];
                     self.isSTFieldSuccess = NO;
                     if (isReadingFriendlyName && !isVerifyingPassword) {
                         if (selectedTag == FriendlyNameSecondWrite) {
@@ -852,7 +826,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     /////////////////   change password Process     //////////////////
                     
                     if (isChangingPassword) {
-                        [authUtils nextAuthCode];
                         if (curPassWriteIndex < 7) {
                             curPassWriteIndex += 1;
                             [self writeNewPasswordDataWithIndex:curPassWriteIndex];
@@ -883,18 +856,25 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     alertMessage = kOutOf_Range;
                     break;
                 case 5:
-                    isReRead = NO;
+                    curPassWriteIndex = 0;
+                    if ([[LFBluetoothManager sharedManager] isPasswordVerified]) {
+                        [authUtils initWithPassKey:newPasswordStr andMacAddress:macString andSeed:configSeedData.bytes];
+                    }
+                    [authUtils nextAuthCode];
+                    isReRead = YES;
+                    isChangingPassword = NO;
                     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
                     alertMessage = kPassword_Changed;
                     [[LFBluetoothManager sharedManager] setPasswordString:newPasswordStr];
                     passwordVal = newPasswordStr;
-                    [[LFBluetoothManager sharedManager] setIsPasswordVerified:NO];
+                    [self removeIndicator];
                     break;
                     
                 default:
                     break;
             }
             if (stVal != 0) {
+            [self removeIndicator];
             [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                 if ([alert isKindOfClass:[UIAlertController class]]) {
                     [alert dismissViewControllerAnimated:NO completion:nil];
@@ -960,6 +940,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                 currentIndex = 0;
                 [self removeIndicator];
                 [self readDeviceMacAndAuthSeed];
+                //isReadingData = NO;
                 return;
             }
         } else {
@@ -987,6 +968,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [self updateCharactersticsData:data];
     return;
 }
+
 
 - (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
     NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
@@ -1141,8 +1123,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         {
             if (currentIndex == Advanced_GFTD) {
                 convertedVal = [NSString stringWithFormat:@"%.1f sec", (float)val/10.0];
-            }
-            else{
+            } else{
               convertedVal = [NSString stringWithFormat:@"%d sec", (int)val];
             }
             
@@ -1556,7 +1537,8 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 - (void)checkPassword:(NSString *)passwordStr {
     // for authentication process we need to write any data to hardware on on success we need to check authentication process.
     isVerifyingPassword = YES;
-    [LFBluetoothManager sharedManager].passwordVal = passwordStr;
+    passwordVal = passwordStr;
+    [[LFBluetoothManager sharedManager] setPasswordString:passwordStr];
     LFDisplay *ctVal = [advanceConfigDetails objectAtIndex:0];
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
@@ -1566,7 +1548,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
         if (password != nil) {
             [[LFBluetoothManager sharedManager] setPasswordString:password];
-            [LFBluetoothManager sharedManager].passwordVal = password;
+            passwordVal = password;
         }
     }
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
@@ -1774,6 +1756,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 {
     LFRTDViewController *rtd = (LFRTDViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFRTDViewControllerID"];
     [self.navigationController pushViewController:rtd animated:YES];
+    
 }
 
 - (void)dealloc
@@ -1795,6 +1778,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [[LFBluetoothManager sharedManager] setIsPassWordChange:YES];
     curPassWriteIndex = 0;
     [self writeNewPasswordDataWithIndex:0];
+    [self showIndicatorOn:self.tabBarController.view withText:@"changing Password...."];
 }
 
 - (void)writeNewPasswordDataWithIndex:(NSInteger)passIndex {

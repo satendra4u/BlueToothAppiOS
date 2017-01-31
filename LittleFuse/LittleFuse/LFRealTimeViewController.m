@@ -695,6 +695,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 #pragma mark Action Methods
 
 - (IBAction)resetRelayAction:(id)sender {
+    /*
     canContinueTimer = NO;
     [[LFBluetoothManager sharedManager] stopFaultTimer];
     
@@ -721,7 +722,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else{
         
         [self writeRelayData];
-    }
+    }*/
 }
 #pragma mark -Editing Delegate
 
