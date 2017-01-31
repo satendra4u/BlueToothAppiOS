@@ -803,7 +803,8 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     }
                     break;
                 case 1:
-                     [authUtils nextAuthCode];
+                    [authUtils nextAuthCode];
+                    [self removeIndicator];
                     self.isSTFieldSuccess = NO;
                     if (isReadingFriendlyName && !isVerifyingPassword) {
                         if (selectedTag == FriendlyNameSecondWrite) {
@@ -1271,6 +1272,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 
 - (void)writeDataToIndex:(NSInteger)index withValue:(double)val
 {
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
     isWrite = YES;
     currentIndex = index;
     NSString *formate = isBasic ? basicFormateArray[currentIndex]: ([self isNeedToRemoveFeatureEnableMaskSection] ? advancedFormateWithoutMaskArray[currentIndex]: advancedFormateArray[currentIndex]);
@@ -1551,7 +1553,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             passwordVal = password;
         }
     }
-    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    
     if (selectedTag == FriendlyNameFirstWrite || selectedTag == FriendlyNameSecondWrite) {
         [self saveNewFriendlyNameWithValue:txt];
         return;
@@ -1778,7 +1780,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [[LFBluetoothManager sharedManager] setIsPassWordChange:YES];
     curPassWriteIndex = 0;
     [self writeNewPasswordDataWithIndex:0];
-    [self showIndicatorOn:self.tabBarController.view withText:@"changing Password...."];
 }
 
 - (void)writeNewPasswordDataWithIndex:(NSInteger)passIndex {
