@@ -539,8 +539,8 @@ static LFBluetoothManager *sharedData = nil;
     if (error) {
         if (_isWriting) {
             DLog(@"Error occured while writing data to hardware. Error is = %@", error);
-            if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
-                [_delegate showOperationCompletedAlertWithStatus:NO];
+            if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:withCharacteristic:)]) {
+                [_delegate showOperationCompletedAlertWithStatus:NO withCharacteristic:characteristic];
             }
         }
         
@@ -551,8 +551,9 @@ static LFBluetoothManager *sharedData = nil;
     if (_isWriting) {
         if (_isPassWordChange) {
             [discoveredPeripheral readValueForCharacteristic:characteristic];
-        } else if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:)]) {
-            [_delegate showOperationCompletedAlertWithStatus:YES];
+        }
+         else if (_delegate && [_delegate respondsToSelector:@selector(showOperationCompletedAlertWithStatus:withCharacteristic:)]) {
+            [_delegate showOperationCompletedAlertWithStatus:YES withCharacteristic:characteristic];
         }
     } else {
         [discoveredPeripheral readValueForCharacteristic:characteristic];
@@ -560,6 +561,7 @@ static LFBluetoothManager *sharedData = nil;
     
 }
 #pragma mark Custom methods
+
 - (NSMutableArray *)getcharactersticsList
 {
     return charactersticsList;
@@ -616,23 +618,17 @@ static LFBluetoothManager *sharedData = nil;
     }
 
 }
-
-
 - (void)writeConfigData:(NSData *)data
 {
     //    // // // NSLog(@"=======================================================");
            NSLog(@"Writing data %@\n",  data);
-    
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         if ([self isConfig]) {
             [discoveredPeripheral writeValue:data forCharacteristic:charactersticsList[4] type:CBCharacteristicWriteWithResponse];
         } else {
             [discoveredPeripheral writeValue:data forCharacteristic:charactersticsList[5] type:CBCharacteristicWriteWithResponse];
         }
-        
     });
-    
 }
 
 - (void)writeConfigDataForFaultsList:(NSData *)data {
@@ -787,4 +783,21 @@ static LFBluetoothManager *sharedData = nil;
 - (void) setMacString:(NSString *) macStr {
     macString = macStr;
 }
+
+- (NSData *) getConfigSeedData {
+    return configSeedData;
+}
+- (NSString *) getMacString
+{
+    return macString;
+}
+- (NSString *) getPasswordString {
+    return password;
+}
+
+- (void)readValueForCharacteristic:(CBCharacteristic *)characteristic{
+    [discoveredPeripheral readValueForCharacteristic:characteristic];
+
+}
+
 @end

@@ -9,5 +9,6 @@
 #import "LFBaseViewController.h"
 
 @interface LFInfoViewController : LFBaseViewController
+@property (nonatomic,assign) BOOL isAdvConfig;
 
 @end

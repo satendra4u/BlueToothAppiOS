@@ -140,9 +140,12 @@
     }
 
     [self dismissViewControllerAnimated:NO completion:^{
-        if (_delegate && [_delegate respondsToSelector:@selector(selectedValue: andPassword:)]) {
-            NSString *newVal = self.textFiled.text;
-            [_delegate selectedValue:newVal andPassword:password];
+        NSString *newVal = self.textFiled.text;
+        if (newVal.length) {
+            if (_delegate && [_delegate respondsToSelector:@selector(selectedValue: andPassword:)]) {
+                
+                [_delegate selectedValue:newVal andPassword:password];
+            }
         }
     }];
 
@@ -151,6 +154,7 @@
 - (IBAction)infoAction:(UIButton *)sender
 {
     LFInfoViewController *info = (LFInfoViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFInfoViewControllerID"];
+    info.isAdvConfig = _isAdvConfig;
     [self.navigationController pushViewController:info animated:YES];
 }
 

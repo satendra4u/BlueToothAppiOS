@@ -326,6 +326,8 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
     [tabBarController setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
@@ -670,6 +672,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     } else {
         editing.showAuthentication = YES;//YES to show the password screen.
     }
+    editing.isAdvConfig = !isBasic;
     [navController setViewControllers:@[editing]];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.navigationController presentViewController:navController animated:NO completion:nil];
@@ -681,17 +684,18 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 - (void)toggledTappedAtIndexPath:(NSIndexPath *)indexPath {
     
     isToggleCell = YES;
+    if (indexPath.section == 1) {
+        selectedTag = indexPath.row + AdvancedSection0RowsCount;
+    } else if (indexPath.section == 2) {
+        selectedTag = indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount;
+    }
+    else if (indexPath.row == -1) {
+        //For edit action.
+        selectedTag = -1;
+    }
+
        if ([LFBluetoothManager sharedManager].isPasswordVerified) {
-        if (indexPath.section == 1) {
-            selectedTag = indexPath.row + AdvancedSection0RowsCount;
-        } else if (indexPath.section == 2) {
-            selectedTag = indexPath.row + AdvancedSection0RowsCount + AdvancedSectionFeaturesCount;
-        }
-        else if (indexPath.row == -1) {
-            //For edit action.
-            selectedTag = -1;
-        }
-        
+           
         [self toggleSelectedWithSuccess:YES andPassword:nil];
     } else {
         [self showPasswordScreenWithIndexpath:indexPath];
@@ -779,7 +783,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         return;
     }
     
-            if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
+    if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
             [self removeIndicator];
             isWrite = NO;
             NSData *stData = [tData subdataWithRange:NSMakeRange(11, 1)];
@@ -842,12 +846,17 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                         [self removeIndicator];
                         return;
                     }
+                    if (isToggleCell) {
+                        [self toggleSelectedWithSuccess:YES andPassword:nil];
+                        isToggleCell = NO;
+                    }
                     
                     /////////////////                               ///////////
                     alertMessage = kSave_Success;
                     isReRead = YES;
                     break;
                 case 2:
+                    [editing authDoneWithStatus:NO shouldDismissView:YES];
                     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
                     isChangingPassword = NO;
                     alertMessage = kAuthenticationFailed;
@@ -1043,6 +1052,18 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
 
+
+- (void)readCharactisticData:(CBCharacteristic *)characteristic
+{
+    [[LFBluetoothManager sharedManager] setRealtime:NO];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+    [[LFBluetoothManager sharedManager] readValueForCharacteristic:characteristic];
+    
+   // NSData *data1 = [NSData dataWithBytes:data length:20];
+   // [[LFBluetoothManager sharedManager] setSelectedTag:[NSString stringWithFormat:@"%d", (int)index]];
+   // [[LFBluetoothManager sharedManager] writeConfigData:data1];
+}
 - (NSString *)getConvertedStringForValue:(NSUInteger) dataVal {
     
     NSString *strVal = [NSString stringWithFormat:@"%0.2lu", (unsigned long)dataVal];
@@ -1061,13 +1082,10 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     NSString *convertedVal = [NSString stringWithFormat:@"%@", strVal];
     return convertedVal;
 }
-
 - (void)getValuesFromData:(NSData *)data withForamte:(NSString *)formate
 {
     NSUInteger val = [LFUtilities getValueFromHexData:data];
-    
     unichar c = [formate characterAtIndex:0];
-    
     NSString *convertedVal = [NSString stringWithFormat:@"%0.2lu", (unsigned long)val];
     
     switch (c) {
@@ -1557,7 +1575,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             passwordVal = password;
         }
     }
-    
     if (selectedTag == FriendlyNameFirstWrite || selectedTag == FriendlyNameSecondWrite) {
         [self saveNewFriendlyNameWithValue:txt];
         return;
@@ -1588,7 +1605,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     } else {
         display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:selectedTag] : [advanceConfigDetails objectAtIndex:selectedTag]);
         if (selectedTag == Advanced_GFTD) {
-            txt = [NSString stringWithFormat:@"%ld",[txt integerValue] * 10] ;
+            txt = [NSString stringWithFormat:@"%d",[txt intValue] * 10] ;
         }
         display.value = txt;
         
@@ -1719,11 +1736,13 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [tblConfigDisplay reloadData];
 }
 
-- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic
 {
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
     [self removeIndicator];
     if (isSuccess) {
+        [self readCharactisticData:characteristic];
+        /*
         if (isVerifyingPassword) {
             [self readCharactisticsWithIndex:0];
         }
@@ -1732,7 +1751,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         }
         else {
             [self readCharactisticsWithIndex:selectedTag];
-        }
+        }*/
     }
     else {
         //Error occured while writing data to device.
@@ -1871,7 +1890,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     return YES;  //Please remove return if client ask for feature enabled disabled section
     // FIXME: refacter this code
     /* THIS METHOD CHECKING CONFIGURATION FEATURED VALUES EXCEPT */
-    if (!((basicConfigDetails != nil && basicConfigDetails.count > 0) && (advanceConfigDetails != nil && advanceConfigDetails.count > 0))) {
+  /*  if (!((basicConfigDetails != nil && basicConfigDetails.count > 0) && (advanceConfigDetails != nil && advanceConfigDetails.count > 0))) {
         return NO;
     }
     BOOL basicStatus = YES;
@@ -1923,7 +1942,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         }
     }
     
-    return (basicStatus && advancedStatus);
+    return (basicStatus && advancedStatus);*/
 }
 
 #pragma mark Setter Methods

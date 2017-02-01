@@ -1,4 +1,4 @@
-//
+ //
 //  LFInfoViewController.m
 //  Littlefuse
 //
@@ -24,7 +24,9 @@
     self.navigationController.navigationBar.topItem.titleView = imageView;
 
     [self.activityIndicator startAnimating];
-    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"]]]; //@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"
+    NSString *urlString = _isAdvConfig ? @"http://www.littelfuse.com/mp8000advanced" : @"http://www.littelfuse.com/mp8000basic";
+    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
+   // [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"]]]; //@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"
 }
 
 - (void)didReceiveMemoryWarning {

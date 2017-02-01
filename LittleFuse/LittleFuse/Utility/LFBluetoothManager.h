@@ -38,7 +38,7 @@
  * This method alert after writing data to device.
  * @param: isSuccess: Specifies if the write is success or not.
  */
-- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess;
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic;
 
 /**
  * This method is called when configuration data is received for a given index.
@@ -115,12 +115,12 @@
 @property (assign, nonatomic) BOOL isPassWordChange;
 
 @property (assign, nonatomic) NSData *macData;
-@property (strong, nonatomic) NSString *macString;
-@property (strong, nonatomic) NSString *passwordVal;
+//@property (strong, nonatomic) NSString *macString;
+//@property (strong, nonatomic) NSString *passwordVal;
 
 
 @property (assign, nonatomic) BOOL isPasswordVerified;
-@property (assign, nonatomic) NSData *configSeedData;
+//@property (assign, nonatomic) NSData *configSeedData;
 
 
 + (LFBluetoothManager *)sharedManager;
@@ -210,6 +210,7 @@
 
 - (void)resetConfigurationCharacteristics;
 
+- (void)readValueForCharacteristic:(CBCharacteristic *)characteristic;
 
 #pragma Mark Data Conversion Methods
 
@@ -222,5 +223,10 @@
 - (void) setPasswordString:(NSString *) passwordString;
 - (void) setConfigSeedData:(NSData *) seedData;
 - (void) setMacString:(NSString *) macStr;
+
+- (NSData *) getConfigSeedData;
+- (NSString *) getMacString;
+- (NSString *) getPasswordString;
+
 
 @end

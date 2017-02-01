@@ -1415,6 +1415,7 @@
                         <outlet property="btnCancel" destination="2rc-PX-bgs" id="VD7-en-1ko"/>
                         <outlet property="btnSave" destination="Ldy-eF-cJ4" id="wl0-TT-Mo2"/>
                         <outlet property="btnsView" destination="TWR-KO-auY" id="a4E-eR-kjv"/>
+                        <outlet property="infoBtn" destination="ezg-KJ-6hl" id="byq-8j-wZd"/>
                         <outlet property="lblMax" destination="J4d-kO-uE9" id="ziO-qx-hJa"/>
                         <outlet property="lblMin" destination="iat-kF-tQ5" id="qXB-v4-oM7"/>
                         <outlet property="lblSelectTxt" destination="Avr-Zi-hFZ" id="leg-Vk-dRo"/>

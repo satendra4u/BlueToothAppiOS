@@ -73,7 +73,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     _lblSystemStatus.adjustsFontSizeToFitWidth = YES;
     
     
-   // [self readCharactisticsWithIndex:2];
+    [self readCharactisticsWithIndex:2];
 
     [tblDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [tblDisplay setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
@@ -97,10 +97,11 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
     [tabBarController setEnableRefresh:NO];
     canContinueTimer = YES;
-    [[LFBluetoothManager sharedManager]setDelegate:self];
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
     float batteryLevel = [[UIDevice currentDevice] batteryLevel];
     if (batteryLevel > 0.20) {
@@ -112,8 +113,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     refreshTimeInterval = 600;
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    [[LFBluetoothManager sharedManager] setDelegate:nil];
-    [[LFBluetoothManager sharedManager] setDelegate:self];
+    
     [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:10];
    /* if ([LFBluetoothManager sharedManager].macData) {
         [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
@@ -141,6 +141,8 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [[LFBluetoothManager sharedManager] setRealtime:NO];
 
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+   // [[LFBluetoothManager sharedManager] setDelegate:nil];
+
    //
 }
 - (void)viewDidDisappear:(BOOL)animated
@@ -644,6 +646,29 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
 
+- (void)readCharactistic:(CBCharacteristic *)charactistic
+{
+    
+    
+   /* Byte data[20];
+    for (int i=0; i < 20; i++) {
+        if (i== 8) {
+            data[i] = realMemMap[index];
+        } else if (i == 10){
+            data[i] = realMemFieldLens[index];
+        }  else {
+            data[i] = (Byte)0x00;
+        }
+    }
+    
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    [[LFBluetoothManager sharedManager] writeConfigData:data1];*/
+    
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] readValueForCharacteristic:charactistic];
+    
+}
 /**
  *Calculates timers data received from device.
  */
@@ -695,7 +720,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 #pragma mark Action Methods
 
 - (IBAction)resetRelayAction:(id)sender {
-    /*
+    
     canContinueTimer = NO;
     [[LFBluetoothManager sharedManager] stopFaultTimer];
     
@@ -703,7 +728,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
         isVerifyingPassword = YES;
         LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
         editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
-        
+        editing.selectedText = @"password";
         self.providesPresentationContextTransitionStyle = YES;
         self.definesPresentationContext = YES;
         [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
@@ -722,7 +747,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else{
         
         [self writeRelayData];
-    }*/
+    }
 }
 #pragma mark -Editing Delegate
 
@@ -730,11 +755,11 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     // TODO: Ask aswin to y it is
    // isVerifyingPassword = YES;
     if (passwordStr != nil) {
-        [LFBluetoothManager sharedManager].passwordVal = passwordStr;
+        [[LFBluetoothManager sharedManager] setPasswordString:passwordStr] ;
     }
     
     
-    if(! ([LFBluetoothManager sharedManager].configSeedData && [LFBluetoothManager sharedManager].macData) ){
+    if(! ([[LFBluetoothManager sharedManager] getConfigSeedData] && [LFBluetoothManager sharedManager].macData) ){
         [self readDeviceMacAndAuthSeed];
     }
     else{
@@ -819,13 +844,14 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 }
 
-- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic
 {
     //isWrite = NO;
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
     [self removeIndicator];
     if (isSuccess) {
-        [self readCharactisticsWithIndex:2];//2 for index of reset relay address and length
+        [self readCharactistic:characteristic];
+        //[self readCharactisticsWithIndex:2];//2 for index of reset relay address and length
         //canContinueTimer = YES;
 
         }
@@ -845,13 +871,13 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     if (authUtils == nil) {
         authUtils = [[LFAuthUtils alloc]init];
     }
-    NSLog(@"Password is %@",[LFBluetoothManager sharedManager].passwordVal );
-    NSLog(@"mac string is %@",[LFBluetoothManager sharedManager].macString );
-    NSLog(@"configseed data is %@",[LFBluetoothManager sharedManager].configSeedData.bytes );
+    NSLog(@"Password is %@",[[LFBluetoothManager sharedManager] getPasswordString] );
+    NSLog(@"mac string is %@",[[LFBluetoothManager sharedManager] getMacString] );
+    NSLog(@"configseed data is %@",[[LFBluetoothManager sharedManager] getConfigSeedData] );
 
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
 
-        [authUtils initWithPassKey:[LFBluetoothManager sharedManager].passwordVal andMacAddress:[LFBluetoothManager sharedManager].macString andSeed:[LFBluetoothManager sharedManager].configSeedData.bytes];
+        [authUtils initWithPassKey:[[LFBluetoothManager sharedManager] getPasswordString] andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed:[[LFBluetoothManager sharedManager] getConfigSeedData].bytes];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
     
@@ -906,9 +932,9 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 - (void)readDeviceMacAndAuthSeed {
     isFetchingMacOrSeedData = YES;
-
+    [editing authDoneWithStatus:YES shouldDismissView:YES];
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
- [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
+    [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
 
 }
 
@@ -930,7 +956,8 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
         [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
         [self removeIndicator];
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
-        [self performSelector:@selector(writeRelayData) withObject:nil afterDelay:2];
+        
+        [self performSelector:@selector(showAlertToResetRelay) withObject:nil afterDelay:1];
         return;
     }
     
