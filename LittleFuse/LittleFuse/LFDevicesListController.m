@@ -1,4 +1,4 @@
-//
+ //
 //  ViewController.m
 //  LittleFuse
 //
@@ -133,7 +133,6 @@
 
 - (void)initialSetup{
     [LFBluetoothManager sharedManager].isPasswordVerified = NO;
-    //    NSLog(@"%s",__func__);
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
     isDeviceSelected = NO;
@@ -142,7 +141,6 @@
     [[LFBluetoothManager sharedManager] setDisplayCharacterstics:NO];
     if ([[LFBluetoothManager sharedManager] getDevicesList]) {
         peripheralsList = [[LFBluetoothManager sharedManager] getDevicesList];
-        //        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
     canRefresh = YES;
@@ -150,8 +148,7 @@
     float batteryLevel = [[UIDevice currentDevice] batteryLevel];
     if (batteryLevel > 0.20) {
         refreshTimeInterval = 5;
-    }
-    else {
+    } else {
         refreshTimeInterval = 600;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -195,18 +192,15 @@
    // [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
 
 #pragma mark - UITableView Delegate -
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     lblScanning.hidden = [peripheralsList count] ? YES : NO;
     return peripheralsList.count;
 }
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     LFDeviceTableViewCell *cell = (LFDeviceTableViewCell *)[tableView dequeueReusableCellWithIdentifier:kDeviceCellID];
@@ -268,7 +262,6 @@
 - (void)verifyDeviceCount {
     if (!isScanDataFound) {
         [peripheralsList removeAllObjects];
-//        NSLog(@"%s", __func__);
         [tblDevices reloadData];
     }
 }

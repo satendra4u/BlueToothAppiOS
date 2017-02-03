@@ -128,6 +128,7 @@ typedef enum : NSUInteger {
     BOOL isVerifyingPassword;
     BOOL isChangingPassword;
     BOOL isResettingSeed;
+    BOOL isInitialReading;
     NSInteger curPassWriteIndex;
     NSString *macString;
     NSData *configSeedData;
@@ -182,6 +183,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    isInitialReading = YES;
     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
     curPassWriteIndex = 0;
     stFieldSuccessCount = 0;
@@ -323,7 +325,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [self removeIndicator];
     [[LFBluetoothManager sharedManager] stopFaultTimer];
 }
-
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
     [[LFBluetoothManager sharedManager] setDelegate:nil];
@@ -339,8 +340,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
         [self readCharactisticsWithIndex:currentIndex];
     }
-    
-    
 }
 
 - (void)showCharacterstics:(NSMutableArray *)charactersticsArray
@@ -433,10 +432,10 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     if (!canContinueTimer) {
         return;
     }
+    isInitialReading = YES;
     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
     canContinueTimer = YES;
     currentIndex = 0;
-    //isReadingData = YES;
     [self removeIndicator];
     [self readCharactisticsWithIndex:currentIndex];
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
@@ -694,10 +693,12 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         selectedTag = -1;
     }
 
-       if ([LFBluetoothManager sharedManager].isPasswordVerified) {
+    if ([LFBluetoothManager sharedManager].isPasswordVerified) {
            
         [self toggleSelectedWithSuccess:YES andPassword:nil];
+        
     } else {
+        
         [self showPasswordScreenWithIndexpath:indexPath];
     }
 
@@ -742,6 +743,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     previousSelected = @"";
     if (sender.selectedSegmentIndex == 0) {
         isBasic = YES;
+        
         [[LFBluetoothManager sharedManager] setDelegate:self];
     } else {
         [[LFBluetoothManager sharedManager] setDelegate:self];
@@ -750,7 +752,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
             [self readCharactisticsWithIndex:currentIndex];
             isAdvanceLoded = YES;
-           // isReadingData = YES;
+             isInitialReading = YES;
         }
     }
     
@@ -846,10 +848,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                         [self removeIndicator];
                         return;
                     }
-                    if (isToggleCell) {
-                        [self toggleSelectedWithSuccess:YES andPassword:nil];
-                        isToggleCell = NO;
-                    }
+                    
                     
                     /////////////////                               ///////////
                     alertMessage = kSave_Success;
@@ -940,21 +939,29 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                 [editing authDoneWithStatus:YES shouldDismissView:isToggleCell];
                 currentIndex = selectedTag;
                 [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+                if (isToggleCell) {
+                    [self toggleSelectedWithSuccess:YES andPassword:nil];
+                    isToggleCell = NO;
+                }
                 return;
             }
+            
+           
             return;
         }
         //////////////////////////////   re reading process   ends /////////////////////////
         
         
         //////////////////////////////  this is for only for first reading      ///////////////////////
+    if (isInitialReading) {
+       
         currentIndex = currentIndex + 1;
         if (isBasic) {
             if (currentIndex > basicConfigDetails.count - 1) {
                 currentIndex = 0;
                 [self removeIndicator];
                 [self readDeviceMacAndAuthSeed];
-                //isReadingData = NO;
+                 isInitialReading = NO;
                 return;
             }
         } else {
@@ -962,6 +969,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                 if (currentIndex > advanceConfigFeatureDetails.count - 1) {
                     currentIndex = 0;
                     [self removeIndicator];
+                     isInitialReading = NO;
                     return;
                 }
             }
@@ -969,12 +977,15 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                 if (currentIndex > advanceConfigDetails.count - 1) {
                     currentIndex = 0;
                     [self removeIndicator];
+                     isInitialReading = NO;
                     return;
                 }
             }
             
         }
-    [self readCharactisticsWithIndex:currentIndex];
+        [self readCharactisticsWithIndex:currentIndex];
+
+    }
 }
 
 - (void)configureServiceWithValue:(NSData *)data
@@ -1563,7 +1574,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     isVerifyingPassword = YES;
     passwordVal = passwordStr;
     [[LFBluetoothManager sharedManager] setPasswordString:passwordStr];
-    LFDisplay *ctVal = [advanceConfigDetails objectAtIndex:0];
+    LFDisplay *ctVal = [basicConfigDetails objectAtIndex:0]; //([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0]);
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
 

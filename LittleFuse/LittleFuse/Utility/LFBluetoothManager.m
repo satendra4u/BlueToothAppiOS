@@ -282,7 +282,9 @@ static LFBluetoothManager *sharedData = nil;
     }
     
     // Discover the characteristic we want...
-    
+    for (CBService *services in peripheral.services) {
+        NSLog(@"Servicces: %@\n\n\n", services);
+    }
     CBService *service = [peripheral.services lastObject];
     discoveredPeripheral = peripheral;
     [discoveredPeripheral discoverCharacteristics:nil forService:service];
@@ -312,8 +314,8 @@ static LFBluetoothManager *sharedData = nil;
     
     // Again, we loop through the array, just in case.
     for (CBCharacteristic *characteristic in service.characteristics) {
-        [peripheral setNotifyValue:YES forCharacteristic:characteristic];
         [discoveredPeripheral setNotifyValue:YES forCharacteristic:characteristic];
+        NSLog(@"charecterstics for notify: %@ \n\n",characteristic);
     }
     
     // Once this is complete, we just need to wait for the data to come in.
@@ -527,7 +529,11 @@ static LFBluetoothManager *sharedData = nil;
 {
     // // // NSLog(@"%s", __func__);
     if (error) {
-        // // // NSLog(@"Error changing notification state: %@", error.localizedDescription);
+         NSLog(@"Error changing notification state: %@", error.localizedDescription);
+        return;
+    }
+    if (characteristic.isNotifying) {
+        NSLog(@"Notification began on %@", characteristic);
     }
 }
 
@@ -578,18 +584,15 @@ static LFBluetoothManager *sharedData = nil;
     discoveredPeripheral = nil;
     
     if (devicesList.count > indexOfObj) {
-        LFPeripheral *device = devicesList[indexOfObj];
-        selectedPeripheral = device;
-        CBPeripheral *peripheral = device.peripheral;
-        self.selectedDevice = device.name;
-        discoveredPeripheral = peripheral;
+        selectedPeripheral = devicesList[indexOfObj];
+        self.selectedDevice = selectedPeripheral.name;
+        discoveredPeripheral = selectedPeripheral.peripheral;
         
-        device.paired = YES;
-        [devicesList replaceObjectAtIndex:indexOfObj withObject:device];
+        selectedPeripheral.paired = YES;
+        [devicesList replaceObjectAtIndex:indexOfObj withObject:selectedPeripheral];
         [[LFDataManager sharedManager] updatePeripheralDetails:selectedPeripheral];
-        // And connect
         // // // NSLog(@"Connecting to peripheral %@", peripheral);
-        [centralManager connectPeripheral:peripheral options:nil];
+        [centralManager connectPeripheral:discoveredPeripheral options:nil];
     }
 }
 
