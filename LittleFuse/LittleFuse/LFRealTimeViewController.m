@@ -24,6 +24,8 @@
     __weak IBOutlet UITableView *tblDisplay;
     __weak IBOutlet UILabel *lblDeviceName;
     
+    __weak IBOutlet UILabel *activeTimerLabel;
+    
     NSMutableArray *configArr;
     NSMutableArray *sectionArray;
     
@@ -113,12 +115,10 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     //refreshTimeInterval = 600;
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    
     [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:10];
    /* if ([LFBluetoothManager sharedManager].macData) {
         [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
     }*/
-   
 }
 
 
@@ -447,7 +447,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
         [mutAttrStr appendAttributedString:attrStr];
         [self.lblSystemStatus setAttributedText:mutAttrStr];
     }
-    NSData *data1, *data2;
+        NSData *data1, *data2;
     data1 = [data subdataWithRange:NSMakeRange(18, 2)];
     data2 = [data subdataWithRange:NSMakeRange(12, 2)];
     NSMutableData *combinedData = [[NSMutableData alloc]init];
@@ -459,6 +459,9 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     NSInteger val1 = [LFUtilities getValueFromHexData:combinedData];
     NSInteger val2 = [LFUtilities getValueFromHexData:data1];
     NSInteger vunb = [LFUtilities getValueFromHexData:data2];
+    
+   
+
     
     LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (vunb/100.0)] Code:@"TCU"];
     NSInteger hours = val1/3600; //Hours
@@ -473,8 +476,57 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [sectionArray replaceObjectAtIndex:3 withObject:arr];
     [tblDisplay reloadData];
     tblDisplay.contentOffset = currentContentOffset;
+    
+    
+    
+   
+    
+    NSInteger timerVal = [LFUtilities getValueFromHexData:[data subdataWithRange:NSMakeRange(8, 4)]];
+    
+    NSInteger timerHours = timerVal/3600; //Hours
+    NSInteger timerMinutes = timerHours/60; //Minutes
+    
+    NSInteger timerSeconds = timerMinutes%60; //Seconds
+    
+    NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerHours] : [NSString stringWithFormat:@"0%ld",timerHours]);
+    NSString *timerMinutesString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerMinutes] : [NSString stringWithFormat:@"0%ld",timerMinutes]);
+    NSString *timerSecondsString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerSeconds] : [NSString stringWithFormat:@"0%ld",timerSeconds]);
+    NSMutableAttributedString *activeTimerTitelAttrStr = [[NSMutableAttributedString alloc]initWithString:@"Active Timer: "];
+    NSString *rdrString = [self getRDRFromMask:[data subdataWithRange:NSMakeRange(0, 4)]];
+    NSString *timerString = [NSString stringWithFormat:@" %@ : %@ : %@ %@",timerHoursString,timerMinutesString,timerSecondsString,rdrString];
+    NSLog(@"timer string: %@",timerString);
+
+    NSAttributedString *activeTimerValueAttrStr = [[NSAttributedString alloc]initWithString:timerString attributes:@{
+                                                                                                                    NSBackgroundColorAttributeName: [UIColor clearColor] ,
+                                                                                                                    NSForegroundColorAttributeName: [UIColor blackColor]
+                                                                                                                    }];
+    [activeTimerTitelAttrStr appendAttributedString:activeTimerValueAttrStr];
+    [activeTimerLabel setAttributedText:activeTimerTitelAttrStr];
+
 }
 
+-(NSString *)getRDRFromMask:(NSData *)maskData
+{
+    NSString* rdr = @"RD";
+    NSString *mask = [self getDataStringFromData:maskData];
+    if (mask.length) {
+        
+        if (mask.length > 4) {
+            mask = [mask substringWithRange:NSMakeRange(0, 4)];
+        }
+        NSInteger r0 = 0x0001;
+        NSInteger r1 = 0x0002;
+        NSInteger r2 = 0x0004;
+        NSInteger val = [mask integerValue];
+        NSInteger status = (val & r2) | (val & r1) | (val & r0);
+        if (status == 0) {
+            rdr = @"Inactive";
+        } else {
+            rdr = [rdr stringByAppendingString:[NSString stringWithFormat:@"%ld",status - 1]];
+        }
+    }
+    return rdr;
+}
 - (NSString *)getFaultValueForDataString:(NSString *)dataString {
     NSString *codeVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
