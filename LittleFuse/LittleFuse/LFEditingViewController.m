@@ -254,7 +254,9 @@
         if (_isAdvConfig) {
             if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
                 [_delegate toggleSelectedWithSuccess:YES andPassword:password];
-                [self dismissViewControllerAnimated:NO completion:nil];
+                if (dismissView) {
+                    [self dismissViewControllerAnimated:NO completion:nil];
+                }
                 return;
             }
         }

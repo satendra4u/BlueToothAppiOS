@@ -110,7 +110,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else {
         refreshTimeInterval = 600;
     }
-    refreshTimeInterval = 600;
+    //refreshTimeInterval = 600;
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
     
@@ -165,7 +165,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else {
         refreshTimeInterval = 600;
     }
-     refreshTimeInterval = 600;
+     //refreshTimeInterval = 600;
     if (!canContinueTimer) {
         return;
     }
@@ -974,40 +974,10 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
             case 0:
                 isReRead = NO;
                 isWrite = YES;
-               /*
-                // run timer for sending 10 times read for isSTFieldSuccess set to YES
-                // set stFieldSuccessCount  set 0 on every write
-                if (stFieldSuccessCount == 10) {
-                    self.isSTFieldSuccess = NO;
-                    stFieldSuccessCount = 0;
-                    return;
-                }
-                alertMessage = kWriting_Failed;
-                if (isVerifyingPassword && isFirstTimeAuthenticate) {
-                    self.isSTFieldSuccess = YES;
-                    return;
-                }*/
+              
                 break;
             case 1:
-              /*  if (isReadingFriendlyName && !isVerifyingPassword) {
-                    if (selectedTag == FriendlyNameSecondWrite) {
-                        selectedTag = FriendlyNameThirdWrite;
-                        [self changeFriendlyNameProcess];
-                        return;
-                    } if (selectedTag == FriendlyNameThirdWrite) {
-                        isReadingFriendlyName = NO;
-                        NSLog(@"my friendly name: %@\n\n\n\n", friendlyNameStr );
-                        [self setDeviceName:friendlyNameStr];
-                        return;
-                    }
-                }
-                if (isReadingFriendlyName && currentIndex == FriendlyNameFirstWrite && !isVerifyingPassword) {
-                    selectedTag = FriendlyNameSecondWrite;
-                    [self changeFriendlyNameProcess];
-                    return;
-                }
-                
-                self.isSTFieldSuccess = NO;*/
+              
                 alertMessage = kSave_Success;
                // isReRead = YES;
                 [authUtils nextAuthCode];

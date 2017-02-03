@@ -1183,25 +1183,22 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         [basicConfigDetails replaceObjectAtIndex:currentIndex withObject:display];
     } else {
         LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:currentIndex] :[advanceConfigDetails objectAtIndex:currentIndex]);
-        if (!isBasic) {
             if (currentIndex == AdvancedSection0RowsCount ) {
                 if ([self isNeedToRemoveFeatureEnableMaskSection]) {
                     _hardwareConfigVal = val;
-                }
-                else{
+                } else{
                     _featureEndisVal = val;
                 }
             } else if (currentIndex == AdvancedSection0RowsCount + AdvancedSectionFeaturesCount ) {
                 _hardwareConfigVal = val;
             }
-        }
         if ([self isNeedToRemoveFeatureEnableMaskSection]) {
             switch ((AdvancedConfiguration)currentIndex+AdvancedSectionFeaturesCount) {
                 case Advanced_SPM:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
                     break;
                 case Advanced_SPT:
-                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
                     break;
                 case Advanced_PTC:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
@@ -1217,9 +1214,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     display.value = convertedVal;
                     break;
             }
-
-        }
-        else{
+        } else {
             switch ((AdvancedConfiguration)currentIndex) {
                 case Advanced_GFT:
                     display.value = [NSString stringWithFormat:@"%d", (_featureEndisVal & (1 << 0))? 1:0];
@@ -1249,7 +1244,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 5))? 1:0];
                     break;
                 case Advanced_SPT:
-                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 7))? 1:0];
+                    display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 6))? 1:0];
                     break;
                 case Advanced_PTC:
                     display.value = [NSString stringWithFormat:@"%d", (_hardwareConfigVal & (1 << 9))? 1:0];
@@ -1574,7 +1569,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     isVerifyingPassword = YES;
     passwordVal = passwordStr;
     [[LFBluetoothManager sharedManager] setPasswordString:passwordStr];
-    LFDisplay *ctVal = [basicConfigDetails objectAtIndex:0]; //([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0]);
+    LFDisplay *ctVal = (isBasic ? [basicConfigDetails objectAtIndex:0] : ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0])); //([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0]);
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
 
@@ -1627,6 +1622,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 - (void)toggleSelectedWithSuccess:(BOOL)isSuccess andPassword:(NSString *)password{
+    if (!isToggleCell) {
+        return;
+    }
     if (!isSuccess) {
         [tblConfigDisplay reloadData];
         return;
@@ -1644,7 +1642,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                         _hardwareConfigVal  ^= 1 << 5;
                         break;
                     case Advanced_SPT:
-                        _hardwareConfigVal  ^= 1 << 7;
+                        _hardwareConfigVal  ^= 1 << 6;
                         break;
                     case Advanced_PTC:
                         _hardwareConfigVal  ^= 1 << 9;
@@ -1700,7 +1698,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                         _hardwareConfigVal  ^= 1 << 5;
                         break;
                     case Advanced_SPT:
-                        _hardwareConfigVal  ^= 1 << 7;
+                        _hardwareConfigVal  ^= 1 << 6;
                         break;
                     case Advanced_PTC:
                         _hardwareConfigVal  ^= 1 << 9;
