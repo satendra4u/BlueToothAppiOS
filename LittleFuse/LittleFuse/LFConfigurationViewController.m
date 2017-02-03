@@ -1574,7 +1574,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     isVerifyingPassword = YES;
     passwordVal = passwordStr;
     [[LFBluetoothManager sharedManager] setPasswordString:passwordStr];
-    LFDisplay *ctVal = [basicConfigDetails objectAtIndex:0]; //([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0]);
+    LFDisplay *ctVal = (isBasic ? [basicConfigDetails objectAtIndex:0] : ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0])); //([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:0] : [advanceConfigDetails objectAtIndex:0]);
     [self writeDataToIndex:0 withValue:ctVal.value.doubleValue];
 }
 
