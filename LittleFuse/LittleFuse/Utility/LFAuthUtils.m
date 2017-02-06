@@ -93,14 +93,14 @@ NSMutableData* mMacAddress;
     //    NSMutableData *passKeyBytes = [self dataFromHexString:passKey];
     NSData *randData = [NSData dataWithBytes:RAND_SALT1 length:sizeof(RAND_SALT1)];
     NSData *passkeydata = [passKey dataUsingEncoding:NSUTF8StringEncoding];
-    NSLog(@"Pass key data = %@", passkeydata);
+    DLog(@"Pass key data = %@", passkeydata);
     NSMutableData *mutableData = [[NSMutableData alloc]init];
     
     [mutableData appendData:randData];
     [mutableData appendData:mac];
     [mutableData appendData:passkeydata];
     NSData *resultData = [mutableData SHA256];
-    NSLog(@"Perm key with single data= %@", resultData);
+    DLog(@"Perm key with single data= %@", resultData);
     return [NSMutableData dataWithData:resultData];
 }
 
@@ -110,7 +110,7 @@ NSMutableData* mMacAddress;
 
 - (NSMutableData *)computeAuthCode:(const char *)byteData address:(short)address size:(short)size {
     NSMutableData *fullAuthCode = [self computeFullAuthCodeWithSeed:mSeed permKey:mPermKey data:byteData address:address size:size];
-    NSLog(@"Full auth code = %@", fullAuthCode);
+    DLog(@"Full auth code = %@", fullAuthCode);
     NSMutableData *shortenedAuthCode = [[NSMutableData alloc]init];
     mNextSeed = fullAuthCode;
     for (int i = 0; i<8; i++) {

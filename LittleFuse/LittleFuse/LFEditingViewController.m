@@ -80,14 +80,17 @@
         _infoBtn.hidden = YES;
         _lblSelectTxt.text = @"Enter a new name for the device.";
         _textFiled.keyboardType = UIKeyboardTypeDefault;
-    }
-    else if ([_selectedText caseInsensitiveCompare:@"password"] == NSOrderedSame) {
+    } else if ([_selectedText caseInsensitiveCompare:@"password"] == NSOrderedSame) {
         _lblrangeTxt.text = @"Note:Enter password between 1-12 characters";
         _infoBtn.hidden = YES;
         _lblSelectTxt.text = @"Enter a new password for the device.";
         _textFiled.keyboardType = UIKeyboardTypeDefault;
-    }
-    else {
+    } else if ([_selectedText caseInsensitiveCompare:@"ResetPassword"] == NSOrderedSame) {
+        _lblrangeTxt.text = @"Note:Enter reset code in Alpha Numaraic";
+        _infoBtn.hidden = YES;
+        _lblSelectTxt.text = @"Enter the passcode to Reset Password.";
+        _textFiled.keyboardType = UIKeyboardTypeNamePhonePad;
+    } else {
         _infoBtn.hidden = NO;
         _textFiled.keyboardType = UIKeyboardTypeDecimalPad;
     }
@@ -240,8 +243,7 @@
     NSString *password;
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
         password = self.authenticationTextField.text;
-    }
-    else {
+    } else {
         password = nil;
     }
     

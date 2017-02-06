@@ -488,13 +488,13 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     
     NSInteger timerSeconds = timerMinutes%60; //Seconds
     
-    NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerHours] : [NSString stringWithFormat:@"0%ld",timerHours]);
-    NSString *timerMinutesString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerMinutes] : [NSString stringWithFormat:@"0%ld",timerMinutes]);
-    NSString *timerSecondsString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",timerSeconds] : [NSString stringWithFormat:@"0%ld",timerSeconds]);
+    NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerHours] : [NSString stringWithFormat:@"0%ld",(long)timerHours]);
+    NSString *timerMinutesString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerMinutes] : [NSString stringWithFormat:@"0%ld",(long)timerMinutes]);
+    NSString *timerSecondsString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerSeconds] : [NSString stringWithFormat:@"0%ld",(long)timerSeconds]);
     NSMutableAttributedString *activeTimerTitelAttrStr = [[NSMutableAttributedString alloc]initWithString:@"Active Timer: "];
     NSString *rdrString = [self getRDRFromMask:[data subdataWithRange:NSMakeRange(0, 4)]];
     NSString *timerString = [NSString stringWithFormat:@" %@ : %@ : %@ %@",timerHoursString,timerMinutesString,timerSecondsString,rdrString];
-    NSLog(@"timer string: %@",timerString);
+    DLog(@"timer string: %@",timerString);
 
     NSAttributedString *activeTimerValueAttrStr = [[NSAttributedString alloc]initWithString:timerString attributes:@{
                                                                                                                     NSBackgroundColorAttributeName: [UIColor clearColor] ,
@@ -522,7 +522,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
         if (status == 0) {
             rdr = @"Inactive";
         } else {
-            rdr = [rdr stringByAppendingString:[NSString stringWithFormat:@"%ld",status - 1]];
+            rdr = [rdr stringByAppendingString:[NSString stringWithFormat:@"%d", (int)(status - 1)]];
         }
     }
     return rdr;
@@ -870,7 +870,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     
     NSData *data1 = [NSData dataWithBytes:data length:20];
     
-    
     NSData *lengthVal = [data1 subdataWithRange:NSMakeRange(10, 1)];
     char buff;
     [lengthVal getBytes:&buff length:1];
@@ -923,9 +922,9 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     if (authUtils == nil) {
         authUtils = [[LFAuthUtils alloc]init];
     }
-    NSLog(@"Password is %@",[[LFBluetoothManager sharedManager] getPasswordString] );
-    NSLog(@"mac string is %@",[[LFBluetoothManager sharedManager] getMacString] );
-    NSLog(@"configseed data is %@",[[LFBluetoothManager sharedManager] getConfigSeedData] );
+    DLog(@"Password is %@",[[LFBluetoothManager sharedManager] getPasswordString] );
+    DLog(@"mac string is %@",[[LFBluetoothManager sharedManager] getMacString] );
+    DLog(@"configseed data is %@",[[LFBluetoothManager sharedManager] getConfigSeedData] );
 
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
 
@@ -959,6 +958,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [LFBluetoothManager sharedManager].macString = tString;
     [self performSelector:@selector(getSeedData) withObject:nil afterDelay:2];
 }
+
 - (void)getSeedData {
     isFetchingMacOrSeedData = YES;
     NSArray *charsArr = [LFBluetoothManager sharedManager].discoveredPeripheral.services[1].characteristics;
@@ -973,6 +973,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
      [self updateCharactersticsData:data];
     return;
 }
+
 - (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
     NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
     NSData *newVal = [newData subdataWithRange:NSMakeRange(0, 8)];
@@ -987,7 +988,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [editing authDoneWithStatus:YES shouldDismissView:YES];
     [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
     [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
-
 }
 
 - (void) updateCharactersticsData:(NSData *) data {

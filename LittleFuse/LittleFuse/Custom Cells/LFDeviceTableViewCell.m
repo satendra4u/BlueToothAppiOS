@@ -37,7 +37,7 @@
     
 //    int rssiPercent = (int) (100.0f * (127.0f + peripheral.rssi.integerValue) / (127.0f + 20.0f));
     
-  //  NSLog(@"rssiPercent %d", rssiPercent);
+  //  DLog(@"rssiPercent %d", rssiPercent);
     self.lblDeviceName.text = [NSString stringWithFormat:@"MAC XXXX%@", [peripheral.name substringFromIndex:peripheral.name.length-4]];
     self.lblDeviceLocalName.text = [peripheral.name substringToIndex:peripheral.name.length-4];
     self.lblPairedStatus.text = peripheral.isPaired ? PAIRED :  UNPAIRED;

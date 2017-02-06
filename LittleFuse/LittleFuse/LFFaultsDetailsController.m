@@ -189,7 +189,7 @@
     NSInteger Vca = [LFUtilities getValueFromHexData:data4];
     
     NSInteger tcrVal = [LFUtilities getValueFromHexData:data5];
-//    NSLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
+//    DLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
     LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"L1-L2" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vab/100.0f)] Code:@"L1-L2"];
     
     LFDisplay *bToc = [[LFDisplay alloc] initWithKey:@"L2-L3" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vbc/100.0f)] Code:@"L2-L3"];

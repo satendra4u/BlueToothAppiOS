@@ -260,8 +260,8 @@ static LFDataManager *dataManager = nil;
         
         NSSet *filteredSet = [faultList filteredSetUsingPredicate:filter];
 //        if (filteredSet.count > 0) {
-//            NSLog(@"Count of filtered set = %ld", (long)filteredSet.count);
-//            NSLog(@"Items in filtered set = %@", filteredSet);
+//            DLog(@"Count of filtered set = %ld", (long)filteredSet.count);
+//            DLog(@"Items in filtered set = %@", filteredSet);
 //        }
         NSManagedObject *fault = [[filteredSet allObjects] firstObject];
        faultData = [[LFFaultData alloc]initWithManagedObject:fault];

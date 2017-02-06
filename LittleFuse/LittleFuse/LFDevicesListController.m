@@ -232,7 +232,7 @@
         isScanDataFound = YES;
     }
     peripheralsList = [devicesArray mutableCopy];
-//    NSLog(@"%s", __func__);
+//    DLog(@"%s", __func__);
     [tblDevices reloadData];
 }
 
@@ -386,7 +386,7 @@
         isPopupOpened = NO;
         [self hideAllAlerts];
         [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
-//        NSLog(@"%s", __func__);
+//        DLog(@"%s", __func__);
         [tblDevices reloadData];
     }
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
