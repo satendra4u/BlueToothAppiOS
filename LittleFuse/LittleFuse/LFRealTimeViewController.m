@@ -141,13 +141,10 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [[LFBluetoothManager sharedManager] setRealtime:NO];
 
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+    [[LFBluetoothManager sharedManager] disconnectDevice];
    // [[LFBluetoothManager sharedManager] setDelegate:nil];
 
    //
-}
-- (void)viewDidDisappear:(BOOL)animated
-{
-   // [[LFBluetoothManager sharedManager] setDelegate:nil];
 }
 
 

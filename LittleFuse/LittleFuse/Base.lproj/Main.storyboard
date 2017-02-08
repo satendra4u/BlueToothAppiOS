@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="n9M-B5-oUJ">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="n9M-B5-oUJ">
     <device id="retina4_0" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -202,7 +202,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Device ID:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nIa-wo-oNd">
-                                <rect key="frame" x="123.5" y="0.0" width="73" height="50"/>
+                                <rect key="frame" x="124" y="0.0" width="73" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="PVD-DE-Peh"/>
                                 </constraints>
@@ -418,10 +418,10 @@
                                                     </variation>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kgx-eM-aQA">
-                                                    <rect key="frame" x="10" y="-0.5" width="50" height="50"/>
+                                                    <rect key="frame" x="10" y="-1" width="50" height="51"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A-B" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TZU-St-ccI">
-                                                            <rect key="frame" x="15" y="18.5" width="21" height="14"/>
+                                                            <rect key="frame" x="15" y="19" width="21" height="14"/>
                                                             <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="12"/>
                                                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <nil key="highlightedColor"/>
@@ -498,7 +498,7 @@
                                 </connections>
                             </tableView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Faults recorded" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6aH-a2-ygv">
-                                <rect key="frame" x="91.5" y="243.5" width="137" height="17"/>
+                                <rect key="frame" x="92" y="244" width="137" height="17"/>
                                 <fontDescription key="fontDescription" name="Arial-BoldMT" family="Arial" pointSize="15"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1253,6 +1253,18 @@
                                             <action selector="infoAction:" destination="RDj-GM-koO" eventType="touchUpInside" id="lFS-sv-o3i"/>
                                         </connections>
                                     </button>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Conform password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="0QS-mC-vZ1">
+                                        <rect key="frame" x="20" y="135" width="240" height="30"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="30" id="DRy-Bu-a0r"/>
+                                        </constraints>
+                                        <nil key="textColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                        <connections>
+                                            <outlet property="delegate" destination="RDj-GM-koO" id="mpd-gz-fCm"/>
+                                        </connections>
+                                    </textField>
                                 </subviews>
                                 <color key="backgroundColor" red="0.84313725490000002" green="0.84313725490000002" blue="0.84313725490000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
@@ -1272,9 +1284,11 @@
                                     <constraint firstItem="h5f-WJ-5cE" firstAttribute="top" secondItem="0Jf-HK-YfD" secondAttribute="bottom" constant="10" id="Rcw-A2-zHc"/>
                                     <constraint firstItem="bFw-pD-6B9" firstAttribute="centerX" secondItem="eg6-B0-Pvc" secondAttribute="centerX" id="Ti7-GS-ble"/>
                                     <constraint firstAttribute="trailing" secondItem="bFw-pD-6B9" secondAttribute="trailing" constant="40" id="U96-el-vd2"/>
+                                    <constraint firstItem="TWR-KO-auY" firstAttribute="top" secondItem="0QS-mC-vZ1" secondAttribute="bottom" constant="10" id="W8g-RY-CNz"/>
                                     <constraint firstItem="0Jf-HK-YfD" firstAttribute="leading" secondItem="eg6-B0-Pvc" secondAttribute="leading" constant="20" id="WXz-1d-sPv"/>
                                     <constraint firstAttribute="bottom" secondItem="TWR-KO-auY" secondAttribute="bottom" id="ZTa-nq-S1J"/>
                                     <constraint firstItem="TWR-KO-auY" firstAttribute="top" secondItem="bFw-pD-6B9" secondAttribute="bottom" constant="20" id="ZdH-jo-M8I"/>
+                                    <constraint firstAttribute="trailing" secondItem="0QS-mC-vZ1" secondAttribute="trailing" constant="20" id="fmT-56-jks"/>
                                     <constraint firstItem="fN3-UB-NUO" firstAttribute="centerY" secondItem="eg6-B0-Pvc" secondAttribute="centerY" constant="-13.5" id="hA1-QH-Kq3"/>
                                     <constraint firstAttribute="width" constant="280" id="lR6-Ie-B83"/>
                                     <constraint firstAttribute="trailing" secondItem="J4d-kO-uE9" secondAttribute="trailing" constant="5" id="mnI-o6-uAr"/>
@@ -1285,6 +1299,7 @@
                                     <constraint firstAttribute="trailing" secondItem="h5f-WJ-5cE" secondAttribute="trailing" constant="20" id="uGR-dV-rd0"/>
                                     <constraint firstItem="iat-kF-tQ5" firstAttribute="baseline" secondItem="bFw-pD-6B9" secondAttribute="baseline" id="vx0-SH-t3G"/>
                                     <constraint firstAttribute="trailing" secondItem="TWR-KO-auY" secondAttribute="trailing" id="wBK-NM-fIH"/>
+                                    <constraint firstItem="0QS-mC-vZ1" firstAttribute="leading" secondItem="eg6-B0-Pvc" secondAttribute="leading" constant="20" id="ySc-O4-wTK"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.CornerRadius">
@@ -1441,6 +1456,8 @@
                         <outlet property="btnCancel" destination="2rc-PX-bgs" id="VD7-en-1ko"/>
                         <outlet property="btnSave" destination="Ldy-eF-cJ4" id="wl0-TT-Mo2"/>
                         <outlet property="btnsView" destination="TWR-KO-auY" id="a4E-eR-kjv"/>
+                        <outlet property="conformPasswordField" destination="0QS-mC-vZ1" id="mse-cP-ivC"/>
+                        <outlet property="conformPasswordFieldHeight" destination="DRy-Bu-a0r" id="6Mg-W6-f2h"/>
                         <outlet property="infoBtn" destination="ezg-KJ-6hl" id="byq-8j-wZd"/>
                         <outlet property="lblMax" destination="J4d-kO-uE9" id="ziO-qx-hJa"/>
                         <outlet property="lblMin" destination="iat-kF-tQ5" id="qXB-v4-oM7"/>
@@ -1478,7 +1495,7 @@
                                 </connections>
                             </webView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="fSs-h4-tpH">
-                                <rect key="frame" x="141.5" y="265.5" width="37" height="37"/>
+                                <rect key="frame" x="142" y="266" width="37" height="37"/>
                                 <color key="color" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </activityIndicatorView>
                         </subviews>

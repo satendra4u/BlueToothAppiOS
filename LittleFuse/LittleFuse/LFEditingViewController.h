@@ -49,7 +49,8 @@
 @property (nonatomic, strong) NSString *selectedText;
 
 @property (nonatomic, assign) BOOL showAuthentication;
-@property (nonatomic,assign) BOOL isAdvConfig;
+@property (nonatomic, assign) BOOL isAdvConfig;
+@property (nonatomic, assign) BOOL isChangePassword;
 
 
 - (void)authDoneWithStatus:(BOOL)isSuccess shouldDismissView:(BOOL)dismissView;

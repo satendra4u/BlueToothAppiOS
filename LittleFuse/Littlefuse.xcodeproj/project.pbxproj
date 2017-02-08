@@ -537,7 +537,7 @@
 				TargetAttributes = {
 					933600B01C50A81D007CD61A = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = TV8M2M4B6L;
+						DevelopmentTeam = A9ZQW7FAUR;
 						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -936,7 +936,7 @@
 				PRODUCT_NAME = Littlefuse;
 				PROVISIONING_PROFILE = "473288f6-58a1-4093-9e3d-2fe3db2b4d29";
 				PROVISIONING_PROFILE_SPECIFIER = "PurpleTalk Development";
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -958,7 +958,7 @@
 				PRODUCT_NAME = Littlefuse;
 				PROVISIONING_PROFILE = "07965be6-fa7b-4978-bb3a-4d0ebb09f15f";
 				PROVISIONING_PROFILE_SPECIFIER = Swift;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

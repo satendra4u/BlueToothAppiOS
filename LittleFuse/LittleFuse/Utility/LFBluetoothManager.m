@@ -282,9 +282,7 @@ static LFBluetoothManager *sharedData = nil;
     }
     
     // Discover the characteristic we want...
-    for (CBService *services in peripheral.services) {
-        DLog(@"Servicces: %@\n\n\n", services);
-    }
+   
     CBService *service = [peripheral.services lastObject];
     discoveredPeripheral = peripheral;
     [discoveredPeripheral discoverCharacteristics:nil forService:service];

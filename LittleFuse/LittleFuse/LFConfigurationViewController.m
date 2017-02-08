@@ -656,6 +656,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     editing.delegate = self;
     if ([LFBluetoothManager sharedManager].isPasswordVerified) {
         editing.showAuthentication = NO;
+        if (indexPath.row == ChangePasswordWrite) {
+        editing.isChangePassword = YES;
+        }
     } else {
         editing.showAuthentication = YES;//YES to show the password screen.
     }
@@ -693,11 +696,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     currentIndex = ResetPasswordWrite;
     selectedTag = ResetPasswordWrite;
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ResetPasswordWrite inSection:0];
-    if ([[LFBluetoothManager sharedManager] isPasswordVerified]) {
-        [self showPasswordScreenWithIndexpath:indexPath];
-    } else {
-        [self showPasswordScreenWithIndexpath:indexPath];
-    }
+    [self showPasswordScreenWithIndexpath:indexPath];
     
 }
 - (IBAction)changePwdAction:(id)sender {

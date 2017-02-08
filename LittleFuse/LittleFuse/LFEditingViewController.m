@@ -32,6 +32,8 @@
 @property (weak, nonatomic) IBOutlet UILabel *lblMin;
 @property (weak, nonatomic) IBOutlet UILabel *lblMax;
 @property (weak, nonatomic) IBOutlet UITextField *authenticationTextField;
+@property (weak, nonatomic) IBOutlet UITextField *conformPasswordField;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *conformPasswordFieldHeight;
 
 @property (weak, nonatomic) IBOutlet UIView *btnsView;
 
@@ -72,6 +74,13 @@
         self.lblTitleheader.text = _selectedText;
         [self.view bringSubviewToFront:self.passwordView];
 
+    }
+    if (_isChangePassword) {
+        _conformPasswordField.hidden = NO;
+        _conformPasswordFieldHeight.constant = 30;
+    } else {
+        _conformPasswordField.hidden = YES;
+        _conformPasswordFieldHeight.constant = 0;
     }
     _textFiled.delegate = self;
     _authenticationTextField.delegate = self;
@@ -131,8 +140,18 @@
 
 - (IBAction)saveAction:(UIButton *)sender
 {
+    if (_isChangePassword) {
+        if (![self checkPasswordentries]) {
+            self.textFiled.text = @"";
+            self.conformPasswordField.text = @"";
+            [self.textFiled becomeFirstResponder];
+            return;
+        }
+    }
     
     [self.textFiled resignFirstResponder];
+    [self.conformPasswordField resignFirstResponder];
+    
     
     NSString *password;
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
@@ -152,6 +171,12 @@
         }
     }];
 
+}
+- (BOOL) checkPasswordentries {
+    if ([_textFiled.text isEqualToString:_conformPasswordField.text]) {
+        return YES;
+    }
+    return NO;
 }
 
 - (IBAction)infoAction:(UIButton *)sender
