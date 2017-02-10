@@ -522,11 +522,14 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             cont += [tableView numberOfRowsInSection:i];
         }
         cont += indexPath.row;
-        [self checkFeatureValuesWith:YES andIndex:cont];
+        //Will we disabled once client to do so
+       // [self checkFeatureValuesWith:YES andIndex:cont];
         [cell updateValues:[basicConfigDetails objectAtIndex:cont]];
         
     } else {
-        [self checkFeatureValuesWith:NO andIndex:indexPath.row];
+        //Will we disabled once client to do so
+
+       // [self checkFeatureValuesWith:NO andIndex:indexPath.row];
         LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:indexPath.row] : [advanceConfigDetails objectAtIndex:indexPath.row]);
         [cell updateValues:display];
     }
@@ -1844,6 +1847,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 #pragma  mark MEthods for Feature enable mask chacking
+//Will we disabled once client to do so
 
 - (void) checkFeatureValuesWith:(BOOL) isBasicSettings andIndex:(NSUInteger) index {
     if (isBasicSettings) {

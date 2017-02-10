@@ -74,7 +74,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
     _lblSystemStatus.adjustsFontSizeToFitWidth = YES;
     
-    
     [self readCharactisticsWithIndex:2];
 
     [tblDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
@@ -87,6 +86,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [LittleFuseNotificationCenter addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
 }
 
 /**
@@ -120,20 +120,17 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
         [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
     }*/
 }
-
-
 - (void)updateFaultData {
+    //NSLog(@"\n===============updatefault data called===================\n");
     if(canContinueTimer) {
         [LFBluetoothManager sharedManager].tCurIndex = 0;
         [LFBluetoothManager sharedManager].canContinueTimer = YES;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [[LFBluetoothManager sharedManager] readFaultData];
         });
-        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];//180
     }
 }
-
-
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
@@ -141,13 +138,10 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [[LFBluetoothManager sharedManager] setRealtime:NO];
 
     [[LFBluetoothManager sharedManager] stopFaultTimer];
-    [[LFBluetoothManager sharedManager] disconnectDevice];
+    //[[LFBluetoothManager sharedManager] disconnectDevice];
    // [[LFBluetoothManager sharedManager] setDelegate:nil];
 
-   //
 }
-
-
 - (void)refreshCurrentController {
     /*if (!canContinueTimer) {
         return;
@@ -475,15 +469,15 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     tblDisplay.contentOffset = currentContentOffset;
     
     
-    
-   
-    
     NSInteger timerVal = [LFUtilities getValueFromHexData:[data subdataWithRange:NSMakeRange(8, 4)]];
     
     NSInteger timerHours = timerVal/3600; //Hours
-    NSInteger timerMinutes = timerHours/60; //Minutes
+    NSInteger timerminutesVal = timerVal%3600;
     
-    NSInteger timerSeconds = timerMinutes%60; //Seconds
+    NSInteger timerMinutes = timerminutesVal/60; //Minutes
+    
+    NSInteger timerSeconds = timerminutesVal%60; //Seconds
+    
     
     NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerHours] : [NSString stringWithFormat:@"0%ld",(long)timerHours]);
     NSString *timerMinutesString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerMinutes] : [NSString stringWithFormat:@"0%ld",(long)timerMinutes]);
@@ -499,15 +493,12 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
                                                                                                                     }];
     [activeTimerTitelAttrStr appendAttributedString:activeTimerValueAttrStr];
     [activeTimerLabel setAttributedText:activeTimerTitelAttrStr];
-
 }
-
 -(NSString *)getRDRFromMask:(NSData *)maskData
 {
     NSString* rdr = @"RD";
     NSString *mask = [self getDataStringFromData:maskData];
     if (mask.length) {
-        
         if (mask.length > 4) {
             mask = [mask substringWithRange:NSMakeRange(0, 4)];
         }
@@ -525,47 +516,51 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     return rdr;
 }
 - (NSString *)getFaultValueForDataString:(NSString *)dataString {
+    
     NSString *codeVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
         codeVal = @"OK";
     } else if ([dataString isEqualToString:@"00000001"]) {
-        codeVal = @"Over Current";
+        codeVal = @"Tripped on overcurrent";
     } else if ([dataString isEqualToString:@"00000002"]) {
-        codeVal = @"Under Current";
+        codeVal = @"Tripped on undercurrent";
     } else if ([dataString isEqualToString:@"00000004"]) {
-        codeVal = @"Current Unbalance";
+        codeVal = @"Tripped on current unbalance";
     } else if ([dataString isEqualToString:@"00000008"]) {
-        codeVal = @"Current Single Phasing";
+        codeVal = @"Tripped on current single-phasing";
     } else if ([dataString isEqualToString:@"00000010"]) {
-        codeVal = @"Contactor Failure";
+        codeVal = @"Tripped on contactor failure";
     } else if ([dataString isEqualToString:@"00000020"]) {
-        codeVal = @"Ground Fault";
+        codeVal = @"Tripped on ground fault";
     } else if ([dataString isEqualToString:@"00000040"]) {
-        codeVal = @"High Power Fault";
+        codeVal = @"Tripped on High Power Fault";
     } else if ([dataString isEqualToString:@"00000080"]) {
-        codeVal = @"Low Power Fault";
+        codeVal = @"Tripped on low power fault";
     } else if ([dataString isEqualToString:@"00000100"]) {
-        codeVal = @"Power Outage Fault";
+        codeVal = @"Low Control Voltage fault";
     } else if ([dataString isEqualToString:@"00000200"]) {
         codeVal = @"Trip or holdoff due to PTC fault";
     } else if ([dataString isEqualToString:@"00000400"]) {
         codeVal = @"Tripped triggered from remote source";
-    } else if ([dataString isEqualToString:@"00010000"]) {
-        codeVal = @"Low Voltage Holdoff";
+    }else if ([dataString isEqualToString:@"00000800"]) {
+        codeVal = @"Tripped on Linear Overcurrent";
+    }else if ([dataString isEqualToString:@"00001000"]) {
+        codeVal = @"Tripped Motor Stall";
+    }else if ([dataString isEqualToString:@"00010000"]) {
+        codeVal = @"Active Restart Delay Field Bit 0";
     } else if ([dataString isEqualToString:@"00020000"]) {
-        codeVal = @"High Voltage Holdoff";
+        codeVal = @"Active Restart Delay Field Bit 1";
     } else if ([dataString isEqualToString:@"00040000"]) {
-        codeVal = @"Voltage Unbalanced";
-    } else if ([dataString isEqualToString:@"00008000"]) {
-        codeVal = @"Undefined trip condition";
+        codeVal = @"Active Restart Delay Field Bit 2";
+    } else if ([dataString isEqualToString:@"00200000"]) {
+        codeVal = @"Tripped on PTC Short";
+    } else if ([dataString isEqualToString:@"00400000"]) {
+        codeVal = @"Tripped on PTC Open";
     } else if ([dataString isEqualToString:@"00080000"]) {
-        codeVal = @"Phase Sequence";
-    } else if ([dataString isEqualToString:@"00000800"]) {
-        codeVal = @"Linear Over Current";
+        codeVal = @"Manual Restart Required";
     } else if ([dataString isEqualToString:@"00100000"]) {
         codeVal = @"Undefined trip condition";
     }
-    
     return codeVal;
 }
 
@@ -574,19 +569,41 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     if ([dataString isEqualToString:@"00000000"]) {
         errorVal = @"OK";
     } else if ([dataString isEqualToString:@"00000001"]) {
-        errorVal = @"Warning on overcurrent";
+        errorVal = @"Overcurrent Detected";
     } else if ([dataString isEqualToString:@"00000002"]) {
-        errorVal = @"Warning on undercurrent ";
+        errorVal = @"Undercurrent Detected ";
     } else if ([dataString isEqualToString:@"00000004"]) {
-        errorVal = @"Warning on current unbalance";
+        errorVal = @"Current unbalance Detected";
+    } else if ([dataString isEqualToString:@"00000008"]) {
+        errorVal = @"Current single Phasing Detected";
+    } else if ([dataString isEqualToString:@"00000010"]) {
+        errorVal = @"Contactor Failure Detected";
     } else if ([dataString isEqualToString:@"00000020"]) {
-        errorVal = @"Warning on ground fault";
+        errorVal = @"Ground Fault Detected";
     } else if ([dataString isEqualToString:@"00000040"]) {
-        errorVal = @"Warning on High Power Fault";
+        errorVal = @"High Power Detected";
     } else if ([dataString isEqualToString:@"00000080"]) {
-        errorVal = @"Warning on low power fault ";
-    } else if ([dataString isEqualToString:@"00008000"]) {
-        errorVal = @"Undefined Warning condition";
+        errorVal = @"Low Power Detected";
+    } else if ([dataString isEqualToString:@"00000100"]) {
+        errorVal = @"Low Control Voltage Detected";
+    } else if ([dataString isEqualToString:@"00000200"]) {
+        errorVal = @"PTC Holdoff";
+    } else if ([dataString isEqualToString:@"00000800"]) {
+        errorVal = @"Linear OverCurrent Detected";
+    } else if ([dataString isEqualToString:@"00001000"]) {
+        errorVal = @"Motor Stall Detected";
+    } else if ([dataString isEqualToString:@"00010000"]) {
+        errorVal = @"Low voltage Holdoff";
+    } else if ([dataString isEqualToString:@"00020000"]) {
+        errorVal = @"High voltage Holdoff";
+    } else if ([dataString isEqualToString:@"00040000"]) {
+        errorVal = @"Voltage Unbalanced Holdoff";
+    } else if ([dataString isEqualToString:@"00080000"]) {
+        errorVal = @"Phase Sequence Holdoff";
+    } else if ([dataString isEqualToString:@"00100000"]) {
+        errorVal = @"Undefined Holdoff";
+    } else if ([dataString isEqualToString:@"00800000"]) {
+        errorVal = @"Ground Fault Alarm";
     }
     return errorVal;
 }
