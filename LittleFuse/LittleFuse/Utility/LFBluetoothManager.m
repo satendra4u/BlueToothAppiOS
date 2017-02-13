@@ -112,7 +112,17 @@ static LFBluetoothManager *sharedData = nil;
 #pragma mark CBCentralManager Delegate
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
     if (central.state != CBCentralManagerStatePoweredOn) {
+        // In a real app, you'd deal with all the states correctly
+        //        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+        //            [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+        //        }
+        return;
+    }
+
+    #endif
+    if (central.state != CBManagerStatePoweredOn) {
         // In a real app, you'd deal with all the states correctly
         //        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
         //            [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
@@ -686,6 +696,7 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)disconnectDevice
 {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
     if (centralManager.state == CBCentralManagerStatePoweredOn &&discoveredPeripheral && discoveredPeripheral.state == CBPeripheralStateConnected) {
         [self cleanup];
         //        [centralManager cancelPeripheralConnection:discoveredPeripheral];
@@ -693,9 +704,9 @@ static LFBluetoothManager *sharedData = nil;
         if (devicesList.count) {
             [devicesList removeAllObjects];
         }
-//        if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
-//            [_delegate showScannedDevices:devicesList];
-//        }
+        //        if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
+        //            [_delegate showScannedDevices:devicesList];
+        //        }
         [self scan];
     } else {
         if (centralManager.state == CBCentralManagerStatePoweredOff) {
@@ -718,7 +729,51 @@ static LFBluetoothManager *sharedData = nil;
                 [_delegate showAlertWithText:@"Please authorize the application to use the bluetooth services."];
             }
         }
-        else if (centralManager.state == CBCentralManagerStateUnknown) {
+        else if (centralManager.state == CBCentralManagerStateUnknown) {//CBCentralManagerStateUnknown
+            if (selectedPeripheral) {
+                if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                    [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+                }
+            }
+        }
+        
+    }
+
+#endif
+    
+    if (centralManager.state == CBManagerStatePoweredOn &&discoveredPeripheral && discoveredPeripheral.state == CBPeripheralStateConnected) {
+        [self cleanup];
+        //        [centralManager cancelPeripheralConnection:discoveredPeripheral];
+    } else if (centralManager.state == CBManagerStatePoweredOn){
+        if (devicesList.count) {
+            [devicesList removeAllObjects];
+        }
+//        if (_delegate && [_delegate respondsToSelector:@selector(showScannedDevices:)]) {
+//            [_delegate showScannedDevices:devicesList];
+//        }
+        [self scan];
+    } else {
+        if (centralManager.state == CBManagerStatePoweredOff) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
+            }
+        }
+        else if (centralManager.state == CBManagerStateUnsupported) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Your device does not support the Bluetooth Low Energy (BLE) services. Please try with a different device."];
+            }
+        }
+        else if (centralManager.state == CBManagerStateResetting) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"The bluetooth connection is being reset.Please try again."];
+            }
+        }
+        else if (centralManager.state == CBManagerStateUnauthorized) {
+            if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
+                [_delegate showAlertWithText:@"Please authorize the application to use the bluetooth services."];
+            }
+        }
+        else if (centralManager.state == CBManagerStateUnknown) {//CBCentralManagerStateUnknown
             if (selectedPeripheral) {
                 if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
                     [_delegate showAlertWithText:@"Please switch on your bluetooth to communicate with the hardware."];
