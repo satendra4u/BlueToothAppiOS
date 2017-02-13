@@ -72,25 +72,29 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
             [self presentViewController:alertcontroller animated:YES completion:nil];
 
         } else {
+            #if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
+            
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:AlertTitle message:message delegate:self cancelButtonTitle:cancelTitle otherButtonTitles:nil];
             
             for (NSString *strings in otherButtons) {
                 [alert addButtonWithTitle:strings];
             }
             [alert show];
+           #endif
+
 
         }
     });
     
 }
-
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (alertBlock) {
         alertBlock(alertView, buttonIndex);
     }
 }
-
+#endif
 
 
 #pragma mark -

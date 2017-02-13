@@ -112,10 +112,9 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else {
         refreshTimeInterval = 600;
     }
-    //refreshTimeInterval = 600;
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:10];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
    /* if ([LFBluetoothManager sharedManager].macData) {
         [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
     }*/
@@ -156,7 +155,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else {
         refreshTimeInterval = 600;
     }
-     //refreshTimeInterval = 600;
     if (!canContinueTimer) {
         return;
     }
@@ -407,6 +405,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     else {
         isFaultPresent = YES;
     }
+    
     UIColor *applicableColor;
     if ([faultError isEqualToString:@"OK"]) {
         applicableColor = [UIColor greenColor];

@@ -522,14 +522,12 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             cont += [tableView numberOfRowsInSection:i];
         }
         cont += indexPath.row;
-        //Will we disabled once client to do so
-       // [self checkFeatureValuesWith:YES andIndex:cont];
+        [self checkFeatureValuesWith:YES andIndex:cont];
         [cell updateValues:[basicConfigDetails objectAtIndex:cont]];
         
     } else {
-        //Will we disabled once client to do so
 
-       // [self checkFeatureValuesWith:NO andIndex:indexPath.row];
+        [self checkFeatureValuesWith:NO andIndex:indexPath.row];
         LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:indexPath.row] : [advanceConfigDetails objectAtIndex:indexPath.row]);
         [cell updateValues:display];
     }
@@ -639,6 +637,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     
     LFCharactersticDisplayCell *cell = (LFCharactersticDisplayCell *)[tblConfigDisplay cellForRowAtIndexPath:indexPath];
     
+//    if (editing) {
+//        return;
+//    }
     LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
     editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
     
@@ -663,6 +664,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         editing.isChangePassword = YES;
         }
     } else {
+        if (indexPath.row == ChangePasswordWrite) {
+            editing.isChangePassword = YES;
+        }
         editing.showAuthentication = YES;//YES to show the password screen.
     }
     editing.isAdvConfig = !isBasic;
@@ -695,11 +699,18 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 
 }
 
-- (void) resetPasswordction:(id) sender {
-    currentIndex = ResetPasswordWrite;
-    selectedTag = ResetPasswordWrite;
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ResetPasswordWrite inSection:0];
-    [self showPasswordScreenWithIndexpath:indexPath];
+- (void) resetPasswordction:(UILongPressGestureRecognizer*)sender {
+    
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"UIGestureRecognizerStateEnded");
+        //Do Whatever You want on End of Gesture
+        currentIndex = ResetPasswordWrite;
+        selectedTag = ResetPasswordWrite;
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ResetPasswordWrite inSection:0];
+        [self showPasswordScreenWithIndexpath:indexPath];
+
+    }
+    
     
 }
 - (IBAction)changePwdAction:(id)sender {
@@ -1847,7 +1858,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 #pragma  mark MEthods for Feature enable mask chacking
-//Will we disabled once client to do so
 
 - (void) checkFeatureValuesWith:(BOOL) isBasicSettings andIndex:(NSUInteger) index {
     if (isBasicSettings) {

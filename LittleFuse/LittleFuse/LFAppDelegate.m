@@ -19,7 +19,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+
+#endif
+
+
+
     //For core data modal object initialization
     [[LFDataManager sharedManager] setManagedObjectContext:self.managedObjectContext];
     
