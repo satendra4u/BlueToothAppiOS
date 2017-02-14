@@ -6,6 +6,7 @@
         <attribute name="other" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="power" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="voltage" optional="YES" attributeType="Binary" syncable="YES"/>
+        <relationship name="peripheral" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PeripheralEntity" inverseName="faultDataRelation" inverseEntity="PeripheralEntity" syncable="YES"/>
     </entity>
     <entity name="PeripheralEntity" syncable="YES">
         <attribute name="configurated" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
@@ -13,10 +14,10 @@
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="paired" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="rssi" optional="YES" attributeType="String" syncable="YES"/>
-        <relationship name="faultDataRelation" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FaultDataEntity" syncable="YES"/>
+        <relationship name="faultDataRelation" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FaultDataEntity" inverseName="peripheral" inverseEntity="FaultDataEntity" syncable="YES"/>
     </entity>
     <elements>
-        <element name="FaultDataEntity" positionX="259" positionY="54" width="128" height="118"/>
-        <element name="PeripheralEntity" positionX="-63" positionY="-18" width="128" height="133"/>
+        <element name="FaultDataEntity" positionX="439" positionY="18" width="128" height="133"/>
+        <element name="PeripheralEntity" positionX="-234" positionY="-70" width="128" height="133"/>
     </elements>
 </model>

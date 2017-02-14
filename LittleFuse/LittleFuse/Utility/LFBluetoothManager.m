@@ -187,9 +187,10 @@ static LFBluetoothManager *sharedData = nil;
         LFPeripheral *savedVal = [[LFDataManager sharedManager] getDeviceWithIdentifier:discoveredDevice];
         if (savedVal) {
             discoveredDevice.paired = savedVal.isPaired;
-            discoveredDevice.configured = savedVal.isConfigured;
+            //discoveredDevice.configured = savedVal.isConfigured;
         }
-    
+    discoveredDevice.configured =isConfigured;
+
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF.identifer MATCHES[cd] %@ ", peripheral.identifier.UUIDString];
     NSArray *fileteredArr = [devicesList filteredArrayUsingPredicate:predicate];
     if ([fileteredArr count]) {

@@ -40,6 +40,8 @@
 #define AdvancedSectionFeaturesCount 8
 #define AdvancedSectionHardwareConfigurationCount 5
 
+#define OFFString @"0=Off"
+
 typedef enum : NSInteger {
     FriendlyNameFirstWrite = -1,
     FriendlyNameSecondWrite = -2,
@@ -1864,19 +1866,13 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         LFDisplay *display = basicConfigDetails[index];
         switch (index) {
             case Basic_VUB:
-                if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                    display.value = @"0=Off";
-                }
+                display.value = [self getDisplayValueForDisplay:display];
                 break;
                 case Basic_CUB:
-                if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                    display.value = @"0=Off";
-                }
+                display.value = [self getDisplayValueForDisplay:display];
                 break;
                 case Basic_UC:
-                if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                    display.value = @"0=Off";
-                }
+                display.value = [self getDisplayValueForDisplay:display];
                 break;
                 
             default:
@@ -1887,31 +1883,28 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     } else {
         
         LFDisplay *display = ([self isNeedToRemoveFeatureEnableMaskSection] ? advanceConfigFeatureDetails[index] : advanceConfigDetails[index]);
-           switch (index) {
+              switch (index) {
                case Advanced_GFTC:
-                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                       display.value = @"0=Off";
-                   }
+                   display.value = [self getDisplayValueForDisplay:display];
+//                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
+//                       display.value = @"0=Off";
+//                   }
                    break;
                    case Advanced_LKW:
-                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                       display.value = @"0=Off";
-                   }
+                   display.value = [self getDisplayValueForDisplay:display];
+
                    break;
                    case Advanced_LINTD:
-                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                       display.value = @"0=Off";
-                   }
+                   display.value = [self getDisplayValueForDisplay:display];
+
                    break;
                    case Advanced_HKW:
-                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                       display.value = @"0=Off";
-                   }
+                   display.value = [self getDisplayValueForDisplay:display];
+
                    break;
                case Advanced_STLP:
-                   if ((display.value.length > 0) && [[display.value substringToIndex:1] isEqualToString:@"0"]) {
-                       display.value = @"0=Off";
-                   }
+                   display.value = [self getDisplayValueForDisplay:display];
+ 
                    break;
                default:
                    break;
@@ -1920,6 +1913,18 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     }
 }
 
+-(NSString *)getDisplayValueForDisplay:(LFDisplay *)display
+{
+    NSString *valueString = OFFString;
+    if ((display.value.length > 0) ) {
+        if (![display.value isEqualToString:OFFString]) {
+            NSArray *valuesArray = [display.value componentsSeparatedByString:@" "];
+            NSString *value = (valuesArray.count > 1 ? [valuesArray objectAtIndex:0] : display.value);
+            valueString = ([value floatValue]>0.0 ? display.value : OFFString);
+        }
+    }
+    return valueString;
+}
 - (BOOL) isNeedToRemoveFeatureEnableMaskSection {
     
     return YES;  //Please remove return if client ask for feature enabled disabled section
