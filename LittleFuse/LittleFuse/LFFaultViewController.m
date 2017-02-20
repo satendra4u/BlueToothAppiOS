@@ -16,7 +16,7 @@
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
 
-#define Background_Fault_Refresh_Interval 180
+#define Background_Fault_Refresh_Interval 1
 
 
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
@@ -28,6 +28,9 @@
     LFFaultData *currentData;
     LFFaultData *prevFaultData;
     NSDate *selectedDate;
+    NSUInteger stFieldSuccessCount;
+    
+
     
 }
 @property (strong, nonatomic) IBOutlet UIDatePicker *datepicker;
@@ -38,6 +41,9 @@
 @property (strong, nonatomic) IBOutlet UIToolbar *toolBar;
 
 @property (weak, nonatomic) IBOutlet UILabel *noDataLabel;
+
+@property (nonatomic, assign) BOOL isSTFieldSuccess;
+
 - (IBAction)cancelAction:(id)sender;
 
 - (IBAction)doneAction:(id)sender;
@@ -219,7 +225,7 @@
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
     
     [df setDateFormat:@"MMM dd, yyyy hh:mm a"];
-    
+    [df setTimeZone:[NSTimeZone localTimeZone]];
     NSString *faultdate = [df stringFromDate:date];
     
     [faultDict setValue:faultdate forKey:FAULT_DATE];
@@ -281,6 +287,7 @@
     
     NSData *data1 = [NSData dataWithBytes:data length:20];
 //    [[LFBluetoothManager sharedManager] writeConfigData:data1];//Old code
+    [[LFBluetoothManager sharedManager] setFaultPollingCount:0];
     [[LFBluetoothManager sharedManager] writeConfigDataForFaultsList:data1]; //New code
     currentIndex += 1;
     

@@ -151,7 +151,7 @@ static LFDataManager *dataManager = nil;
     [productInfoObj setValue:data.power forKey:attribute_power];
     [productInfoObj setValue:data.voltage forKey:attribute_voltage];
     [productInfoObj setValue:data.other forKey:attribute_other];
-   
+    NSLog(@"saving fault data is %@",productInfoObj);
     return productInfoObj;
 }
 
@@ -285,10 +285,8 @@ static LFDataManager *dataManager = nil;
         
         NSSet *faultList = [peripheralObj valueForKey:PERIPHERAL_FAULT_RELATION];
         return faultList.count;
-        
     }
     return faultsCount;
-
 }
 
 @end

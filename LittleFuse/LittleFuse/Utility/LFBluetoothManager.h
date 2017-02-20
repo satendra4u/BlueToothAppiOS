@@ -72,6 +72,8 @@
 
 - (void)receivedDeviceMacWithData:(NSData*)data;
 
+- (void)deviceDisconnected;
+
 @end
 
 @interface LFBluetoothManager : NSObject <CBCentralManagerDelegate, CBPeripheralDelegate>
@@ -115,6 +117,9 @@
 @property (assign, nonatomic) BOOL isPassWordChange;
 
 @property (assign, nonatomic) NSData *macData;
+@property (assign, nonatomic) NSInteger faultPollingCount;
+@property (assign, nonatomic) NSInteger devicePairingRetryCount;
+
 //@property (strong, nonatomic) NSString *macString;
 //@property (strong, nonatomic) NSString *passwordVal;
 
@@ -136,7 +141,10 @@
  * Stops the scan operation.
  */
 - (void)stopScan;
-
+/**
+ * Clean devices list.
+ */
+- (void)cleanup;
 /**
  * This method connects mobile device to a peripheral at an index from the list of discovered peripherals.
  * @param: indexOfObj: Index of selected peripheral.
@@ -220,6 +228,7 @@
  @returns    Encripted Data type NSData
  */
 - (NSData *) getCommandEncriptedDataWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length;
+- (NSData *) getCommandEncriptedDataForResetPasswordWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length;
 - (void) setPasswordString:(NSString *) passwordString;
 - (void) setConfigSeedData:(NSData *) seedData;
 - (void) setMacString:(NSString *) macStr;

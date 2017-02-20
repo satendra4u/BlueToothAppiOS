@@ -27,6 +27,8 @@
     BOOL canRefresh;
     BOOL isDeviceSelected;
     BOOL isScanDataFound;
+    BOOL isInitialDisconnect;
+
     
     NSInteger selectedIndex;
     NSInteger refreshTimeInterval;
@@ -51,6 +53,7 @@
     isInitialLaunch = YES;
     isDeviceSelected = NO;
     isScanDataFound = NO;
+    isInitialDisconnect = YES;
     // Do any additional setup after loading the view, typically from a nib.
     peripheralsList = [[NSMutableArray alloc] initWithCapacity:0];
     charactersticsList = [[NSMutableArray alloc] initWithCapacity:0];
@@ -132,6 +135,9 @@
    }
 
 - (void)initialSetup{
+    
+    [[LFBluetoothManager sharedManager] cleanup];
+     [[LFBluetoothManager sharedManager] disconnectDevice];
     [LFBluetoothManager sharedManager].isPasswordVerified = NO;
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
@@ -217,6 +223,7 @@
     selectedIndex = indexPath.row;
     isPopupOpened = YES;
     isDeviceSelected = YES;
+    [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:0];
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
@@ -245,6 +252,21 @@
     CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[4];
     [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
     
+}
+
+- (void)deviceDisconnected
+{
+   // if (!isInitialDisconnect) {
+        UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:@"LittelFuse" message:@"Device Disconnected Successfully" preferredStyle:UIAlertControllerStyleAlert];
+        
+        [alertcontroller addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+            
+        }]];
+        
+        [self presentViewController:alertcontroller animated:YES completion:nil];
+    //}
+    //isInitialDisconnect = NO;
 }
 
 #pragma mark - Private methods -
@@ -384,10 +406,21 @@
 {
     if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame)) {
         isPopupOpened = NO;
-        [self hideAllAlerts];
-        [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
-//        DLog(@"%s", __func__);
-        [tblDevices reloadData];
+        if ([[LFBluetoothManager sharedManager] devicePairingRetryCount] < 3)// Here 3 is just static count, we are retrying 3 times to connect device to avoid encryption is insufficient when we enter correct pairing code. If client suggest any number of time we have to replace it
+        {
+            [[LFBluetoothManager sharedManager] connectToDevice:selectedIndex];
+            [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:[LFBluetoothManager sharedManager].devicePairingRetryCount + 1];
+            return;
+        }
+        else{
+            [[LFBluetoothManager sharedManager] scan];
+            [self hideAllAlerts];
+            
+            [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
+            //        DLog(@"%s", __func__);
+            [tblDevices reloadData];
+
+        }
     }
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
@@ -395,7 +428,7 @@
             
         }
     }];
-    [self.navigationController popToRootViewControllerAnimated:NO];
+    //[self.navigationController popToRootViewControllerAnimated:NO];
 }
 
 - (void)hideAllAlerts {

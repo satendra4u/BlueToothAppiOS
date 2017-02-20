@@ -660,7 +660,8 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         editing.selectedText = cell.lblKey.text;
     }
     editing.delegate = self;
-    if ([LFBluetoothManager sharedManager].isPasswordVerified) {
+   
+    if ([LFBluetoothManager sharedManager].isPasswordVerified || indexPath.row == ResetPasswordWrite) {
         editing.showAuthentication = NO;
         if (indexPath.row == ChangePasswordWrite) {
         editing.isChangePassword = YES;
@@ -759,6 +760,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 - (void) updateCharactersticsData:(NSData *) data {
+    if (isResetPassword) {
+        return;
+    }
     
     NSData *tData = data;
     if (isFetchingMacOrSeedData && currentIndex == 0 && !isVerifyingPassword) {
@@ -1327,7 +1331,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             break;
         case 'K': //formate H with Kilo Wats conversion
         {
-            val = val * (100.0*1000);
+            val = val * (100*1000);
         }
             break;
         case 'G':
@@ -1622,7 +1626,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     } else {
         display = ([self isNeedToRemoveFeatureEnableMaskSection] ? [advanceConfigFeatureDetails objectAtIndex:selectedTag] : [advanceConfigDetails objectAtIndex:selectedTag]);
         if (selectedTag == Advanced_GFTD) {
-            txt = [NSString stringWithFormat:@"%d",[txt intValue] * 10] ;
+            txt = [NSString stringWithFormat:@"%.2f",[txt floatValue] * 10.0] ;
         }
         display.value = txt;
         
@@ -1758,6 +1762,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 
 - (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic
 {
+    if(isResetPassword) return;
     [[LFBluetoothManager sharedManager] setIsWriting:NO];
     [self removeIndicator];
     if (isSuccess) {
@@ -1812,11 +1817,15 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 #pragma  Mark - Reset password
 - (void) writeResetPasswordDataWithText:(NSString *) text {
     
+    [self  showIndicatorOn:self.tabBarController.view withText:@"Reseting Password..."];
+
     isWrite = YES;
     isResetPassword = YES;
     NSData *passData = [text dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *encriptedData = [[LFBluetoothManager sharedManager] getCommandEncriptedDataForResetPasswordWithValue:passData andAddress:(Byte)0x00d4 andLength:(Byte)0x04];
+    
 
-    NSData *encriptedData = [[LFBluetoothManager sharedManager] getCommandEncriptedDataWithValue:passData andAddress:(Byte)0x00d4 andLength:(Byte)0x04];
+   // NSData *encriptedData = [[LFBluetoothManager sharedManager] getCommandEncriptedDataWithValue:passData andAddress:(Byte)0x00d4 andLength:(Byte)0x04];
     
     [[LFBluetoothManager sharedManager] setIsWriting:YES];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
@@ -1825,10 +1834,15 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     prevWrittenData = encriptedData;
     [[LFBluetoothManager sharedManager] writeConfigData:encriptedData];
     canRefresh = YES;
+    [self performSelector:@selector(resetPasswordCompletionAction) withObject:nil afterDelay:10];
    
 }
 #pragma mark Change Password Methods.
-
+-(void)resetPasswordCompletionAction
+{
+    [self removeIndicator];
+    [self.navigationController popToRootViewControllerAnimated:NO];
+}
 - (void)changePasswordWithNewValue:(NSString *)newPassword {
     // TODO: for present requirements  we got 32 bits remining 32 bite data fill with zeros
     char *filledData = (char *) malloc(32);

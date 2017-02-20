@@ -114,7 +114,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     }
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
+    //[self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
    /* if ([LFBluetoothManager sharedManager].macData) {
         [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
     }*/
@@ -132,8 +132,12 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 }
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
-    [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     canContinueTimer = NO;
+NSLog(@"\n===============view will disappear called===================\n");
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+
+
+    [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
 
     [[LFBluetoothManager sharedManager] stopFaultTimer];
@@ -238,7 +242,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     range = NSMakeRange(range.location + range.length, len);
     data6 = [data subdataWithRange:range];
     
-    DLog(@" Voltage %@\t%@ \t%@ \t%@ \t %@ \t %@ \t%@", data0,data1, data2, data3, data4, data5, data6);
+   // DLog(@" Voltage %@\t%@ \t%@ \t%@ \t %@ \t %@ \t%@", data0,data1, data2, data3, data4, data5, data6);
     
     NSInteger vrms0 = [LFUtilities getValueFromHexData:data0];
     
@@ -289,7 +293,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     range = NSMakeRange(range.location + range.length, len);
     data5 = [data subdataWithRange:range];
     
-    DLog(@" Current %@\t%@ \t%@ \t%@ \t %@ \t %@ ", data0,data1, data2, data3, data4, data5);
+   // DLog(@" Current %@\t%@ \t%@ \t%@ \t %@ \t %@ ", data0,data1, data2, data3, data4, data5);
     
     NSInteger vrms0 = [LFUtilities getValueFromHexData:data0];
     
@@ -392,7 +396,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     if (!canContinueTimer) {
         return;
     }
-    DLog(@"Equipment data = %@", data);
+   // DLog(@"Equipment data = %@", data);
     BOOL isFaultPresent = YES;
     NSString *dataString = [self getDataStringFromData:[data subdataWithRange:NSMakeRange(0, 4)]];
     NSString *faultError = @"OK";
@@ -484,7 +488,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     NSMutableAttributedString *activeTimerTitelAttrStr = [[NSMutableAttributedString alloc]initWithString:@"Active Timer: "];
     NSString *rdrString = [self getRDRFromMask:[data subdataWithRange:NSMakeRange(0, 4)]];
     NSString *timerString = [NSString stringWithFormat:@" %@ : %@ : %@ %@",timerHoursString,timerMinutesString,timerSecondsString,rdrString];
-    DLog(@"timer string: %@",timerString);
+   // DLog(@"timer string: %@",timerString);
 
     NSAttributedString *activeTimerValueAttrStr = [[NSAttributedString alloc]initWithString:timerString attributes:@{
                                                                                                                     NSBackgroundColorAttributeName: [UIColor clearColor] ,
@@ -519,7 +523,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     __block NSString *receivedString = @"";
     if (mask.length) {
        // mask = [@"0x" stringByAppendingString:mask];
-        mask = @"0x00030800";
        NSArray * dataStringsArray = @[@"0x00000000",@"0x00000001",@"0x00000002",@"0x00000004",@"0x00000008",@"0x00000010",@"0x00000020",@"0x00000040",@"0x00000080",@"0x00000100",@"0x00000200",@"0x00000400",@"0x00000800",@"0x00001000",@"0x00010000",@"0x00020000",@"0x00040000",@"0x00200000",@"0x00400000",@"0x00080000",@"0x00100000"];
         
         
@@ -1047,6 +1050,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 - (void) updateCharactersticsData:(NSData *) data {
     
+    NSLog(@"\n=================updateCharactersticsData in reattimeviewcontroller=================");
     NSData *tData = data;
       
     if (isFetchingMacOrSeedData) {

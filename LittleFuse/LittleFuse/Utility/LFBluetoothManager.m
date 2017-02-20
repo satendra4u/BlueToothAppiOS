@@ -88,7 +88,12 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)cleanup
 {
-    
+    // If we've got this far, we're connected, but we're not subscribed, so we just disconnect
+    if(discoveredPeripheral)
+    {
+        [centralManager cancelPeripheralConnection:discoveredPeripheral];
+    }
+
     // See if we are subscribed to a characteristic on the peripheral
     if (discoveredPeripheral.services != nil) {
         for (CBService *service in discoveredPeripheral.services) {
@@ -103,16 +108,16 @@ static LFBluetoothManager *sharedData = nil;
             }
         }
     }
-    
-    // If we've got this far, we're connected, but we're not subscribed, so we just disconnect
-    [centralManager cancelPeripheralConnection:discoveredPeripheral];
-    
+    if(discoveredPeripheral)
+    {
+        [centralManager cancelPeripheralConnection:discoveredPeripheral];
+    }
 }
 
 #pragma mark CBCentralManager Delegate
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
-    #if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED < 10
     if (central.state != CBCentralManagerStatePoweredOn) {
         // In a real app, you'd deal with all the states correctly
         //        if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
@@ -265,6 +270,10 @@ static LFBluetoothManager *sharedData = nil;
     //    [centralManager connectPeripheral:discoveredPeripheral options:nil];
     [LittleFuseNotificationCenter postNotificationName:PeripheralDidDisconnect object:nil];
     
+    if (_delegate && [_delegate respondsToSelector:@selector(deviceDisconnected)]) {
+        [_delegate deviceDisconnected];
+    }
+    
 }
 
 
@@ -351,17 +360,18 @@ static LFBluetoothManager *sharedData = nil;
 //           DLog(@"%s", __func__);
     // called on read response
     if (error) {
-        if (error.code == 15 && [error.localizedDescription isEqualToString:@"Encryption is insufficient."]) {
+        
+       /* if (error.code == 15 && [error.localizedDescription isEqualToString:@"Encryption is insufficient."]) {
             if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
 //                DLog(@"Canncelled pairing of the device");
                 [_delegate showAlertWithText:[error localizedDescription]];
                 [self scan];
                 return;
             }
-        }
+        }*/
         if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
             [_delegate showAlertWithText:[error localizedDescription]];
-            [self scan];
+            //[self scan];
         }
         return;
     }
@@ -395,8 +405,24 @@ static LFBluetoothManager *sharedData = nil;
     } else if ([characteristic.UUID.UUIDString containsString:FAULT_CHARACTERSTICS]) {
         NSData *data = characteristic.value;
         uint8_t *bytesArr = (uint8_t*)[data bytes];
-        if (bytesArr[1] == 0x01) {
+        if (bytesArr[1] == 0x01) { //success
             [self displayFaults];
+        }
+        else if (bytesArr[1] == 0x00) // polling
+        {
+            if (_faultPollingCount <10) {
+                _faultPollingCount += 1;
+                [self readValueForCharacteristic:characteristic];
+                NSLog(@"\n========================== polling called ========================= ");
+                return;
+
+            }
+            _faultPollingCount = 0;
+
+        }
+        else if (bytesArr[1] == 0x10) // end
+        {
+            NSLog(@"\n========================== fault count ended ========================= ");
         }
         
     } else if ([characteristic.UUID.UUIDString containsString:VOLATAGE_FAULT_CHARACTERSTIC]) {
@@ -498,7 +524,7 @@ static LFBluetoothManager *sharedData = nil;
     if (_tCurIndex > 1000) {
         return;
     }
-    DLog(@"Reading Fault Data of %d", (int)_tCurIndex);
+   // DLog(@"Reading Fault Data of %d", (int)_tCurIndex);
     Byte data[20];
     char* bytes = (char*) &_tCurIndex;
     int convertedLen = sizeof(bytes)/2;
@@ -517,6 +543,7 @@ static LFBluetoothManager *sharedData = nil;
     
     NSData *data1 = [NSData dataWithBytes:data length:20];
 //    [[LFBluetoothManager sharedManager] writeConfigData:data1];//Old code
+    [[LFBluetoothManager sharedManager] setFaultPollingCount:0];
 
     [[LFBluetoothManager sharedManager] writeConfigDataForFaultsList:data1];
     _tCurIndex += 1;
@@ -697,7 +724,7 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)disconnectDevice
 {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 10
     if (centralManager.state == CBCentralManagerStatePoweredOn &&discoveredPeripheral && discoveredPeripheral.state == CBPeripheralStateConnected) {
         [self cleanup];
         //        [centralManager cancelPeripheralConnection:discoveredPeripheral];
@@ -830,6 +857,30 @@ static LFBluetoothManager *sharedData = nil;
         [mutData appendData:subdata];
     }
     return mutData;
+}
+- (NSData *) getCommandEncriptedDataForResetPasswordWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length {
+    
+    Byte data[12];
+    const char *bytes = [valueData bytes];
+    
+    for (int i = 0; i < 12; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = address;
+            } else if (i == 10){
+                data[i] = length;
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            } else {
+                data[i] = (Byte)0x00;
+            }
+        }
+    }
+    
+    NSData *data1 = [NSData dataWithBytes:data length:12];
+        return data1;
 }
 - (void) setPasswordString:(NSString *) passwordString {
     password = passwordString;
