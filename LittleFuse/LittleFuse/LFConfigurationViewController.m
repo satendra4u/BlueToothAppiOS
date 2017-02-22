@@ -41,6 +41,7 @@
 #define AdvancedSectionHardwareConfigurationCount 5
 
 #define OFFString @"0=Off"
+#define Background_Fault_Refresh_Interval 20
 
 typedef enum : NSInteger {
     FriendlyNameFirstWrite = -1,
@@ -133,8 +134,8 @@ typedef enum : NSUInteger {
     BOOL isInitialReading;
     BOOL isResetPassword;
     NSInteger curPassWriteIndex;
-    NSString *macString;
-    NSData *configSeedData;
+   // NSString *macString;
+    //NSData *configSeedData;
     NSData *prevWrittenData;
     NSMutableData *completePasswordData;
     NSString *passwordVal;
@@ -366,7 +367,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             [tMutStr appendString:@":"];
         }
     }
-    macString = tString;
     [[LFBluetoothManager sharedManager] setMacString:tString];
     [self performSelector:@selector(getSeedData) withObject:nil afterDelay:2];
 }
@@ -385,22 +385,19 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         authUtils = [[LFAuthUtils alloc]init];
     }
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
-        [authUtils initWithPassKey:passwordVal andMacAddress:macString andSeed:configSeedData.bytes];
+        [authUtils initWithPassKey:passwordVal andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed: [[LFBluetoothManager sharedManager] getConfigSeedData].bytes ];
     }
     NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
     DLog( @"auth code:%@",authCode);
     return authCode;
 }
-
-
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:YES];
     [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
-    if (configSeedData != nil) {
+    if ([[LFBluetoothManager sharedManager] getConfigSeedData] != nil) {
         [self updateFaultData];
     }
 }
-
 - (void)stopIndicator {
     if (isBasic && currentIndex == 0) {
         [self removeIndicator];
@@ -410,7 +407,6 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         }
     }
 }
-
 - (void)updateFaultData {
     if(canContinueTimer) {
         [LFBluetoothManager sharedManager].tCurIndex = 0;
@@ -418,7 +414,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [[LFBluetoothManager sharedManager] readFaultData];
         });
-        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+       // [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
     }
 }
 
@@ -777,12 +773,12 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             [mutData appendBytes:zeroBytes length:1];
         }
         DLog(@"seed data:%@", mutData);
-        configSeedData = mutData;
+        
         [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
         [self removeIndicator];
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
         if (isResettingSeed) {
-            [authUtils initWithPassKey:newPasswordStr andMacAddress:macString andSeed:configSeedData.bytes];
+            [authUtils initWithPassKey:newPasswordStr andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed:[[LFBluetoothManager sharedManager] getConfigSeedData].bytes];
             isResettingSeed = NO;
         }
         return;
@@ -1139,11 +1135,11 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                     
                 }
             } else {
-                if (currentIndex == 4) { //if(currentIndex == 5) {
+               /* if (currentIndex == 4) { //if(currentIndex == 5) {
                     convertedVal = [self getConvertedStringForValue:val];
-                } else {
+                } else {*/
                     convertedVal = [NSString stringWithFormat:@"%.2f", val/100.0];
-                }
+               // }
             }
         }
             break;
@@ -1390,7 +1386,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 
 #pragma mark Writing TimeOut Method.
 - (void)checkTimeOut {
-    if (!canRefresh || ((configSeedData == nil) && currentIndex == -1 )) {
+    if (!canRefresh || (([[LFBluetoothManager sharedManager] getConfigSeedData] == nil) && currentIndex == -1 )) {
         return;
     }
     
@@ -2033,6 +2029,11 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     stFieldSuccessCount++ ;
 }
 
+-(void)restartFaultLoading
+{
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+    
+}
 #pragma mark Peripheral Disconnected Notification
 
 - (void)peripheralDisconnected {

@@ -73,6 +73,7 @@
 - (void)receivedDeviceMacWithData:(NSData*)data;
 
 - (void)deviceDisconnected;
+-(void)restartFaultLoading;
 
 @end
 
@@ -116,7 +117,7 @@
 
 @property (assign, nonatomic) BOOL isPassWordChange;
 
-@property (assign, nonatomic) NSData *macData;
+@property (strong, nonatomic) NSData *macData;
 @property (assign, nonatomic) NSInteger faultPollingCount;
 @property (assign, nonatomic) NSInteger devicePairingRetryCount;
 

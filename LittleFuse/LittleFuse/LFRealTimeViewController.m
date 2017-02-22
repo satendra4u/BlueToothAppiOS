@@ -523,7 +523,7 @@ NSLog(@"\n===============view will disappear called===================\n");
     __block NSString *receivedString = @"";
     if (mask.length) {
        // mask = [@"0x" stringByAppendingString:mask];
-       NSArray * dataStringsArray = @[@"0x00000000",@"0x00000001",@"0x00000002",@"0x00000004",@"0x00000008",@"0x00000010",@"0x00000020",@"0x00000040",@"0x00000080",@"0x00000100",@"0x00000200",@"0x00000400",@"0x00000800",@"0x00001000",@"0x00010000",@"0x00020000",@"0x00040000",@"0x00200000",@"0x00400000",@"0x00080000",@"0x00100000"];
+       NSArray * dataStringsArray = @[@"0x00000000",@"0x00000001",@"0x00000002",@"0x00000004",@"0x00000008",@"0x00000010",@"0x00000020",@"0x00000040",@"0x00000080",@"0x00000100",@"0x00000200",@"0x00000400",@"0x00000800",@"0x00001000",@"0x00010000",@"0x00020000",@"0x00040000",@"0x00200000",@"0x00400000",@"0x00080000",@"0x00100000",@"0x00800000"];
         
         
         [dataStringsArray enumerateObjectsUsingBlock:^(NSString* obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -983,6 +983,7 @@ NSLog(@"\n===============view will disappear called===================\n");
     DLog(@"Password is %@",[[LFBluetoothManager sharedManager] getPasswordString] );
     DLog(@"mac string is %@",[[LFBluetoothManager sharedManager] getMacString] );
     DLog(@"configseed data is %@",[[LFBluetoothManager sharedManager] getConfigSeedData] );
+     DLog(@"write data is %@",writeData );
 
     if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
 
@@ -1013,7 +1014,8 @@ NSLog(@"\n===============view will disappear called===================\n");
             [tMutStr appendString:@":"];
         }
     }
-    [LFBluetoothManager sharedManager].macString = tString;
+    [[LFBluetoothManager sharedManager] setMacString:tString];
+
     [self performSelector:@selector(getSeedData) withObject:nil afterDelay:2];
 }
 
@@ -1044,7 +1046,7 @@ NSLog(@"\n===============view will disappear called===================\n");
 - (void)readDeviceMacAndAuthSeed {
     isFetchingMacOrSeedData = YES;
     [editing authDoneWithStatus:YES shouldDismissView:YES];
-    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading..."];
     [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
 }
 
@@ -1067,11 +1069,9 @@ NSLog(@"\n===============view will disappear called===================\n");
         [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
         [self removeIndicator];
         [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
-        
         [self performSelector:@selector(showAlertToResetRelay) withObject:nil afterDelay:1];
         return;
     }
-    
     if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
         [self removeIndicator];
         isWrite = NO;
@@ -1080,7 +1080,6 @@ NSLog(@"\n===============view will disappear called===================\n");
         
         int stVal = 0x0000000F & ((Byte)byteVal[0] >> 4); // this for getting response st val
         NSString *alertMessage;
-        
         switch (stVal) {
             case 0:
                 isReRead = NO;
@@ -1124,6 +1123,8 @@ NSLog(@"\n===============view will disappear called===================\n");
             [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
                 if ([alert isKindOfClass:[UIAlertController class]]) {
                     [alert dismissViewControllerAnimated:NO completion:nil];
+                    canContinueTimer = YES;
+                    [self refreshCurrentController];
                 }
             }];
         }

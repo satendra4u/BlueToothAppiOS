@@ -16,7 +16,7 @@
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
 
-#define Background_Fault_Refresh_Interval 1
+#define Background_Fault_Refresh_Interval 20
 
 
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
@@ -114,20 +114,20 @@
     NSDate *date = [NSDate date];
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
     [self fetchDataWithDate:date];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:0];
 }
 
 - (void)updateFaultData {
-    if(!canContinueTimer) {
+   /* if(!canContinueTimer) {
         return;
-    }
+    }*/
     [LFBluetoothManager sharedManager].tCurIndex = 0;
     currentIndex = 0;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[LFBluetoothManager sharedManager] readFaultData];
     });
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+   
 }
 
 - (void)dealloc {
@@ -193,9 +193,9 @@
         currentData = [[LFFaultData alloc] init];
         [self  readFaultData];
     } else {
-        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+        //currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
 //        currentIndex = sectionArray.count + 1;;
-//        currentIndex += 1;
+       // currentIndex += 1;
         [self readFaultData];
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
@@ -246,9 +246,7 @@
     else {
         [_tblFaults reloadData];
     }
-
 }
-
 - (BOOL)isCurrentDataSameWithPreviousSavedOne
 {
     LFFaultData *fault = [[LFDataManager sharedManager] getSavedDataWithDate:currentData.date];
@@ -256,10 +254,7 @@
         return YES;
     }
     return NO;
-    
 }
-
-
 - (void)readFaultData
 {
     if (!canContinueTimer) {
@@ -354,13 +349,28 @@
             error = @"LPF";
             break;
         case 9:
-            error = @"POF";
+            error = @"LCV";
             break;
         case 10:
             error = @"PTCF";
             break;
         case 11:
             error = @"RMTF";
+            break;
+        case 12:
+            error = @"LIN";
+            break;
+        case 13:
+            error = @"STALL";
+            break;
+        case 14:
+            error = @"PTCS";
+            break;
+        case 15:
+            error = @"PTCO";
+            break;
+        case 16:
+            error = @"GFA";
             break;
         case 100:
             error = @"LVH";
@@ -417,13 +427,28 @@
             error = @"Low Power Fault";
             break;
         case 9:
-            error = @"Power Outage Fault";
+            error = @"Low Power Voltage";
             break;
         case 10:
             error = @"PTC Fault";
             break;
         case 11:
             error = @"Tripped Triggered From Remote Source";
+            break;
+        case 12:
+            error = @"Linear Overcurrent";
+            break;
+        case 13:
+            error = @"Motor Stall";
+            break;
+        case 14:
+            error = @"PTC Short";
+            break;
+        case 15:
+            error = @"PTC Open";
+            break;
+        case 16:
+            error = @"Ground Fault Alarm";
             break;
         case 100:
             error = @"Low Voltage Holdoff";
@@ -515,5 +540,11 @@
             [self.navigationController popToRootViewControllerAnimated:NO];
         }
     }];
+}
+
+-(void)restartFaultLoading
+{
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+
 }
 @end

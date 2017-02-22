@@ -39,7 +39,6 @@ static LFBluetoothManager *sharedData = nil;
 {
     self = [super init];
     if (self) {
-        
     }
     
     return self;
@@ -270,6 +269,10 @@ static LFBluetoothManager *sharedData = nil;
     //    [centralManager connectPeripheral:discoveredPeripheral options:nil];
     [LittleFuseNotificationCenter postNotificationName:PeripheralDidDisconnect object:nil];
     
+    [[LFBluetoothManager sharedManager] setMacString:nil];
+    [[LFBluetoothManager sharedManager] setMacData:nil];
+    [[LFBluetoothManager sharedManager] setConfigSeedData:nil];
+
     if (_delegate && [_delegate respondsToSelector:@selector(deviceDisconnected)]) {
         [_delegate deviceDisconnected];
     }
@@ -414,7 +417,7 @@ static LFBluetoothManager *sharedData = nil;
                 _faultPollingCount += 1;
                 [self readValueForCharacteristic:characteristic];
                 NSLog(@"\n========================== polling called ========================= ");
-                return;
+               
 
             }
             _faultPollingCount = 0;
@@ -422,9 +425,12 @@ static LFBluetoothManager *sharedData = nil;
         }
         else if (bytesArr[1] == 0x10) // end
         {
+            if (_delegate && [_delegate respondsToSelector:@selector(restartFaultLoading)]) {
+                [_delegate restartFaultLoading];
+            }
             NSLog(@"\n========================== fault count ended ========================= ");
         }
-        
+         return;
     } else if ([characteristic.UUID.UUIDString containsString:VOLATAGE_FAULT_CHARACTERSTIC]) {
         if (_delegate && [_delegate respondsToSelector:@selector(getFaultVoltageData:)]) {
             [_delegate getFaultVoltageData:readdata];
@@ -495,10 +501,15 @@ static LFBluetoothManager *sharedData = nil;
             [[LFDataManager sharedManager] saveFaultDetails:_curFaultData WithPeripheral:selectedPeripheral];
         _curFaultData = nil;
         _curFaultData = [[LFFaultData alloc] init];
-        [self  readFaultData];
+        //[self  readFaultData];
     } else {
-        _tCurIndex = (_tCurIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
-        [self readFaultData];
+        if (_delegate && [_delegate respondsToSelector:@selector(restartFaultLoading)]) {
+            [_delegate restartFaultLoading];
+        }
+        NSLog(@"\n========================== fault count ended ========================= ");
+
+      //  _tCurIndex = (_tCurIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+       // [self readFaultData];
     }
 
 }
@@ -516,6 +527,7 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)readFaultData
 {
+    return;
     if (!_canContinueTimer) {
         _tCurIndex = 0;
         return;

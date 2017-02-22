@@ -256,6 +256,7 @@
 
 - (void)deviceDisconnected
 {
+       
    // if (!isInitialDisconnect) {
         UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:@"LittelFuse" message:@"Device Disconnected Successfully" preferredStyle:UIAlertControllerStyleAlert];
         

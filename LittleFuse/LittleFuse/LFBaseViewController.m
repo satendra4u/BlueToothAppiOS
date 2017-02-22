@@ -84,7 +84,7 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     });
     
 }
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 9
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (alertBlock) {
@@ -98,7 +98,6 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
 - (void)showIndicatorOn:(UIView*)superView withText:(NSString *)msg
 {
     CGRect viewFrame = superView.bounds;
-    
     indicatorView = [[UIView alloc] initWithFrame:self.view.bounds];
     UIView *aView = [[UIView alloc] initWithFrame:CGRectMake(10, ((CGRectGetHeight(viewFrame) - 150) / 2.0) , CGRectGetWidth(viewFrame)-20, 100)];
     aView.backgroundColor = [UIColor whiteColor];
@@ -119,9 +118,8 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     [indicatorView addSubview:aView];
     [superView bringSubviewToFront:indicatorView];
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+    
 }
-
-
 - (void)removeIndicator
 {
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
