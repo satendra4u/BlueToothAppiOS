@@ -527,7 +527,6 @@ static LFBluetoothManager *sharedData = nil;
 
 - (void)readFaultData
 {
-    return;
     if (!_canContinueTimer) {
         _tCurIndex = 0;
         return;

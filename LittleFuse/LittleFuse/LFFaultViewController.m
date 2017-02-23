@@ -22,7 +22,7 @@
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
 {
     BOOL canContinueTimer;
-    NSInteger currentIndex;
+   // NSInteger currentIndex;
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
     LFFaultData *currentData;
@@ -57,7 +57,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    currentIndex = 0;
+    //currentIndex = 0;
     
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -114,7 +114,7 @@
     NSDate *date = [NSDate date];
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
     [self fetchDataWithDate:date];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:0];
+    //[self performSelector:@selector(updateFaultData) withObject:nil afterDelay:0];
 }
 
 - (void)updateFaultData {
@@ -122,7 +122,7 @@
         return;
     }*/
     [LFBluetoothManager sharedManager].tCurIndex = 0;
-    currentIndex = 0;
+   // currentIndex = 0;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[LFBluetoothManager sharedManager] readFaultData];
@@ -191,12 +191,12 @@
         prevFaultData = currentData;
         currentData = nil;
         currentData = [[LFFaultData alloc] init];
-        [self  readFaultData];
+        [[LFBluetoothManager sharedManager] readFaultData];
     } else {
         //currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
 //        currentIndex = sectionArray.count + 1;;
        // currentIndex += 1;
-        [self readFaultData];
+        [[LFBluetoothManager sharedManager] readFaultData];
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
         } else {
@@ -255,6 +255,8 @@
     }
     return NO;
 }
+//Implemented in bluetoothManager
+/*
 - (void)readFaultData
 {
     if (!canContinueTimer) {
@@ -287,7 +289,7 @@
     currentIndex += 1;
     
     
-}
+}*/
 
 
 #pragma mark - UITableView
@@ -427,7 +429,7 @@
             error = @"Low Power Fault";
             break;
         case 9:
-            error = @"Low Power Voltage";
+            error = @"Low Control Voltage";
             break;
         case 10:
             error = @"PTC Fault";
@@ -489,7 +491,6 @@
 - (void)fetchDataWithDate:(NSDate *)date
 {
     NSDate *tomorrow = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
-    
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSIntegerMax fromDate:tomorrow];
     [components setHour:5];
     [components setMinute:30];
@@ -506,13 +507,17 @@
             currentData = fault;
             [self showData:fault.voltage];
         }
-        currentIndex = 0;
-        [self readFaultData];
+        //currentIndex = 0;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
+
+        [[LFBluetoothManager sharedManager] readFaultData];
         
     } else {
         [self.tblFaults reloadData];
-        currentIndex = 0;
-        [self readFaultData];
+        //currentIndex = 0;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
+
+        [[LFBluetoothManager sharedManager] readFaultData];
     }
     
 }
