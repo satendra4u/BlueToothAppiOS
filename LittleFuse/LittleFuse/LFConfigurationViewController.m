@@ -647,13 +647,16 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
     
     if (indexPath.row == FriendlyNameFirstWrite) {
-        editing.selectedText = @"Name";
+        editing.selectedText = kFriendly_deviceName_title;
     } else if (indexPath.row == ChangePasswordWrite) {
-        editing.selectedText = @"password";
+        editing.selectedText = kAuthentication_title;
+
     } else if (indexPath.row == ResetPasswordWrite) {
-      editing.selectedText = @"ResetPassword";
+      editing.selectedText = kResetPassword_title;
+
     } else {
         editing.selectedText = cell.lblKey.text;
+
     }
     editing.delegate = self;
    
@@ -661,7 +664,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         editing.showAuthentication = NO;
         if (indexPath.row == ChangePasswordWrite) {
         editing.isChangePassword = YES;
-        }
+                    }
     } else {
         if (indexPath.row == ChangePasswordWrite) {
             editing.isChangePassword = YES;
@@ -1598,7 +1601,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     }
     else if (selectedTag == ChangePasswordWrite) {
         if ((txt.length == 0) || (txt == nil)) {
-            [self showAlertWithText:@"Please enter a valid password"];
+            [self showAlertWithText:kEnter_Valid_Password];
             return;
         }
         [self changePasswordWithNewValue:txt];

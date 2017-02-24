@@ -476,15 +476,12 @@ NSLog(@"\n===============view will disappear called===================\n");
     
     NSInteger timerHours = timerVal/3600; //Hours
     NSInteger timerminutesVal = timerVal%3600;
-    
     NSInteger timerMinutes = timerminutesVal/60; //Minutes
-    
     NSInteger timerSeconds = timerminutesVal%60; //Seconds
     
-    
     NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerHours] : [NSString stringWithFormat:@"0%ld",(long)timerHours]);
-    NSString *timerMinutesString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerMinutes] : [NSString stringWithFormat:@"0%ld",(long)timerMinutes]);
-    NSString *timerSecondsString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerSeconds] : [NSString stringWithFormat:@"0%ld",(long)timerSeconds]);
+    NSString *timerMinutesString = (timerMinutes > 9 ? [NSString stringWithFormat:@"%ld",(long)timerMinutes] : [NSString stringWithFormat:@"0%ld",(long)timerMinutes]);
+    NSString *timerSecondsString = (timerSeconds > 9 ? [NSString stringWithFormat:@"%ld",(long)timerSeconds] : [NSString stringWithFormat:@"0%ld",(long)timerSeconds]);
     NSMutableAttributedString *activeTimerTitelAttrStr = [[NSMutableAttributedString alloc]initWithString:@"Active Timer: "];
     NSString *rdrString = [self getRDRFromMask:[data subdataWithRange:NSMakeRange(0, 4)]];
     NSString *timerString = [NSString stringWithFormat:@" %@ : %@ : %@ %@",timerHoursString,timerMinutesString,timerSecondsString,rdrString];
@@ -1088,7 +1085,7 @@ NSLog(@"\n===============view will disappear called===================\n");
                 break;
             case 1:
               
-                alertMessage = kSave_Success;
+                alertMessage = kReset_success;
                // isReRead = YES;
                 [authUtils nextAuthCode];
                 isVerifyingPassword = NO;

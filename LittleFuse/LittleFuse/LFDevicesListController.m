@@ -258,9 +258,9 @@
 {
        
    // if (!isInitialDisconnect) {
-        UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:@"LittelFuse" message:@"Device Disconnected Successfully" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:kApp_Name message:kDevice_Disconnected preferredStyle:UIAlertControllerStyleAlert];
         
-        [alertcontroller addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alertcontroller addAction:[UIAlertAction actionWithTitle:kOK style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self.navigationController popToRootViewControllerAnimated:YES];
             
         }]];

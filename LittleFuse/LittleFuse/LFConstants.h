@@ -108,6 +108,11 @@
 
 #define  kApp_Name  @"Littelfuse"
 #define  kConfigure @"Configure"
+#define  kFriendly_deviceName_title  @"Friendly Device Name"
+#define  kAuthentication_title @"Authentication"
+#define  kResetPassword_title @"Password Reset"
+
+
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert body constants *****
 // ------------------------------------------------------------------------------------------
@@ -118,16 +123,23 @@
 #define  kDevice_Disconnected @"Device Disconnected"
 #define  kWriting_Failed @"Writing data failed."
 #define  kEnter_Correct_Password @"Please enter correct password and try again."
-#define  kSave_Success @"Data saved successfully."
+#define  kSave_Success @"Data saved successfully"
 #define  kProblem_Saving @"There is a problem saving data."
 #define  kNot_Configured @"This MP8000 has not yet been Configured. Configure this MP8000 now?"
-#define  kEnter_Valid_Password @"Please enter valid password"
+#define  kEnter_Valid_Password @"Please enter password"
 #define  kPermision_Error @"Read or Write Permission Error"
 #define  kOutOf_Range @"Out of Range Error"
 #define  kPassword_Changed @"Password Changed Successfully"
 #define  kAuthenticationFailed @"User Authorization Failed"
 #define  kUpdateFailed @"Update Failed due to Timeout"
-#define  kResetRelay_motorStarts @"Caution: Motor May Start!"
+#define  kResetRelay_motorStarts @"Caution:Motor May Start!"
+#define  kReset_success @"Device reset successfully"
+#define  kFriendly_deviceName_message  @"Please enter the friendly device name to change the device name"
+#define  kAuthentication_message  @"Please enter the password to edit the configuration settings"
+#define  kResetPassword_message  @"Please enter reset code"
+
+
+
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert button titles *****
 // ------------------------------------------------------------------------------------------

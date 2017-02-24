@@ -39,6 +39,7 @@
 
 @property (weak, nonatomic) IBOutlet UISlider *slider;
 @property (weak, nonatomic) IBOutlet UIButton *infoBtn;
+@property (weak, nonatomic) IBOutlet UILabel *authenticationTitleLabel;
 
 - (IBAction)sliderValueChange:(UISlider *)sender;
 
@@ -84,20 +85,27 @@
     }
     _textFiled.delegate = self;
     _authenticationTextField.delegate = self;
-    if ([_selectedText caseInsensitiveCompare:@"name"] == NSOrderedSame) {
+    if ([_selectedText caseInsensitiveCompare:kFriendly_deviceName_title] == NSOrderedSame) {
         _lblrangeTxt.text = @"Note:Enter name between 1-12 characters";
         _infoBtn.hidden = YES;
-        _lblSelectTxt.text = @"Enter a new name for the device.";
+        _lblSelectTxt.text = kFriendly_deviceName_message;
         _textFiled.keyboardType = UIKeyboardTypeDefault;
-    } else if ([_selectedText caseInsensitiveCompare:@"password"] == NSOrderedSame) {
+    } else if ([_selectedText caseInsensitiveCompare:kAuthentication_title] == NSOrderedSame) {
         _lblrangeTxt.text = @"Note:Enter password between 1-12 characters";
         _infoBtn.hidden = YES;
-        _lblSelectTxt.text = @"Enter a new password for the device.";
+        if (_isChangePassword) {
+            _lblSelectTxt.text = @"";
+
+        }
+        else{
+            _lblSelectTxt.text = kAuthentication_message;
+
+        }
         _textFiled.keyboardType = UIKeyboardTypeDefault;
-    } else if ([_selectedText caseInsensitiveCompare:@"ResetPassword"] == NSOrderedSame) {
+    } else if ([_selectedText caseInsensitiveCompare:kResetPassword_title] == NSOrderedSame) {
         _lblrangeTxt.text = @"Note:Enter reset code in Alpha Numaraic";
         _infoBtn.hidden = YES;
-        _lblSelectTxt.text = @"Enter the passcode to Reset Password.";
+        _lblSelectTxt.text = kResetPassword_message;
         _textFiled.keyboardType = UIKeyboardTypeNamePhonePad;
     } else {
         _infoBtn.hidden = NO;
