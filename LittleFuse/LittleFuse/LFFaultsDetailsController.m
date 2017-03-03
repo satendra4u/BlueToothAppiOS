@@ -313,7 +313,7 @@
     NSString *type = [LFUtilities conversionJFormate:data3];
     
     
-    CGFloat totalPower = (Pa + Pb + Pc)/100000.0f;
+    CGFloat totalPower = (Pa + Pb + Pc)/1000.0f;
     LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"Power" Value:[NSString stringWithFormat:@"%.3f KW", totalPower] Code:@"P"];
     
     LFDisplay *pfa = [[LFDisplay alloc] initWithKey:@"Power Factor" Value:type Code:@"PF"];
