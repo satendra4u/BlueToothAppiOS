@@ -38,7 +38,7 @@
  * This method alert after writing data to device.
  * @param: isSuccess: Specifies if the write is success or not.
  */
-- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess;
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic;
 
 /**
  * This method is called when configuration data is received for a given index.
@@ -69,6 +69,11 @@
  * @param: data: The data received from the device to be converted.
  */
 - (void)getFaultOtherData:(NSData *)data;
+
+- (void)receivedDeviceMacWithData:(NSData*)data;
+
+- (void)deviceDisconnected;
+-(void)restartFaultLoading;
 
 @end
 
@@ -110,6 +115,20 @@
 
 @property (assign, nonatomic) BOOL isWriting;
 
+@property (assign, nonatomic) BOOL isPassWordChange;
+
+@property (strong, nonatomic) NSData *macData;
+@property (assign, nonatomic) NSInteger faultPollingCount;
+@property (assign, nonatomic) NSInteger devicePairingRetryCount;
+
+//@property (strong, nonatomic) NSString *macString;
+//@property (strong, nonatomic) NSString *passwordVal;
+
+
+@property (assign, nonatomic) BOOL isPasswordVerified;
+//@property (assign, nonatomic) NSData *configSeedData;
+
+
 + (LFBluetoothManager *)sharedManager;
 
 - (void)createObjects;
@@ -123,7 +142,10 @@
  * Stops the scan operation.
  */
 - (void)stopScan;
-
+/**
+ * Clean devices list.
+ */
+- (void)cleanup;
 /**
  * This method connects mobile device to a peripheral at an index from the list of discovered peripherals.
  * @param: indexOfObj: Index of selected peripheral.
@@ -187,5 +209,34 @@
  * This method stops the background loading of faults.
  */
 - (void)stopFaultTimer;
+
+/**
+ * This method gets called whenever pairing is cancelled for a device after tapping.
+ */
+- (void)pairingCancelledForDeviceAtIndex:(NSInteger)indexOfObj;
+
+- (void)discoverCharacteristicsForAuthentication;
+
+- (void)resetConfigurationCharacteristics;
+
+- (void)readValueForCharacteristic:(CBCharacteristic *)characteristic;
+
+#pragma Mark Data Conversion Methods
+
+/**
+ @discussion this method will gives you the encripted data include the password
+ @param  Command value and address, lenght of the command , and comand value bytes
+ @returns    Encripted Data type NSData
+ */
+- (NSData *) getCommandEncriptedDataWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length;
+- (NSData *) getCommandEncriptedDataForResetPasswordWithValue:(NSData *) valueData andAddress:(Byte) address andLength:(Byte) length;
+- (void) setPasswordString:(NSString *) passwordString;
+- (void) setConfigSeedData:(NSData *) seedData;
+- (void) setMacString:(NSString *) macStr;
+
+- (NSData *) getConfigSeedData;
+- (NSString *) getMacString;
+- (NSString *) getPasswordString;
+
 
 @end

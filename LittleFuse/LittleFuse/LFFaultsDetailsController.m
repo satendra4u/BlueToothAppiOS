@@ -40,7 +40,7 @@
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
 
     [self convertFaultData];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)appEnteredBackground {
@@ -189,14 +189,14 @@
     NSInteger Vca = [LFUtilities getValueFromHexData:data4];
     
     NSInteger tcrVal = [LFUtilities getValueFromHexData:data5];
-//    NSLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
+//    DLog(@"Voltage 1 = %d \n Voltage 2 = %d \n Voltage 3 = %d", Vab, Vbc, Vca);
     LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"L1-L2" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vab/100.0f)] Code:@"L1-L2"];
     
     LFDisplay *bToc = [[LFDisplay alloc] initWithKey:@"L2-L3" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vbc/100.0f)] Code:@"L2-L3"];
     
     LFDisplay *cToa = [[LFDisplay alloc] initWithKey:@"L3-L1" Value:[NSString stringWithFormat:@"%ld VAC", lroundf(Vca/100.0f)] Code:@"L3-L1"];
     
-    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCR"];;
+    LFDisplay *tcr = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (tcrVal/100.0)] Code:@"TCU"];;
     
     NSArray *voltgaeDetails = @[aTob, bToc, cToa];
     
@@ -313,7 +313,7 @@
     NSString *type = [LFUtilities conversionJFormate:data3];
     
     
-    CGFloat totalPower = (Pa + Pb + Pc)/100000.0f;
+    CGFloat totalPower = (Pa + Pb + Pc)/1000.0f;
     LFDisplay *aTob = [[LFDisplay alloc] initWithKey:@"Power" Value:[NSString stringWithFormat:@"%.3f KW", totalPower] Code:@"P"];
     
     LFDisplay *pfa = [[LFDisplay alloc] initWithKey:@"Power Factor" Value:type Code:@"PF"];
@@ -322,9 +322,8 @@
     LFDisplay *phaseSequence = [[LFDisplay alloc] initWithKey:@"Phase Sequence" Value:[NSString stringWithFormat:@"%d", (int)seq] Code:@"PS"];
     if (seq == 0) {
         phaseSequence.value = @"ABC";
-    }
-    else {
-        phaseSequence.value = @"CBA";
+    } else {
+        phaseSequence.value = @"ACB";
     }
     
     NSArray *powerDetails = @[aTob, pfa];
@@ -401,7 +400,7 @@
     if (!canContinueTimer) {
         return;
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
             [self.navigationController popToRootViewControllerAnimated:NO];

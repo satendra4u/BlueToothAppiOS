@@ -10,7 +10,7 @@
 #define LFConstants_h
 
 
-#define APP_NAME @"Littelfuse"
+#define APP_NAME @"MP8000"
 
 #ifdef DEBUG
 #   define DLog(fmt, ...) NSLog((@"%s [Line %d] >>>>" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
@@ -39,6 +39,7 @@
 #define CURRENT_FAULT_CHARACTERSTIC     @"F303"
 #define POWER_FAULT_CHARACTERSTIC       @"F304"
 #define OTHER_FAULT_CHARACTERSTIC       @"F305"
+#define DEVICE_SERIAL_NUMBER_CHARACTERISTIC @"2A25"
 
 #define DISPLAY_TABBAR                  @"DisplayScreen"
 #define SAVE_CONFIG_VALUES              @"SaveValuesToConfig"
@@ -98,5 +99,60 @@
 #define PeripheralDidDisconnect @"PeripheralDidDisconnectNotification"
 #define PeripheralDidConnect    @"PeripheralDidConnectNotification"
 #define LittleFuseNotificationCenter [NSNotificationCenter defaultCenter]
+
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert titles *****
+// ------------------------------------------------------------------------------------------
+
+#pragma mark Alert Titles
+
+#define  kApp_Name  @"Littelfuse"
+#define  kConfigure @"CONFIGURE"
+#define  kFriendly_deviceName_title  @"Friendly Device Name"
+#define  kAuthentication_title @"Authentication"
+#define  kResetPassword_title @"Password Reset"
+
+
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert body constants *****
+// ------------------------------------------------------------------------------------------
+
+
+#pragma mark Alert Body
+
+#define  kDevice_Disconnected @"Device Disconnected"
+#define  kWriting_Failed @"Writing data failed."
+#define  kEnter_Correct_Password @"Please enter correct password and try again."
+#define  kSave_Success @"Data saved successfully"
+#define  kProblem_Saving @"There is a problem saving data."
+#define  kNot_Configured @"This MP8000 has not yet configured. Would you like to configure this device now?"
+#define  kEnter_Valid_Password @"Please enter password"
+#define  kPermision_Error @"Read or Write Permission Error"
+#define  kOutOf_Range @"Out of Range Error"
+#define  kPassword_Changed @"Password Changed Successfully"
+#define  kAuthenticationFailed @"User Authorization Failed"
+#define  kUpdateFailed @"Update Failed due to Timeout"
+#define  kResetRelay_motorStarts @"Caution:Motor May Start!"
+#define  kReset_success @"Device reset successfully"
+#define  kFriendly_deviceName_message  @"Please enter the friendly device name to change the device name"
+#define  kAuthentication_message  @"Please enter the password to edit the configuration settings"
+#define  kResetPassword_message  @"Please enter reset code"
+
+
+
+// ------------------------------------------------------------------------------------------
+//                              ***** Alert button titles *****
+// ------------------------------------------------------------------------------------------
+
+#pragma mark Alert Button Titles
+
+#define kOK  @"OK"
+#define kNo @"NO"
+#define kCancel @"CANCEL"
+#define kContinue @"CONTINUE"
+
+
+
+
 
 #endif /* LFConstants_h */

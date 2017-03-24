@@ -12,8 +12,11 @@
 #import "LFBluetoothManager.h"
 #import "LFNavigationBar.h"
 #import "LFDisplay.h"
+#import "LFNavigationController.h"
+#import "LFEditingViewController.h"
+#import "LFAuthUtils.h"
 
-@interface LFRealTimeViewController () <UIScrollViewDelegate, UITableViewDataSource, UITableViewDelegate, BlutoothSharedDataDelegate>
+@interface LFRealTimeViewController () <UIScrollViewDelegate, UITableViewDataSource, UITableViewDelegate, BlutoothSharedDataDelegate,EditingDelegate>
 {
     
     BOOL canContinueTimer;
@@ -21,20 +24,38 @@
     __weak IBOutlet UITableView *tblDisplay;
     __weak IBOutlet UILabel *lblDeviceName;
     
+    __weak IBOutlet UILabel *activeTimerLabel;
+    
     NSMutableArray *configArr;
     NSMutableArray *sectionArray;
     
     NSData *unbalanceCurrentData;
     NSInteger refreshTimeInterval;
     CGPoint currentContentOffset;
+    
+    //NSString *passwordVal;
+    //NSString *macString;
+    
+    //NSData *configSeedData;
+    NSData *prevWrittenData;
+
+
+    BOOL isFetchingMacOrSeedData;
+    BOOL isWrite;
+    BOOL isReRead;
+    BOOL isVerifyingPassword;
+
+
+    LFAuthUtils *authUtils;
+    
+    LFEditingViewController *editing;
 }
 @end
 
 @implementation LFRealTimeViewController
 
-const char realMemMap[] = { 0x56, 0x5e};
-
-const char realMemFieldLens[] = { 0x02, 0x02};
+const char realMemMap[] = { 0x56, 0x5e,0x0076};
+const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 
 
 - (void)viewDidLoad
@@ -52,16 +73,20 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     lblDeviceName.attributedText = string;
 
     _lblSystemStatus.adjustsFontSizeToFitWidth = YES;
+    
+    [self readCharactisticsWithIndex:2];
+
     [tblDisplay registerNib:[UINib nibWithNibName:@"LFCharactersticDisplayCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:CHARACTER_DISPLAY_CELL_ID];
     [tblDisplay setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getCurrentData:) name:CURRENT_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getPowerData:) name:POWER_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getVoltageData:) name:VOLTAGE_NOTIFICATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getTimersData:) name:REAL_TIME_CONFIGURATION object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getCurrentData:) name:CURRENT_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getPowerData:) name:POWER_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getVoltageData:) name:VOLTAGE_NOTIFICATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getTimersData:) name:REAL_TIME_CONFIGURATION object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(getEquipmentData:) name:EQUIPMENT_NOTIFICATION object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
 }
 
 /**
@@ -74,10 +99,11 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
+    [[LFBluetoothManager sharedManager] setDelegate:nil];
+    [[LFBluetoothManager sharedManager] setDelegate:self];
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
     [tabBarController setEnableRefresh:NO];
     canContinueTimer = YES;
-    [[LFBluetoothManager sharedManager]setDelegate:self];
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
     float batteryLevel = [[UIDevice currentDevice] batteryLevel];
     if (batteryLevel > 0.20) {
@@ -88,35 +114,41 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     }
     currentContentOffset = tblDisplay.contentOffset;
     [self refreshCurrentController];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
+    //[self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];
+   /* if ([LFBluetoothManager sharedManager].macData) {
+        [self receivedDeviceMacWithData:[LFBluetoothManager sharedManager].macData];
+    }*/
 }
-
-
 - (void)updateFaultData {
+    //NSLog(@"\n===============updatefault data called===================\n");
     if(canContinueTimer) {
-        [LFBluetoothManager sharedManager].tCurIndex = 1;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
         [LFBluetoothManager sharedManager].canContinueTimer = YES;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [[LFBluetoothManager sharedManager] readFaultData];
         });
-        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:180];
+        [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:1];//180
     }
 }
-
-
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
-    [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     canContinueTimer = NO;
+NSLog(@"\n===============view will disappear called===================\n");
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+
+
+    [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
+
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+    //[[LFBluetoothManager sharedManager] disconnectDevice];
+   // [[LFBluetoothManager sharedManager] setDelegate:nil];
+
 }
-
-
 - (void)refreshCurrentController {
-    if (!canContinueTimer) {
+    /*if (!canContinueTimer) {
         return;
-    }
+    }*/
     currentContentOffset = tblDisplay.contentOffset;
     [[LFBluetoothManager sharedManager] fetchRealTimeValues];
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
@@ -139,6 +171,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getVoltageData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self voltageCharcterstics:[notification object]];
 }
 
@@ -147,6 +182,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getCurrentData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self currentCharcterstics:[notification object]];
     
 }
@@ -156,6 +194,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getEquipmentData:(NSNotification *)notificaition
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self equipmentStatus:[notificaition object]];
 }
 
@@ -164,11 +205,17 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  */
 - (void)getPowerData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     [self powerCharacterstics:[notification object]];
 }
 
 - (void)voltageCharcterstics:(NSData *)data
 {
+    if (!canContinueTimer) {
+        return;
+    }
     //Reverse the data
     
     NSInteger len = 4;
@@ -195,7 +242,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     range = NSMakeRange(range.location + range.length, len);
     data6 = [data subdataWithRange:range];
     
-    DLog(@" Voltage %@\t%@ \t%@ \t%@ \t %@ \t %@ \t%@", data0,data1, data2, data3, data4, data5, data6);
+   // DLog(@" Voltage %@\t%@ \t%@ \t%@ \t %@ \t %@ \t%@", data0,data1, data2, data3, data4, data5, data6);
     
     NSInteger vrms0 = [LFUtilities getValueFromHexData:data0];
     
@@ -222,7 +269,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)currentCharcterstics:(NSData *)data
 {
-    
+    if (!canContinueTimer) {
+        return;
+    }
     NSInteger len = 4;
     NSData *data0, *data1, *data2, *data3, *data4, *data5;
     NSRange range = NSMakeRange(0, len);
@@ -244,7 +293,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     range = NSMakeRange(range.location + range.length, len);
     data5 = [data subdataWithRange:range];
     
-    DLog(@" Current %@\t%@ \t%@ \t%@ \t %@ \t %@ ", data0,data1, data2, data3, data4, data5);
+   // DLog(@" Current %@\t%@ \t%@ \t%@ \t %@ \t %@ ", data0,data1, data2, data3, data4, data5);
     
     NSInteger vrms0 = [LFUtilities getValueFromHexData:data0];
     
@@ -301,6 +350,9 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)powerCharacterstics:(NSData *)data
 {
+    if (!canContinueTimer) {
+        return;
+    }
     NSInteger len = 4;
     NSData *data0, *data1, *data2, *data3, *data4;
     NSRange range = NSMakeRange(0, len);
@@ -341,7 +393,10 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 
 - (void)equipmentStatus:(NSData *)data
 {
-    DLog(@"Equipment data = %@", data);
+    if (!canContinueTimer) {
+        return;
+    }
+   // DLog(@"Equipment data = %@", data);
     BOOL isFaultPresent = YES;
     NSString *dataString = [self getDataStringFromData:[data subdataWithRange:NSMakeRange(0, 4)]];
     NSString *faultError = @"OK";
@@ -354,6 +409,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     else {
         isFaultPresent = YES;
     }
+    
     UIColor *applicableColor;
     if ([faultError isEqualToString:@"OK"]) {
         applicableColor = [UIColor greenColor];
@@ -385,7 +441,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
         [mutAttrStr appendAttributedString:attrStr];
         [self.lblSystemStatus setAttributedText:mutAttrStr];
     }
-    NSData *data1, *data2;
+        NSData *data1, *data2;
     data1 = [data subdataWithRange:NSMakeRange(18, 2)];
     data2 = [data subdataWithRange:NSMakeRange(12, 2)];
     NSMutableData *combinedData = [[NSMutableData alloc]init];
@@ -398,7 +454,10 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     NSInteger val2 = [LFUtilities getValueFromHexData:data1];
     NSInteger vunb = [LFUtilities getValueFromHexData:data2];
     
-    LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Remaining" Value:[NSString stringWithFormat:@"%0.2f %%", (vunb/100.0)] Code:@"TCR"];
+   
+
+    
+    LFDisplay *vunbaised = [[LFDisplay alloc] initWithKey:@"Thermal Capacity Used" Value:[NSString stringWithFormat:@"%0.2f %%", (vunb/100.0)] Code:@"TCU"];
     NSInteger hours = val1/3600; //Hours
     NSInteger minutesVal = val1%3600;
     NSInteger minutes = minutesVal/60; //Minutes
@@ -411,86 +470,184 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     [sectionArray replaceObjectAtIndex:3 withObject:arr];
     [tblDisplay reloadData];
     tblDisplay.contentOffset = currentContentOffset;
-}
+    
+    
+    NSInteger timerVal = [LFUtilities getValueFromHexData:[data subdataWithRange:NSMakeRange(8, 4)]];
+    
+    NSInteger timerHours = timerVal/3600; //Hours
+    NSInteger timerminutesVal = timerVal%3600;
+    NSInteger timerMinutes = timerminutesVal/60; //Minutes
+    NSInteger timerSeconds = timerminutesVal%60; //Seconds
+    
+    NSString *timerHoursString = (timerHours > 9 ? [NSString stringWithFormat:@"%ld",(long)timerHours] : [NSString stringWithFormat:@"0%ld",(long)timerHours]);
+    NSString *timerMinutesString = (timerMinutes > 9 ? [NSString stringWithFormat:@"%ld",(long)timerMinutes] : [NSString stringWithFormat:@"0%ld",(long)timerMinutes]);
+    NSString *timerSecondsString = (timerSeconds > 9 ? [NSString stringWithFormat:@"%ld",(long)timerSeconds] : [NSString stringWithFormat:@"0%ld",(long)timerSeconds]);
+    NSMutableAttributedString *activeTimerTitelAttrStr = [[NSMutableAttributedString alloc]initWithString:@"Active Timer: "];
+    NSString *rdrString = [self getRDRFromMask:[data subdataWithRange:NSMakeRange(0, 4)]];
+    NSString *timerString = [NSString stringWithFormat:@" %@ : %@ : %@ %@",timerHoursString,timerMinutesString,timerSecondsString,rdrString];
+   // DLog(@"timer string: %@",timerString);
 
+    NSAttributedString *activeTimerValueAttrStr = [[NSAttributedString alloc]initWithString:timerString attributes:@{
+                                                                                                                    NSBackgroundColorAttributeName: [UIColor clearColor] ,
+                                                                                                                    NSForegroundColorAttributeName: [UIColor blackColor]
+                                                                                                                    }];
+    [activeTimerTitelAttrStr appendAttributedString:activeTimerValueAttrStr];
+    [activeTimerLabel setAttributedText:activeTimerTitelAttrStr];
+}
+-(NSString *)getRDRFromMask:(NSData *)maskData
+{
+    NSString* rdr = @"RD";
+    NSString *mask = [self getDataStringFromData:maskData];
+    if (mask.length) {
+        if (mask.length > 4) {
+            mask = [mask substringWithRange:NSMakeRange(0, 4)];
+        }
+        NSInteger r0 = 0x0001;
+        NSInteger r1 = 0x0002;
+        NSInteger r2 = 0x0004;
+        NSInteger val = [mask integerValue];
+        NSInteger status = (val & r2) | (val & r1) | (val & r0);
+        if (status == 0) {
+            rdr = @"Inactive";
+        } else {
+            rdr = [rdr stringByAppendingString:[NSString stringWithFormat:@"%d", (int)(status - 1)]];
+        }
+    }
+    return rdr;
+}
+-(NSString *)getFaultAndWarnStringFromDataString:(NSString *)mask
+{
+    __block NSString *receivedString = @"";
+    if (mask.length) {
+       // mask = [@"0x" stringByAppendingString:mask];
+       NSArray * dataStringsArray = @[@"0x00000000",@"0x00000001",@"0x00000002",@"0x00000004",@"0x00000008",@"0x00000010",@"0x00000020",@"0x00000040",@"0x00000080",@"0x00000100",@"0x00000200",@"0x00000400",@"0x00000800",@"0x00001000",@"0x00010000",@"0x00020000",@"0x00040000",@"0x00200000",@"0x00400000",@"0x00080000",@"0x00100000",@"0x00800000"];
+        
+        
+        [dataStringsArray enumerateObjectsUsingBlock:^(NSString* obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            //NSInteger dataValue = [obj integerValue];
+
+            unsigned int dataValueDec;
+            NSUInteger dataValueIntDec;
+
+            NSScanner *dataValuescan = [NSScanner scannerWithString:obj];
+            if ([dataValuescan scanHexInt:&dataValueDec]) {
+                dataValueIntDec = dataValueDec;
+            }
+            
+            
+            unsigned int maskValueDec;
+            NSUInteger maskValueIntDec;
+            
+            NSScanner *maskValuescan = [NSScanner scannerWithString:mask];
+            if ([maskValuescan scanHexInt:&maskValueDec]) {
+                maskValueIntDec = maskValueDec;
+            }
+            BOOL status = dataValueIntDec & maskValueIntDec;
+            if (status) {
+                receivedString = [obj stringByReplacingOccurrencesOfString:@"0x" withString:@""];
+                *stop = YES;
+            }
+            
+        }];
+    }
+    return receivedString;
+}
 - (NSString *)getFaultValueForDataString:(NSString *)dataString {
+    
+    dataString = [self getFaultAndWarnStringFromDataString:dataString];
     NSString *codeVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
         codeVal = @"OK";
-    }
-    else if ([dataString isEqualToString:@"00000001"]) {
-        codeVal = @"Over Current";
-    }
-    else if ([dataString isEqualToString:@"00000002"]) {
-        codeVal = @"Under Current";
-    }
-    else if ([dataString isEqualToString:@"00000004"]) {
-        codeVal = @"Current Unbalance";
-    }
-    else if ([dataString isEqualToString:@"00000008"]) {
-        codeVal = @"Current Single Phasing";
-    }
-    else if ([dataString isEqualToString:@"00000010"]) {
-        codeVal = @"Contactor Failure";
-    }
-    else if ([dataString isEqualToString:@"00000020"]) {
-        codeVal = @"Ground Fault";
-    }
-    else if ([dataString isEqualToString:@"00000040"]) {
-        codeVal = @"High Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000080"]) {
-        codeVal = @"Low Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000100"]) {
-        codeVal = @"Power Outage Fault";
-    }
-    else if ([dataString isEqualToString:@"00000200"]) {
+    } else if ([dataString isEqualToString:@"00000001"]) {
+        codeVal = @"Tripped on overcurrent";
+    } else if ([dataString isEqualToString:@"00000002"]) {
+        codeVal = @"Tripped on undercurrent";
+    } else if ([dataString isEqualToString:@"00000004"]) {
+        codeVal = @"Tripped on current unbalance";
+    } else if ([dataString isEqualToString:@"00000008"]) {
+        codeVal = @"Tripped on current single-phasing";
+    } else if ([dataString isEqualToString:@"00000010"]) {
+        codeVal = @"Tripped on contactor failure";
+    } else if ([dataString isEqualToString:@"00000020"]) {
+        codeVal = @"Tripped on ground fault";
+    } else if ([dataString isEqualToString:@"00000040"]) {
+        codeVal = @"Tripped on High Power Fault";
+    } else if ([dataString isEqualToString:@"00000080"]) {
+        codeVal = @"Tripped on low power fault";
+    } else if ([dataString isEqualToString:@"00000100"]) {
+        codeVal = @"Low Control Voltage fault";
+    } else if ([dataString isEqualToString:@"00000200"]) {
         codeVal = @"Trip or holdoff due to PTC fault";
-    }
-    else if ([dataString isEqualToString:@"00000400"]) {
+    } else if ([dataString isEqualToString:@"00000400"]) {
         codeVal = @"Tripped triggered from remote source";
-    }
-    else if ([dataString isEqualToString:@"00010000"]) {
-        codeVal = @"Low Voltage Holdoff";
-    }
-    else if ([dataString isEqualToString:@"00020000"]) {
-        codeVal = @"High Voltage Holdoff";
-    }
-    else if ([dataString isEqualToString:@"00040000"]) {
-        codeVal = @"Voltage Unbalanced Holdoff";
-    }
-    else if ([dataString isEqualToString:@"00008000"]) {
+    }else if ([dataString isEqualToString:@"00000800"]) {
+        codeVal = @"Tripped on Linear Overcurrent";
+    }else if ([dataString isEqualToString:@"00001000"]) {
+        codeVal = @"Tripped Motor Stall";
+    }else if ([dataString isEqualToString:@"00010000"]) {
+        codeVal = @"Active Restart Delay Field Bit 0";
+    } else if ([dataString isEqualToString:@"00020000"]) {
+        codeVal = @"Active Restart Delay Field Bit 1";
+    } else if ([dataString isEqualToString:@"00040000"]) {
+        codeVal = @"Active Restart Delay Field Bit 2";
+    } else if ([dataString isEqualToString:@"00200000"]) {
+        codeVal = @"Tripped on PTC Short";
+    } else if ([dataString isEqualToString:@"00400000"]) {
+        codeVal = @"Tripped on PTC Open";
+    } else if ([dataString isEqualToString:@"00080000"]) {
+        codeVal = @"Manual Restart Required";
+    } else if ([dataString isEqualToString:@"00100000"]) {
         codeVal = @"Undefined trip condition";
+    }
+    else if ([dataString isEqualToString:@"10000000"]) {
+        codeVal = @"FW Update";
     }
     return codeVal;
 }
 
+
 - (NSString *)getCorrectStringForWarningString:(NSString *)dataString {
+    dataString = [self getFaultAndWarnStringFromDataString:dataString];
+
     NSString *errorVal = @"OK";
     if ([dataString isEqualToString:@"00000000"]) {
         errorVal = @"OK";
-    }
-    else if ([dataString isEqualToString:@"00000001"]) {
-        errorVal = @"Warning on overcurrent";
-    }
-    else if ([dataString isEqualToString:@"00000002"]) {
-        errorVal = @"Warning on undercurrent ";
-    }
-    else if ([dataString isEqualToString:@"00000004"]) {
-        errorVal = @"Warning on current unbalance";
-    }
-    else if ([dataString isEqualToString:@"00000020"]) {
-        errorVal = @"Warning on ground fault";
-    }
-    else if ([dataString isEqualToString:@"00000040"]) {
-        errorVal = @"Warning on High Power Fault";
-    }
-    else if ([dataString isEqualToString:@"00000080"]) {
-        errorVal = @"Warning on low power fault ";
-    }
-    else if ([dataString isEqualToString:@"00008000"]) {
-        errorVal = @"Undefined Warning condition";
+    } else if ([dataString isEqualToString:@"00000001"]) {
+        errorVal = @"Overcurrent Detected";
+    } else if ([dataString isEqualToString:@"00000002"]) {
+        errorVal = @"Undercurrent Detected ";
+    } else if ([dataString isEqualToString:@"00000004"]) {
+        errorVal = @"Current unbalance Detected";
+    } else if ([dataString isEqualToString:@"00000008"]) {
+        errorVal = @"Current single Phasing Detected";
+    } else if ([dataString isEqualToString:@"00000010"]) {
+        errorVal = @"Contactor Failure Detected";
+    } else if ([dataString isEqualToString:@"00000020"]) {
+        errorVal = @"Ground Fault Detected";
+    } else if ([dataString isEqualToString:@"00000040"]) {
+        errorVal = @"High Power Detected";
+    } else if ([dataString isEqualToString:@"00000080"]) {
+        errorVal = @"Low Power Detected";
+    } else if ([dataString isEqualToString:@"00000100"]) {
+        errorVal = @"Low Control Voltage Detected";
+    } else if ([dataString isEqualToString:@"00000200"]) {
+        errorVal = @"PTC Holdoff";
+    } else if ([dataString isEqualToString:@"00000800"]) {
+        errorVal = @"Linear OverCurrent Detected";
+    } else if ([dataString isEqualToString:@"00001000"]) {
+        errorVal = @"Motor Stall Detected";
+    } else if ([dataString isEqualToString:@"00010000"]) {
+        errorVal = @"Low voltage Holdoff";
+    } else if ([dataString isEqualToString:@"00020000"]) {
+        errorVal = @"High voltage Holdoff";
+    } else if ([dataString isEqualToString:@"00040000"]) {
+        errorVal = @"Voltage Unbalanced Holdoff";
+    } else if ([dataString isEqualToString:@"00080000"]) {
+        errorVal = @"Phase Sequence Holdoff";
+    } else if ([dataString isEqualToString:@"00100000"]) {
+        errorVal = @"Undefined Holdoff";
+    } else if ([dataString isEqualToString:@"00800000"]) {
+        errorVal = @"Ground Fault Alarm";
     }
     return errorVal;
 }
@@ -574,33 +731,62 @@ const char realMemFieldLens[] = { 0x02, 0x02};
 {
     configArr = nil;
     sectionArray = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [LittleFuseNotificationCenter removeObserver:self];
 }
 
 - (void)readCharactisticsWithIndex:(NSInteger)index
 {
+    
+    /*if (!canContinueTimer) {
+        return;
+    }*/
     Byte data[20];
     for (int i=0; i < 20; i++) {
         if (i== 8) {
             data[i] = realMemMap[index];
         } else if (i == 10){
             data[i] = realMemFieldLens[index];
-        } else {
+        }  else {
             data[i] = (Byte)0x00;
         }
     }
     
     [[LFBluetoothManager sharedManager] setConfig:YES];
-    [[LFBluetoothManager sharedManager] setRealtime:YES];
     NSData *data1 = [NSData dataWithBytes:data length:20];
     [[LFBluetoothManager sharedManager] writeConfigData:data1];
 }
 
+- (void)readCharactistic:(CBCharacteristic *)charactistic
+{
+    
+    
+   /* Byte data[20];
+    for (int i=0; i < 20; i++) {
+        if (i== 8) {
+            data[i] = realMemMap[index];
+        } else if (i == 10){
+            data[i] = realMemFieldLens[index];
+        }  else {
+            data[i] = (Byte)0x00;
+        }
+    }
+    
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    [[LFBluetoothManager sharedManager] writeConfigData:data1];*/
+    
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] readValueForCharacteristic:charactistic];
+    
+}
 /**
  *Calculates timers data received from device.
  */
 - (void)getTimersData:(NSNotification *)notification
 {
+    if (!canContinueTimer) {
+        return;
+    }
     CBCharacteristic *characteristic = (CBCharacteristic *)notification.object;
     NSData *data = characteristic.value;
     
@@ -633,7 +819,7 @@ const char realMemFieldLens[] = { 0x02, 0x02};
     if (!canContinueTimer) {
         return;
     }
- [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+ [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
      if ([alert isKindOfClass:[UIAlertController class]]) {
          [alert dismissViewControllerAnimated:NO completion:nil];
          [self.navigationController popToRootViewControllerAnimated:NO];
@@ -641,5 +827,343 @@ const char realMemFieldLens[] = { 0x02, 0x02};
  }];
 }
 
+#pragma mark Action Methods
+
+- (IBAction)resetRelayAction:(id)sender {
+    
+    canContinueTimer = NO;
+    [[LFBluetoothManager sharedManager] stopFaultTimer];
+    
+    if (![LFBluetoothManager sharedManager].isPasswordVerified) {
+        isVerifyingPassword = YES;
+        LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+        editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+        editing.selectedText = @"password";
+        self.providesPresentationContextTransitionStyle = YES;
+        self.definesPresentationContext = YES;
+        [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+        
+       // editing.selectedText = cell.lblKey.text;
+        editing.delegate = self;
+        
+        
+        editing.showAuthentication = YES;//YES to show the password screen.
+        [navController setViewControllers:@[editing]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.navigationController presentViewController:navController animated:NO completion:nil];
+        });
+    }
+    else{
+        
+        [self writeRelayData];
+    }
+}
+#pragma mark -Editing Delegate
+
+- (void)checkPassword:(NSString *)passwordStr {
+    // TODO: Ask aswin to y it is
+   // isVerifyingPassword = YES;
+    if (passwordStr != nil) {
+        [[LFBluetoothManager sharedManager] setPasswordString:passwordStr] ;
+    }
+    
+    
+    if(! ([[LFBluetoothManager sharedManager] getConfigSeedData] && [LFBluetoothManager sharedManager].macData) ){
+        [self readDeviceMacAndAuthSeed];
+    }
+    else{
+        
+        [editing authDoneWithStatus:YES shouldDismissView:YES];
+        
+        [self showAlertToResetRelay];
+
+       // [self writeRelayData];
+        
+       // [self showAlertToResetRelay];
+       
+    }
+}
+- (void)showAlertToResetRelay{
+    [self showAlertViewWithCancelButtonTitle:kCancel withMessage:kResetRelay_motorStarts withTitle:APP_NAME otherButtons:@[kContinue] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+        if ([alert isKindOfClass:[UIAlertController class]]) {
+            if (index == 1) {
+                
+                 [self writeRelayData];
+            }
+            else{
+                canContinueTimer = YES;
+                [self refreshCurrentController];
+                
+            }
+            [alert dismissViewControllerAnimated:NO completion:nil];
+        }
+    }];
+}
+
+-(void)writeRelayData
+{
+    Byte data[20];
+    NSInteger convertedVal = 9;
+    char *bytes = (char *) malloc(8);
+    memset(bytes, 0, 8);
+    memcpy(bytes, (char *) &convertedVal, 2);//8
+    
+    for (int i = 0; i < 20; i++) {
+        if (i < 8) {
+            data[i] = (Byte)bytes[i];// Save the data whatever we are entered here
+        } else {
+            if (i == 8) {
+                data[i] = 0x0076;//register address
+            } else if (i == 10){
+                data[i] = 0x02;//length of the data
+            } else if (i == 11) {
+                data[i] = (Byte)0x01;//write byte == 1
+            }
+            else {
+                data[i] = (Byte)0x00;
+            }
+        }
+    }
+    
+    NSData *data1 = [NSData dataWithBytes:data length:20];
+    
+    NSData *lengthVal = [data1 subdataWithRange:NSMakeRange(10, 1)];
+    char buff;
+    [lengthVal getBytes:&buff length:1];
+    int myLen = buff;
+    NSData *addressVal = [data1 subdataWithRange:NSMakeRange(8, 1)];
+    char addrBuff;
+    [addressVal getBytes:&addrBuff length:1];
+    int myAddr = addrBuff;
+    NSData *resultData = [self getEncryptedPasswordDataFromString:@"" data:[data1 subdataWithRange:NSMakeRange(0, 8)] address:myAddr size:myLen];
+    data1 = [data1 subdataWithRange:NSMakeRange(0, 12)];
+    NSMutableData *mutData = [NSMutableData dataWithData:data1];
+    for (int i = 0; i< 8;i++) {
+        NSData *subdata = [resultData subdataWithRange:NSMakeRange(i, 1)];
+        [mutData appendData:subdata];
+    }
+    
+    isWrite = YES;
+    
+    [[LFBluetoothManager sharedManager] setIsWriting:YES];
+    [[LFBluetoothManager sharedManager] setConfig:YES];
+    [[LFBluetoothManager sharedManager] writeConfigData:mutData];
+    prevWrittenData = mutData;
+
+}
+
+- (void)showOperationCompletedAlertWithStatus:(BOOL)isSuccess withCharacteristic:(CBCharacteristic *)characteristic
+{
+    //isWrite = NO;
+    [[LFBluetoothManager sharedManager] setIsWriting:NO];
+    [self removeIndicator];
+    if (isSuccess) {
+        [self readCharactistic:characteristic];
+        //[self readCharactisticsWithIndex:2];//2 for index of reset relay address and length
+        //canContinueTimer = YES;
+
+        }
+    else {
+        //Error occured while writing data to device.
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kProblem_Saving withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+        }];
+    }
+}
+#pragma mark Generate Excrypted Data
+
+- (NSData *)getEncryptedPasswordDataFromString:(NSString *)newPassword data:(NSData *)writeData address:(short)address size:(short)size{
+    
+    if (authUtils == nil) {
+        authUtils = [[LFAuthUtils alloc]init];
+    }
+    DLog(@"Password is %@",[[LFBluetoothManager sharedManager] getPasswordString] );
+    DLog(@"mac string is %@",[[LFBluetoothManager sharedManager] getMacString] );
+    DLog(@"configseed data is %@",[[LFBluetoothManager sharedManager] getConfigSeedData] );
+     DLog(@"write data is %@",writeData );
+
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+
+        [authUtils initWithPassKey:[[LFBluetoothManager sharedManager] getPasswordString] andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed:[[LFBluetoothManager sharedManager] getConfigSeedData].bytes];
+    }
+    NSData * authCode = [authUtils computeAuthCode:writeData.bytes address:address size:size];
+    
+    return authCode;
+}
+
+- (void)showCharacterstics:(NSMutableArray *)charactersticsArray
+{
+    CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[2];
+    [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
+}
+#pragma mark Read Mac Data
+
+- (void)receivedDeviceMacWithData:(NSData *)data {
+    [LFBluetoothManager sharedManager].macData = data;
+    isFetchingMacOrSeedData = NO;
+    NSString *tString = [[NSString alloc] initWithData:data
+                                              encoding:NSASCIIStringEncoding];
+    NSMutableString *tMutStr = [[NSMutableString alloc]init];
+    for (int i = 0; i < tString.length; i++) {
+        NSString *tSubStr = [tString substringWithRange:NSMakeRange(i, 1)];
+        [tMutStr appendString:tSubStr];
+        if (i != 0 && i % 2 != 0 && i != tString.length-1) {
+            [tMutStr appendString:@":"];
+        }
+    }
+    [[LFBluetoothManager sharedManager] setMacString:tString];
+
+    [self performSelector:@selector(getSeedData) withObject:nil afterDelay:2];
+}
+
+- (void)getSeedData {
+    isFetchingMacOrSeedData = YES;
+    NSArray *charsArr = [LFBluetoothManager sharedManager].discoveredPeripheral.services[1].characteristics;
+    CBCharacteristic *charactestic = (CBCharacteristic *)charsArr[4];
+    [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
+}
+
+#pragma mark read value delegate
+
+- (void)configureServiceWithValue:(NSData *)data
+{
+     [self updateCharactersticsData:data];
+    return;
+}
+
+- (BOOL)isDataUpdatedCorrectlyWithPrevData:(NSData *)writtenData withNewData:(NSData *)newData {
+    NSData *prevVal = [writtenData subdataWithRange:NSMakeRange(0, 8)];
+    NSData *newVal = [newData subdataWithRange:NSMakeRange(0, 8)];
+    if ([prevVal isEqualToData:newVal]) {
+        return YES;
+    }
+    return NO;
+}
+
+- (void)readDeviceMacAndAuthSeed {
+    isFetchingMacOrSeedData = YES;
+    [editing authDoneWithStatus:YES shouldDismissView:YES];
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading..."];
+    [[LFBluetoothManager sharedManager] discoverCharacteristicsForAuthentication];
+}
+
+- (void) updateCharactersticsData:(NSData *) data {
+    
+    NSLog(@"\n=================updateCharactersticsData in reattimeviewcontroller=================");
+    NSData *tData = data;
+      
+    if (isFetchingMacOrSeedData) {
+        isFetchingMacOrSeedData = NO;
+        NSMutableData *mutData = [[NSMutableData alloc]init];
+        for (int i=12; i<=19; i++) {
+            [mutData appendData:[data subdataWithRange:NSMakeRange(i, 1)]];
+        }
+        for (int j = 0; j<24; j++) {
+            NSInteger convertedVal = 0;
+            char* zeroBytes = (char*) &convertedVal;
+            [mutData appendBytes:zeroBytes length:1];
+        }
+        [[LFBluetoothManager sharedManager] setConfigSeedData:mutData];
+        [self removeIndicator];
+        [[LFBluetoothManager sharedManager] resetConfigurationCharacteristics];
+        [self performSelector:@selector(showAlertToResetRelay) withObject:nil afterDelay:1];
+        return;
+    }
+    if (isWrite && !isReRead) { // //TODO Data is read after writing to the device.Now we should show alert here and remove check after delay for showing alert if no callback is received.
+        [self removeIndicator];
+        isWrite = NO;
+        NSData *stData = [tData subdataWithRange:NSMakeRange(11, 1)];
+        const char *byteVal = [stData bytes];
+        
+        int stVal = 0x0000000F & ((Byte)byteVal[0] >> 4); // this for getting response st val
+        NSString *alertMessage;
+        switch (stVal) {
+            case 0:
+                isReRead = NO;
+                isWrite = YES;
+              
+                break;
+            case 1:
+              
+                alertMessage = kReset_success;
+               // isReRead = YES;
+                [authUtils nextAuthCode];
+                isVerifyingPassword = NO;
+               // DLog(@"Authentication done successfully.");
+                //[editing authDoneWithStatus:YES shouldDismissView:YES];
+                [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+                
+                //[self showAlertToResetRelay];
+
+                break;
+            case 2:
+                alertMessage = kEnter_Correct_Password;
+                isReRead = NO;
+                break;
+            case 3:
+                isReRead = NO;
+                alertMessage = kPermision_Error;
+                break;
+            case 4:
+                isReRead = NO;
+                alertMessage = kOutOf_Range;
+                break;
+            case 5:
+                isReRead = NO;
+                alertMessage = kPassword_Changed;
+                break;
+                
+            default:
+                break;
+        }
+        if (stVal != 0) {
+            [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                if ([alert isKindOfClass:[UIAlertController class]]) {
+                    [alert dismissViewControllerAnimated:NO completion:nil];
+                    canContinueTimer = YES;
+                    [self refreshCurrentController];
+                }
+            }];
+        }
+        //[self readCharactisticsWithIndex:2];
+        return;
+    }
+    
+    
+    //////////////////////////////   re reading process   starts /////////////////////////
+    if (isReRead) {
+        [self removeIndicator];
+        isReRead = NO;
+
+        if (![self isDataUpdatedCorrectlyWithPrevData:prevWrittenData withNewData:tData]) { /// if authentication fails
+            if (isVerifyingPassword) {
+                isVerifyingPassword = NO;
+                [editing authDoneWithStatus:NO shouldDismissView:NO];
+                DLog(@"Authentication failed");
+                return;
+            }
+            
+            return;
+        }
+       // [authUtils nextAuthCode];
+        if (isVerifyingPassword) {
+            isVerifyingPassword = NO;
+            DLog(@"Authentication done successfully.");
+            [editing authDoneWithStatus:YES shouldDismissView:YES];
+            [LFBluetoothManager sharedManager].isPasswordVerified = YES;
+            
+            [self showAlertToResetRelay];
+            return;
+        }
+        [self readCharactisticsWithIndex:2];
+        return;
+    }
+    //////////////////////////////   re reading process   ends /////////////////////////
+    
+    
+}
 
 @end

@@ -71,4 +71,6 @@
  */
 - (NSInteger)getTotalFaultsCount;
 
+- (NSArray *)getAllFaults;
+
 @end

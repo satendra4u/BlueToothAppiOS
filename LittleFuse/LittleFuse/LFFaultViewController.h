@@ -37,7 +37,7 @@
 /**
  * This method is called to read the fault data from the device.
  */
-- (void)readFaultData;
+//- (void)readFaultData;
 
 /**
  * This method fetches the fault code associated with a given value.

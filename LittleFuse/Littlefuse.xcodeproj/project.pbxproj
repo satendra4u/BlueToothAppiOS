@@ -7,8 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CB10062FC5C4BEC5ECA333C /* libPods-LittleFuseUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */; };
+		185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 185816AA1E829DD800C61013 /* LFTabbarItem.m */; };
 		21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */; };
 		21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */; };
+		3B348A97C919890D26BA7BDD /* libPods-Littlefuse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */; };
 		93165BD21C902C3F005462CB /* LFInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93165BD11C902C3F005462CB /* LFInfoViewController.m */; };
 		932A33141C8EFD9D0009BDF6 /* LFFaultsDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 932A33131C8EFD9D0009BDF6 /* LFFaultsDetailsController.m */; };
 		932EF6DB1C5251DC0098DFD4 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 932EF6D01C5251DC0098DFD4 /* LICENSE.txt */; };
@@ -58,6 +61,9 @@
 		93EC63381C9A9424001ACB9C /* LFConfigureButtonsCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 93EC63361C9A9424001ACB9C /* LFConfigureButtonsCell.xib */; };
 		93EC633B1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EC633A1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m */; };
 		93EC633E1C9ABB01001ACB9C /* LFRTDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EC633D1C9ABB01001ACB9C /* LFRTDViewController.m */; };
+		CF4C90411DB0FCBC00F3AE56 /* ChangePasswordView.xib in Resources */ = {isa = PBXBuildFile; fileRef = CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */; };
+		CFACA5451DC72EF900909315 /* LFAuthUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CFACA5441DC72EF900909315 /* LFAuthUtils.m */; };
+		ECA5499120D01282C0A47B1E /* libPods-LittleFuseTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5C40FC99DE7E6E1CC3AA9E /* libPods-LittleFuseTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,9 +84,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Littlefuse.release.xcconfig"; path = "Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse.release.xcconfig"; sourceTree = "<group>"; };
+		125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Littlefuse.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		185816A91E829DD800C61013 /* LFTabbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFTabbarItem.h; sourceTree = "<group>"; };
+		185816AA1E829DD800C61013 /* LFTabbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFTabbarItem.m; sourceTree = "<group>"; };
 		21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCharactersticBitDisplayCell.h; sourceTree = "<group>"; };
 		21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCharactersticBitDisplayCell.m; sourceTree = "<group>"; };
 		21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LFCharactersticBitDisplayCell.xib; sourceTree = "<group>"; };
+		2F2CAB33485560E047E052F9 /* Pods-LittleFuseTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleFuseTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LittleFuseTests/Pods-LittleFuseTests.release.xcconfig"; sourceTree = "<group>"; };
+		5FD461C87FC1A346698B841C /* Pods-LittleFuseTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleFuseTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LittleFuseTests/Pods-LittleFuseTests.debug.xcconfig"; sourceTree = "<group>"; };
+		67314CBF649520AB7B32F81C /* Pods-LittleFuseUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleFuseUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-LittleFuseUITests/Pods-LittleFuseUITests.release.xcconfig"; sourceTree = "<group>"; };
 		93165BD01C902C3F005462CB /* LFInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFInfoViewController.h; sourceTree = "<group>"; };
 		93165BD11C902C3F005462CB /* LFInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFInfoViewController.m; sourceTree = "<group>"; };
 		9319622D1C50BF100036D28B /* LFConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LFConstants.h; sourceTree = "<group>"; };
@@ -164,6 +177,13 @@
 		93EC633A1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCommunicationSettingsController.m; sourceTree = "<group>"; };
 		93EC633C1C9ABB01001ACB9C /* LFRTDViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFRTDViewController.h; sourceTree = "<group>"; };
 		93EC633D1C9ABB01001ACB9C /* LFRTDViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFRTDViewController.m; sourceTree = "<group>"; };
+		BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LittleFuseUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChangePasswordView.xib; sourceTree = "<group>"; };
+		CFACA5431DC72EF900909315 /* LFAuthUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFAuthUtils.h; sourceTree = "<group>"; };
+		CFACA5441DC72EF900909315 /* LFAuthUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFAuthUtils.m; sourceTree = "<group>"; };
+		D69D855695AA6F6903E5880F /* Pods-LittleFuseUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleFuseUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LittleFuseUITests/Pods-LittleFuseUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F8CA1454EEC32A17F93F4148 /* Pods-Littlefuse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Littlefuse.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse.debug.xcconfig"; sourceTree = "<group>"; };
+		FA5C40FC99DE7E6E1CC3AA9E /* libPods-LittleFuseTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LittleFuseTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +193,7 @@
 			files = (
 				937E0E5D1C5F5D7A00246A8D /* CoreData.framework in Frameworks */,
 				937E0E5B1C5F5D7300246A8D /* CoreBluetooth.framework in Frameworks */,
+				3B348A97C919890D26BA7BDD /* libPods-Littlefuse.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +201,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ECA5499120D01282C0A47B1E /* libPods-LittleFuseTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,12 +209,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0CB10062FC5C4BEC5ECA333C /* libPods-LittleFuseUITests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E5A30BBE921DCBC8FF3A8EB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5FD461C87FC1A346698B841C /* Pods-LittleFuseTests.debug.xcconfig */,
+				2F2CAB33485560E047E052F9 /* Pods-LittleFuseTests.release.xcconfig */,
+				D69D855695AA6F6903E5880F /* Pods-LittleFuseUITests.debug.xcconfig */,
+				67314CBF649520AB7B32F81C /* Pods-LittleFuseUITests.release.xcconfig */,
+				F8CA1454EEC32A17F93F4148 /* Pods-Littlefuse.debug.xcconfig */,
+				044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		931962231C50AA700036D28B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -267,6 +303,8 @@
 		932EF6E61C5251FD0098DFD4 /* Tabbar */ = {
 			isa = PBXGroup;
 			children = (
+				185816A91E829DD800C61013 /* LFTabbarItem.h */,
+				185816AA1E829DD800C61013 /* LFTabbarItem.m */,
 				932EF6E71C52520D0098DFD4 /* LFTabbarController.h */,
 				932EF6E81C52520D0098DFD4 /* LFTabbarController.m */,
 				939C10061C58BCC2007692B9 /* LFNavigationController.h */,
@@ -282,6 +320,8 @@
 				933600CD1C50A81D007CD61A /* LittleFuseTests */,
 				933600D81C50A81D007CD61A /* LittleFuseUITests */,
 				933600B21C50A81D007CD61A /* Products */,
+				1E5A30BBE921DCBC8FF3A8EB /* Pods */,
+				BF57B79B448674113943F6DF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -298,6 +338,7 @@
 		933600B31C50A81D007CD61A /* LittleFuse */ = {
 			isa = PBXGroup;
 			children = (
+				CF4C903F1DB0FC9B00F3AE56 /* Custom Views */,
 				937BFDEB1C5CB84000408EB2 /* LFLittleFuse.xcdatamodeld */,
 				933600B71C50A81D007CD61A /* LFAppDelegate.h */,
 				933600B81C50A81D007CD61A /* LFAppDelegate.m */,
@@ -377,6 +418,8 @@
 				937B83A61C59EBFB008D1063 /* LFUtilities.m */,
 				937B87391C5A451B008D1063 /* LFDataManager.h */,
 				937B873A1C5A451B008D1063 /* LFDataManager.m */,
+				CFACA5431DC72EF900909315 /* LFAuthUtils.h */,
+				CFACA5441DC72EF900909315 /* LFAuthUtils.m */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -405,6 +448,24 @@
 			path = "Custom classes";
 			sourceTree = "<group>";
 		};
+		BF57B79B448674113943F6DF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FA5C40FC99DE7E6E1CC3AA9E /* libPods-LittleFuseTests.a */,
+				BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */,
+				125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CF4C903F1DB0FC9B00F3AE56 /* Custom Views */ = {
+			isa = PBXGroup;
+			children = (
+				CF4C90401DB0FCBC00F3AE56 /* ChangePasswordView.xib */,
+			);
+			name = "Custom Views";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -412,9 +473,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 933600DE1C50A81D007CD61A /* Build configuration list for PBXNativeTarget "Littlefuse" */;
 			buildPhases = (
+				1EFC28F057FBA58B21D5DD66 /* [CP] Check Pods Manifest.lock */,
 				933600AD1C50A81D007CD61A /* Sources */,
 				933600AE1C50A81D007CD61A /* Frameworks */,
 				933600AF1C50A81D007CD61A /* Resources */,
+				FB1FF6DE728231DA17E5B4A9 /* [CP] Embed Pods Frameworks */,
+				0C604EA22727830AA9A1F75E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -429,9 +493,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 933600E11C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseTests" */;
 			buildPhases = (
+				54B0EA7778A3C8AB82666D1B /* [CP] Check Pods Manifest.lock */,
 				933600C61C50A81D007CD61A /* Sources */,
 				933600C71C50A81D007CD61A /* Frameworks */,
 				933600C81C50A81D007CD61A /* Resources */,
+				5CA664A7030190065FC3A0F1 /* [CP] Embed Pods Frameworks */,
+				688BF868D1B65C44DF4F6ECD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -447,9 +514,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 933600E41C50A81D007CD61A /* Build configuration list for PBXNativeTarget "LittleFuseUITests" */;
 			buildPhases = (
+				D2366F9AB79CE2639B950E79 /* [CP] Check Pods Manifest.lock */,
 				933600D11C50A81D007CD61A /* Sources */,
 				933600D21C50A81D007CD61A /* Frameworks */,
 				933600D31C50A81D007CD61A /* Resources */,
+				6C69498BD6FC56EEBE685FE9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -468,11 +537,13 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = LF;
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = XcubeLabs;
 				TargetAttributes = {
 					933600B01C50A81D007CD61A = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = TV8M2M4B6L;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -528,6 +599,7 @@
 				932EF6DC1C5251DC0098DFD4 /* OpenSans-Bold.ttf in Resources */,
 				933600BF1C50A81D007CD61A /* Main.storyboard in Resources */,
 				21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */,
+				CF4C90411DB0FCBC00F3AE56 /* ChangePasswordView.xib in Resources */,
 				932EF6E51C5251DC0098DFD4 /* OpenSans-SemiboldItalic.ttf in Resources */,
 				932EF6E11C5251DC0098DFD4 /* OpenSans-Light.ttf in Resources */,
 				932EF6E31C5251DC0098DFD4 /* OpenSans-Regular.ttf in Resources */,
@@ -551,6 +623,129 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0C604EA22727830AA9A1F75E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1EFC28F057FBA58B21D5DD66 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		54B0EA7778A3C8AB82666D1B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		5CA664A7030190065FC3A0F1 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LittleFuseTests/Pods-LittleFuseTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		688BF868D1B65C44DF4F6ECD /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LittleFuseTests/Pods-LittleFuseTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6C69498BD6FC56EEBE685FE9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LittleFuseUITests/Pods-LittleFuseUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D2366F9AB79CE2639B950E79 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		FB1FF6DE728231DA17E5B4A9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		933600AD1C50A81D007CD61A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -559,6 +754,7 @@
 				939C10021C5890BD007692B9 /* LFNavigationBar.m in Sources */,
 				9346E4AA1C5B70E7004D681D /* LFEditingViewController.m in Sources */,
 				939C10051C589E04007692B9 /* LFConfigurationViewController.m in Sources */,
+				CFACA5451DC72EF900909315 /* LFAuthUtils.m in Sources */,
 				937BFDED1C5CB84000408EB2 /* LFLittleFuse.xcdatamodeld in Sources */,
 				932EF6E91C52520D0098DFD4 /* LFTabbarController.m in Sources */,
 				937B83A31C59EB4C008D1063 /* LFDeviceTableViewCell.m in Sources */,
@@ -571,6 +767,7 @@
 				21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */,
 				93165BD21C902C3F005462CB /* LFInfoViewController.m in Sources */,
 				937B83A41C59EB4C008D1063 /* LFBluetoothManager.m in Sources */,
+				185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */,
 				937B83A11C59EB4C008D1063 /* LFCharactersticDisplayCell.m in Sources */,
 				937B83AA1C59F09B008D1063 /* LFFaultViewController.m in Sources */,
 				939C10081C58BCC2007692B9 /* LFNavigationController.m in Sources */,
@@ -652,12 +849,14 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -679,7 +878,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -697,12 +896,14 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -717,7 +918,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -725,79 +926,89 @@
 		};
 		933600DF1C50A81D007CD61A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F8CA1454EEC32A17F93F4148 /* Pods-Littlefuse.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = TV8M2M4B6L;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "473288f6-58a1-4093-9e3d-2fe3db2b4d29";
+				PROVISIONING_PROFILE_SPECIFIER = "PurpleTalk Development";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		933600E01C50A81D007CD61A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				DEVELOPMENT_TEAM = A9ZQW7FAUR;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LittleFuse/LittleFuse-Prefix.pch";
 				INFOPLIST_FILE = LittleFuse/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.Littelfuse;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "07965be6-fa7b-4978-bb3a-4d0ebb09f15f";
+				PROVISIONING_PROFILE_SPECIFIER = Swift;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 		933600E21C50A81D007CD61A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5FD461C87FC1A346698B841C /* Pods-LittleFuseTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Debug;
 		};
 		933600E31C50A81D007CD61A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2F2CAB33485560E047E052F9 /* Pods-LittleFuseTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ravi korukonda (9M528AHG6C)";
 				INFOPLIST_FILE = LittleFuseTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseTests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "cc002514-230b-4af5-8990-056a4c88e792";
+				PROVISIONING_PROFILE = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Littlefuse.temp_caseinsensitive_rename.app/Littlefuse.temp_caseinsensitive_rename";
 			};
 			name = Release;
 		};
 		933600E51C50A81D007CD61A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D69D855695AA6F6903E5880F /* Pods-LittleFuseUITests.debug.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
 				INFOPLIST_FILE = LittleFuseUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseUITests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TEST_TARGET_NAME = LittleFuse;
 				USES_XCTRUNNER = YES;
 			};
@@ -805,12 +1016,14 @@
 		};
 		933600E61C50A81D007CD61A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67314CBF649520AB7B32F81C /* Pods-LittleFuseUITests.release.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Purple Talk, Inc.";
 				INFOPLIST_FILE = LittleFuseUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.purpletalk.LittleFuseUITests;
 				PRODUCT_NAME = Littlefuse;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "11e9e511-abad-42d7-abc4-06cd74d2f570";
 				TEST_TARGET_NAME = LittleFuse;
 				USES_XCTRUNNER = YES;
 			};

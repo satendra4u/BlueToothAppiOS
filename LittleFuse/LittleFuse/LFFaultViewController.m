@@ -16,18 +16,20 @@
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
 
-#define Background_Fault_Refresh_Interval 180
+#define Background_Fault_Refresh_Interval 20
 
 
 @interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
 {
     BOOL canContinueTimer;
-    NSInteger currentIndex;
+   // NSInteger currentIndex;
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
     LFFaultData *currentData;
-    LFFaultData *prevFaultData;
     NSDate *selectedDate;
+    NSUInteger stFieldSuccessCount;
+    
+
     
 }
 @property (strong, nonatomic) IBOutlet UIDatePicker *datepicker;
@@ -38,6 +40,9 @@
 @property (strong, nonatomic) IBOutlet UIToolbar *toolBar;
 
 @property (weak, nonatomic) IBOutlet UILabel *noDataLabel;
+
+@property (nonatomic, assign) BOOL isSTFieldSuccess;
+
 - (IBAction)cancelAction:(id)sender;
 
 - (IBAction)doneAction:(id)sender;
@@ -51,7 +56,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    currentIndex = 1;
+    //currentIndex = 0;
     
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -69,7 +74,7 @@
     _datepicker.maximumDate = [NSDate date];
     canContinueTimer = YES;
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnected) name:PeripheralDidDisconnect object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 }
 
 - (void)appEnteredBackground {
@@ -108,26 +113,26 @@
     NSDate *date = [NSDate date];
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
     [self fetchDataWithDate:date];
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+    //[self performSelector:@selector(updateFaultData) withObject:nil afterDelay:0];
 }
 
 - (void)updateFaultData {
-    if(!canContinueTimer) {
+   /* if(!canContinueTimer) {
         return;
-    }
-    [LFBluetoothManager sharedManager].tCurIndex = 1;
-    currentIndex = 1;
+    }*/
+    [LFBluetoothManager sharedManager].tCurIndex = 0;
+   // currentIndex = 0;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[LFBluetoothManager sharedManager] readFaultData];
     });
-    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+   
 }
 
 - (void)dealloc {
     sectionArray = nil;
     faultDict = nil;
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    [LittleFuseNotificationCenter removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -140,7 +145,8 @@
     NSDateFormatter *dateformat = [[NSDateFormatter alloc] init];
     [dateformat setTimeZone:[NSTimeZone localTimeZone]];
     [dateformat setDateFormat:@"MMMM dd, YYYY"];
-    selectedDate = date;
+     NSDate *nextdate = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
+    selectedDate = nextdate;
     NSString *dateString = [dateformat stringFromDate:date];
     [dateformat setDateFormat:@"yyyy-MM-dd"];
     return dateString;
@@ -175,21 +181,30 @@
     currentData.other = data;
     // To save the Data
     if (![self isCurrentDataSameWithPreviousSavedOne]) {
-        if (currentData.date && [currentData.date compare:selectedDate ] == NSOrderedAscending) {
+             [self showData:currentData.voltage];
+       /* if (currentData.date && [currentData.date compare:selectedDate ] == NSOrderedDescending
+            ) {
             [self showData:currentData.voltage];
-        } else {
+        }*/
+        
+        if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
+        } else {
+            _noDataLabel.hidden = YES;
         }
+        [_tblFaults reloadData];
+        
         
         [[LFDataManager sharedManager] saveFaultDetails:currentData WithPeripheral:[[LFBluetoothManager sharedManager] selectedPeripheral]];
-        prevFaultData = currentData;
         currentData = nil;
         currentData = [[LFFaultData alloc] init];
-        [self  readFaultData];
+        [[LFBluetoothManager sharedManager] readFaultData];
+
     } else {
-//        currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
-        currentIndex = sectionArray.count + 1;
-        [self readFaultData];
+        //currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
+//        currentIndex = sectionArray.count + 1;;
+       // currentIndex += 1;
+        [[LFBluetoothManager sharedManager] readFaultData];
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
         } else {
@@ -218,7 +233,7 @@
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
     
     [df setDateFormat:@"MMM dd, yyyy hh:mm a"];
-    
+    [df setTimeZone:[NSTimeZone localTimeZone]];
     NSString *faultdate = [df stringFromDate:date];
     
     [faultDict setValue:faultdate forKey:FAULT_DATE];
@@ -227,21 +242,68 @@
     [faultDict setValue:currentData forKey:FAULT_DETAILS];
     [faultDict setValue:faultCode forKey:FAULT_CODE];
     
-    [sectionArray addObject:[faultDict copy]];
+   /* if (islatestRecord) {
+         [sectionArray insertObject:[faultDict copy] atIndex:0];
+    }
+    else
+    {
+        [sectionArray addObject:[faultDict copy]];
+
+    }*/
+    
+    if (sectionArray.count) {
+        
+       // for (NSInteger i = sectionArray.count-1; i>= 0; i--)
+        //{
+            BOOL hasDuplicate = [[sectionArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"ErrorDate == %@ AND faultCode == %@", faultdate,faultCode]] count] > 0;
+            
+            if (hasDuplicate)
+            {
+                return;
+            }
+            else{
+                [sectionArray addObject:[faultDict copy]];
+
+            }
+       // }
+        NSSortDescriptor *dateDescriptor = [[NSSortDescriptor alloc] initWithKey:@"ErrorDate" ascending:NO];
+        
+        
+        NSArray *sortedArray = [sectionArray sortedArrayUsingDescriptors:@[dateDescriptor]];
+        
+        
+        
+        [sectionArray removeAllObjects];
+        //sectionArray = sortedArray;
+        [sectionArray addObjectsFromArray:sortedArray];
+    }
+    else{
+        [sectionArray addObject:[faultDict copy]];
+ 
+    }
+    
+    
     DLog(@"Show data  = %@ current count = %ld", data, (long)sectionArray.count);
     [faultDict removeAllObjects];
     _noDataLabel.hidden = YES;
-    if (sectionArray.count >= 10) {
+    [_tblFaults reloadData];
+
+   /* if (sectionArray.count >= 10) {
+        [_tblFaults reloadData];
         [_tblFaults beginUpdates];
-        [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:sectionArray.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+        if (islatestRecord) {
+        [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationTop];
+        }
+        else{
+            [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:sectionArray.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+        }
         [_tblFaults endUpdates];
+
     }
     else {
         [_tblFaults reloadData];
-    }
-
+    }*/
 }
-
 - (BOOL)isCurrentDataSameWithPreviousSavedOne
 {
     LFFaultData *fault = [[LFDataManager sharedManager] getSavedDataWithDate:currentData.date];
@@ -249,10 +311,9 @@
         return YES;
     }
     return NO;
-    
 }
-
-
+//Implemented in bluetoothManager
+/*
 - (void)readFaultData
 {
     if (!canContinueTimer) {
@@ -280,11 +341,12 @@
     
     NSData *data1 = [NSData dataWithBytes:data length:20];
 //    [[LFBluetoothManager sharedManager] writeConfigData:data1];//Old code
+    [[LFBluetoothManager sharedManager] setFaultPollingCount:0];
     [[LFBluetoothManager sharedManager] writeConfigDataForFaultsList:data1]; //New code
     currentIndex += 1;
     
     
-}
+}*/
 
 
 #pragma mark - UITableView
@@ -318,6 +380,9 @@
 {
     NSString *error = @"";
     switch (code) {
+        case 0:
+            error = @"NOFAULT";
+            break;
         case 1:
             error = @"OCF";
             break;
@@ -343,13 +408,28 @@
             error = @"LPF";
             break;
         case 9:
-            error = @"POF";
+            error = @"LCV";
             break;
         case 10:
             error = @"PTCF";
             break;
         case 11:
             error = @"RMTF";
+            break;
+        case 12:
+            error = @"LIN";
+            break;
+        case 13:
+            error = @"STALL";
+            break;
+        case 14:
+            error = @"PTCS";
+            break;
+        case 15:
+            error = @"PTCO";
+            break;
+        case 16:
+            error = @"GFA";
             break;
         case 100:
             error = @"LVH";
@@ -359,6 +439,12 @@
             break;
         case 102:
             error = @"VUBH";
+            break;
+        case 103:
+            error = @"PHSQ";
+            break;
+        case 4096:
+            error = @"FWUpdate";
             break;
         case 61166:
             error = @"UNDEFF";
@@ -375,6 +461,9 @@
 {
     NSString *error = @"";
     switch (code) {
+        case 0:
+            error = @"No fault or warning condition";
+            break;
         case 1:
             error = @"Over Current";
             break;
@@ -400,13 +489,28 @@
             error = @"Low Power Fault";
             break;
         case 9:
-            error = @"Power Outage Fault";
+            error = @"Low Control Voltage";
             break;
         case 10:
             error = @"PTC Fault";
             break;
         case 11:
             error = @"Tripped Triggered From Remote Source";
+            break;
+        case 12:
+            error = @"Linear Overcurrent";
+            break;
+        case 13:
+            error = @"Motor Stall";
+            break;
+        case 14:
+            error = @"PTC Short";
+            break;
+        case 15:
+            error = @"PTC Open";
+            break;
+        case 16:
+            error = @"Ground Fault Alarm";
             break;
         case 100:
             error = @"Low Voltage Holdoff";
@@ -416,6 +520,12 @@
             break;
         case 102:
             error = @"Voltage Unbalanced Holdoff";
+            break;
+        case 103:
+            error = @"Phase Sequence";
+            break;
+        case 4096:
+            error = @"F/W Update";
             break;
         case 61166:
             error = @"Undefined trip condition";
@@ -443,31 +553,44 @@
 
 - (void)fetchDataWithDate:(NSDate *)date
 {
-    NSDate *tomorrow = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
     
+   /* NSDateFormatter *dateformat = [[NSDateFormatter alloc] init];
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+
+    //[dateformat setTimeZone:[NSTimeZone defaultTimeZone]];
+    [dateformat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+
+    NSString *dateString = [dateformat stringFromDate:date];*/
+
+
+    NSDate *tomorrow = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSIntegerMax fromDate:tomorrow];
-    [components setHour:5];
-    [components setMinute:30];
-    [components setSecond:0];
+   // [components setHour:5];
+    //[components setMinute:30];
+   // [components setSecond:0];
     NSArray *arr = [[LFDataManager sharedManager] getFaultDataForSelectedDate:[components date]];
-    NSInteger faultsCount  = sectionArray.count;
+   /* NSInteger faultsCount  = sectionArray.count;
     [sectionArray removeAllObjects];
     if (faultsCount > 0) {
         [_tblFaults reloadData];
-    }
+    }*/
     if (arr.count) {
         for (LFFaultData *fault in arr) {
             [faultDict removeAllObjects];
             currentData = fault;
             [self showData:fault.voltage];
         }
-        currentIndex = 1;
-        [self readFaultData];
+        //currentIndex = 0;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
+
+        [[LFBluetoothManager sharedManager] readFaultData];
         
     } else {
         [self.tblFaults reloadData];
-        currentIndex = 1;
-        [self readFaultData];
+        //currentIndex = 0;
+        [LFBluetoothManager sharedManager].tCurIndex = 0;
+
+        [[LFBluetoothManager sharedManager] readFaultData];
     }
     
 }
@@ -477,7 +600,6 @@
     _tfPicker.inputView = _datepicker;
     _tfPicker.inputAccessoryView = _toolBar;
     [_tfPicker becomeFirstResponder];
-    
     
 }
 - (IBAction)dateChanged:(UIDatePicker *)sender
@@ -490,11 +612,17 @@
     if (!canContinueTimer) {
         return;
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Device Disconnected" withTitle:@"Littelfuse" otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
             [self.navigationController popToRootViewControllerAnimated:NO];
         }
     }];
+}
+
+-(void)restartFaultLoading
+{
+    [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
+
 }
 @end

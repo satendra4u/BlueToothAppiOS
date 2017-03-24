@@ -1,4 +1,4 @@
-//
+ //
 //  ViewController.m
 //  LittleFuse
 //
@@ -7,6 +7,8 @@
 //
 
 #import "LFDevicesListController.h"
+#import "LFNavigationController.h"
+#import "LFEditingViewController.h"
 #import "LFBluetoothManager.h"
 #import "LFDeviceTableViewCell.h"
 #import "LFTabbarController.h"
@@ -14,20 +16,28 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "UIImage+LFImage.h"
 #import <CoreBluetooth/CoreBluetooth.h>
+#import "LFTabbarItem.h"
 
 
 #define kDeviceCellID  @"DeviceCellID"
 
-@interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource>
+
+
+@interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource, EditingDelegate>
 {
     BOOL isPopupOpened;
     BOOL isInitialLaunch;
     BOOL canRefresh;
     BOOL isDeviceSelected;
     BOOL isScanDataFound;
+    BOOL isInitialDisconnect;
+    
+
     
     NSInteger selectedIndex;
     NSInteger refreshTimeInterval;
+    //NSInteger numberOfControllers;
+
     
     NSMutableArray *peripheralsList;
     NSMutableArray *charactersticsList;
@@ -49,6 +59,7 @@
     isInitialLaunch = YES;
     isDeviceSelected = NO;
     isScanDataFound = NO;
+    isInitialDisconnect = YES;
     // Do any additional setup after loading the view, typically from a nib.
     peripheralsList = [[NSMutableArray alloc] initWithCapacity:0];
     charactersticsList = [[NSMutableArray alloc] initWithCapacity:0];
@@ -59,15 +70,17 @@
     [LFBluetoothManager sharedManager].centralManager = [[CBCentralManager alloc] initWithDelegate:[LFBluetoothManager sharedManager] queue:nil];
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(navigateToDislay:) name:DISPLAY_TABBAR object:nil];
+
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(navigateToDislay:) name:DISPLAY_TABBAR object:nil];
     lblVersion.text = [NSString stringWithFormat:@"Version:%@",  [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(peripheralConnected) name:PeripheralDidConnect object:nil];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(peripheralDisconnnected) name:PeripheralDidDisconnect object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralConnected) name:PeripheralDidConnect object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralDisconnnected) name:PeripheralDidDisconnect object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(becameActive) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(becameActive) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
+    
 }
 
 /**
@@ -104,9 +117,35 @@
 - (void)peripheralDisconnnected {
     isPopupOpened = NO;
 }
+
+- (void)checkForNoDevices {
+    if (!canRefresh) {
+        return;
+    }
+    if (peripheralsList.count == 0) {
+        lblScanning.text = @"No devices found.";
+    }
+    else {
+        lblScanning.text = @"Scanning for MP8000 devices...";
+    }
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+//    if ([[LFBluetoothManager sharedManager] discoveredPeripheral] != nil) {
+//        [[LFBluetoothManager sharedManager] disconnectPeripheral];
+//    }
+//    else {
+        [self initialSetup];
+//    }
+   }
+
+- (void)initialSetup{
+    
+    [[LFBluetoothManager sharedManager] cleanup];
+     [[LFBluetoothManager sharedManager] disconnectDevice];
+    [LFBluetoothManager sharedManager].isPasswordVerified = NO;
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     isPopupOpened = NO;
     isDeviceSelected = NO;
@@ -122,8 +161,7 @@
     float batteryLevel = [[UIDevice currentDevice] batteryLevel];
     if (batteryLevel > 0.20) {
         refreshTimeInterval = 5;
-    }
-    else {
+    } else {
         refreshTimeInterval = 600;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -132,10 +170,11 @@
 }
 
 
-
 - (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:YES];
+    [super viewDidAppear: animated];
+    [LFBluetoothManager sharedManager].isPasswordVerified = NO;
 }
+
 
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -162,22 +201,18 @@
     if (!isPopupOpened) {
         [self scanAction:nil];
     }
-    [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
+    
+   // [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
 
 #pragma mark - UITableView Delegate -
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     lblScanning.hidden = [peripheralsList count] ? YES : NO;
     return peripheralsList.count;
 }
-
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -187,17 +222,18 @@
     cell.tag = indexPath.row;
     cell.selectionStyle = UITableViewCellSelectionStyleDefault;
     [cell updateCellWithDict:dict];
+    
     return cell;
 }
-
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     selectedIndex = indexPath.row;
     isPopupOpened = YES;
     isDeviceSelected = YES;
+    [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:0];
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
 }
 
 #pragma mark - Blutooth Shared Data Delegate -
@@ -210,6 +246,7 @@
         isScanDataFound = YES;
     }
     peripheralsList = [devicesArray mutableCopy];
+//    DLog(@"%s", __func__);
     [tblDevices reloadData];
 }
 
@@ -219,9 +256,25 @@
 - (void)showCharacterstics:(NSMutableArray *)charactersticsArray
 {
     charactersticsList = charactersticsArray;
-    CBCharacteristic *charactestic = (CBCharacteristic *)[charactersticsArray firstObject];
+    CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[4];
     [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
     
+}
+
+- (void)deviceDisconnected
+{
+       
+   // if (!isInitialDisconnect) {
+        UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:kApp_Name message:kDevice_Disconnected preferredStyle:UIAlertControllerStyleAlert];
+        
+        [alertcontroller addAction:[UIAlertAction actionWithTitle:kOK style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+            
+        }]];
+        
+        [self presentViewController:alertcontroller animated:YES completion:nil];
+    //}
+    //isInitialDisconnect = NO;
 }
 
 #pragma mark - Private methods -
@@ -248,14 +301,49 @@
     if (!isDeviceSelected) {
         return;
     }
+    
+    
+//    //Display authentication popup.After successfully entering the password, then execute the code below.
+//    LFNavigationController *navController = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingNavigationController"];
+//    LFEditingViewController *editing = [self.storyboard instantiateViewControllerWithIdentifier:@"LFEditingViewControllerID"];
+//    
+//    self.providesPresentationContextTransitionStyle = YES;
+//    self.definesPresentationContext = YES;
+//    [editing setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+//    [navController setModalPresentationStyle:UIModalPresentationOverCurrentContext];
+//    editing.delegate = self;
+//    editing.isFromDevicesList = YES;
+//    editing.showAuthentication = YES;
+//    [navController setViewControllers:@[editing]];
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self.navigationController presentViewController:navController animated:NO completion:nil];
+//    });
+//
+    
+    [self continueAfterPasswordAuthentication];
+    
+   }
+
+
+- (void)continueAfterPasswordAuthentication {
     isPopupOpened = YES;
     LFPeripheral *peripheral = peripheralsList[selectedIndex];
     LFTabbarController *tabbar = (LFTabbarController *)[self.storyboard instantiateViewControllerWithIdentifier:@"TabBarControllerID"];
+    
+    float screenWidth;
 
+    if (([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) || ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight)) {
+        screenWidth = CGRectGetHeight(self.view.frame);
+    }
+    else{
+        screenWidth = CGRectGetWidth(self.view.frame);
+
+    }
+    
     if (!peripheral.isConfigured) { //(LV > HV)
         NSMutableArray *viewControllers = [tabbar.viewControllers mutableCopy];
-        [self showAlertViewWithCancelButtonTitle:@"Configure" withMessage:@"" withTitle:NSLocalizedString(@"This MP8000 has not yet been Configured. Configure this MP8000 now?", (@"This MP8000 has not yet been Configured. Configure this MP8000 now?", )) otherButtons:@[@"No", @"Cancel"] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-            NSInteger numberOfControllers = 3;
+        [self showAlertViewWithCancelButtonTitle:kConfigure withMessage:@"" withTitle:kNot_Configured otherButtons:@[kNo, kCancel] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+           NSInteger  numberOfControllers = 3;
             switch (index) {
                 case 2:
                 {
@@ -300,10 +388,8 @@
             }
             
             tabbar.viewControllers = viewControllers;
-            float width = CGRectGetWidth(self.view.frame)/numberOfControllers;
             
-            [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
-
+            [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(screenWidth/numberOfControllers, 50)]];
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (![[self.navigationController.viewControllers lastObject] isKindOfClass:[LFTabbarController class]]) {
                     [self.navigationController pushViewController:tabbar animated:YES];
@@ -315,9 +401,8 @@
         }];
         
     } else {
-        float width = CGRectGetWidth(self.view.frame)/3;
-        
-        [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
+
+        [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(screenWidth/3, 50)]];
         
         if (![[self.navigationController.viewControllers lastObject] isKindOfClass:[LFTabbarController class]]) {
             [self.navigationController pushViewController:tabbar animated:YES];
@@ -325,7 +410,9 @@
         [[LFBluetoothManager sharedManager] setDisplayCharacterstics:YES];
         
     }
+
 }
+
 
 /**
  * This method displays an alert with a given message.
@@ -334,15 +421,28 @@
 {
     if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame)) {
         isPopupOpened = NO;
-        [self hideAllAlerts];
+        if ([[LFBluetoothManager sharedManager] devicePairingRetryCount] < 3)// Here 3 is just static count, we are retrying 3 times to connect device to avoid encryption is insufficient when we enter correct pairing code. If client suggest any number of time we have to replace it
+        {
+            [[LFBluetoothManager sharedManager] connectToDevice:selectedIndex];
+            [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:[LFBluetoothManager sharedManager].devicePairingRetryCount + 1];
+            return;
+        }
+        else{
+            [[LFBluetoothManager sharedManager] scan];
+            [self hideAllAlerts];
+            
+            [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
+            //        DLog(@"%s", __func__);
+            [tblDevices reloadData];
+
+        }
     }
-    [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+    [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:YES completion:nil];
-            
         }
     }];
-    [self.navigationController popToRootViewControllerAnimated:NO];
+    //[self.navigationController popToRootViewControllerAnimated:NO];
 }
 
 - (void)hideAllAlerts {
@@ -358,5 +458,14 @@
         }
     }
 }
+
+#pragma mark Authentication Delegate
+- (void)authenticationDoneWithStatus:(BOOL)isSuccess {
+    if (isSuccess) {
+        [self continueAfterPasswordAuthentication];
+    }
+}
+
+
 
 @end

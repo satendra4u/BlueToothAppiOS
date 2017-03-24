@@ -8,6 +8,7 @@
 
 #import "LFEditingViewController.h"
 #import "LFInfoViewController.h"
+#import "LFBluetoothManager.h"
 
 @interface LFEditingViewController () <UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
@@ -31,10 +32,15 @@
 @property (weak, nonatomic) IBOutlet UILabel *lblMin;
 @property (weak, nonatomic) IBOutlet UILabel *lblMax;
 @property (weak, nonatomic) IBOutlet UITextField *authenticationTextField;
+@property (weak, nonatomic) IBOutlet UITextField *conformPasswordField;
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *conformPasswordFieldHeight;
 
 @property (weak, nonatomic) IBOutlet UIView *btnsView;
 
 @property (weak, nonatomic) IBOutlet UISlider *slider;
+@property (weak, nonatomic) IBOutlet UIButton *infoBtn;
+@property (weak, nonatomic) IBOutlet UILabel *authenticationTitleLabel;
 
 - (IBAction)sliderValueChange:(UISlider *)sender;
 
@@ -71,8 +77,43 @@
         [self.view bringSubviewToFront:self.passwordView];
 
     }
+    if (_isChangePassword) {
+        _conformPasswordField.hidden = NO;
+        _conformPasswordFieldHeight.constant = 30;
+        self.textFiled.placeholder = @"NewPassword";
+
+    } else {
+        _conformPasswordField.hidden = YES;
+        _conformPasswordFieldHeight.constant = 0;
+    }
     _textFiled.delegate = self;
     _authenticationTextField.delegate = self;
+    if ([_selectedText caseInsensitiveCompare:kFriendly_deviceName_title] == NSOrderedSame) {
+        _lblrangeTxt.text = @"Note:Enter name between 1-12 characters";
+        _infoBtn.hidden = YES;
+        _lblSelectTxt.text = kFriendly_deviceName_message;
+        _textFiled.keyboardType = UIKeyboardTypeDefault;
+    } else if ([_selectedText caseInsensitiveCompare:kAuthentication_title] == NSOrderedSame) {
+        _lblrangeTxt.text = @"Note:Enter password between 1-12 characters";
+        _infoBtn.hidden = YES;
+        if (_isChangePassword) {
+            _lblSelectTxt.text = @"";
+
+        }
+        else{
+            _lblSelectTxt.text = kAuthentication_message;
+
+        }
+        _textFiled.keyboardType = UIKeyboardTypeDefault;
+    } else if ([_selectedText caseInsensitiveCompare:kResetPassword_title] == NSOrderedSame) {
+        _lblrangeTxt.text = @"Note:Enter reset code in Alpha Numaraic";
+        _infoBtn.hidden = YES;
+        _lblSelectTxt.text = kResetPassword_message;
+        _textFiled.keyboardType = UIKeyboardTypeNamePhonePad;
+    } else {
+        _infoBtn.hidden = NO;
+        _textFiled.keyboardType = UIKeyboardTypeDecimalPad;
+    }
     if (CGRectGetHeight(self.view.frame) < 568.0f) {
         [self updateAccessoryViewForTextField:_textFiled];
     }
@@ -106,30 +147,61 @@
 - (IBAction)cancelAction:(UIButton *)sender
 {
     [self dismissViewControllerAnimated:NO completion:nil];
-}
+} 
 
 - (IBAction)saveAction:(UIButton *)sender
 {
+    if (_isChangePassword) {
+        if (![self checkPasswordentries]) {
+            self.textFiled.text = @"";
+            self.conformPasswordField.text = @"";
+            [self.textFiled becomeFirstResponder];
+            return;
+        }
+    }
     
+    [self.textFiled resignFirstResponder];
+    [self.conformPasswordField resignFirstResponder];
+    
+    
+    NSString *password;
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        password = self.authenticationTextField.text;
+    }
+    else {
+        password = nil;
+    }
+
     [self dismissViewControllerAnimated:NO completion:^{
-        if (_delegate && [_delegate respondsToSelector:@selector(selectedValue:)]) {
-            [_delegate selectedValue:self.textFiled.text];
+        NSString *newVal = self.textFiled.text;
+        if (newVal.length) {
+            if (_delegate && [_delegate respondsToSelector:@selector(selectedValue: andPassword:)]) {
+                
+                [_delegate selectedValue:newVal andPassword:password];
+            }
         }
     }];
 
+}
+- (BOOL) checkPasswordentries {
+    if ([_textFiled.text isEqualToString:_conformPasswordField.text]) {
+        return YES;
+    }
+    return NO;
 }
 
 - (IBAction)infoAction:(UIButton *)sender
 {
     LFInfoViewController *info = (LFInfoViewController *)[self.storyboard instantiateViewControllerWithIdentifier:@"LFInfoViewControllerID"];
+    info.isAdvConfig = _isAdvConfig;
     [self.navigationController pushViewController:info animated:YES];
 }
 
 - (IBAction)authenticationCancel:(UIButton *)sender
 {
     if (_isAdvConfig) {
-        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
-            [_delegate toggleSelectedWithSuccess:NO];
+        if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
+            [_delegate toggleSelectedWithSuccess:NO andPassword:nil];
             [self dismissViewControllerAnimated:NO completion:nil];
             return;
         }
@@ -140,32 +212,102 @@
 
 - (IBAction)authenticationOkAction:(UIButton *)sender
 {
-    if (![self.authenticationTextField.text isEqualToString:@"admin"])
-    {
-        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-            self.authenticationTextField.text = @"";
-            if ([alert isKindOfClass:[UIAlertController class]]) {
-                [alert dismissViewControllerAnimated:NO completion:nil];
+
+    NSString *password;
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        password = self.authenticationTextField.text;
+    }
+    else {
+        password = nil;
+    }
+    
+        if (self.isFromDevicesList) { //This condition executes when user tries to connect to device in DevicesList Screen.
+            if (_delegate && [_delegate respondsToSelector:@selector(authenticationDoneWithStatus: andPassword:)]) {
+                [self dismissViewControllerAnimated:NO completion:nil];
+                [_delegate authenticationDoneWithStatus:YES andPassword:password];
+                return;
             }
-        
-        }];
+        }
+    
+    
+    if (!self.authenticationTextField.text.length) {
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Valid_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
+        return;
+    }
+    if (_delegate && [_delegate respondsToSelector:@selector(checkPassword:)]) {
+        [_delegate checkPassword:self.authenticationTextField.text];
+    }
+    
+//    if (![self.authenticationTextField.text isEqualToString:@"littelfuse"])//TODO Implement code to verify the correctnes of entered password.
+//    {
+//        [self showAlertViewWithCancelButtonTitle:@"OK" withMessage:@"Please enter valid password" withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+//            self.authenticationTextField.text = @"";
+//            if ([alert isKindOfClass:[UIAlertController class]]) {
+//                [alert dismissViewControllerAnimated:NO completion:nil];
+//            }
+//            
+//        }];
+//    } else {
+//    
+//        self.authenticationView.hidden = YES;
+//        self.passwordView.hidden = NO;
+//        
+//        [self.textFiled becomeFirstResponder];
+//        self.lblTitleheader.text = _selectedText;
+//        if (_isAdvConfig) {
+//            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
+//                [_delegate toggleSelectedWithSuccess:YES andPassword:password];
+//                [self dismissViewControllerAnimated:NO completion:nil];
+//                return;
+//            }
+//        }
+//        [self.view bringSubviewToFront:self.passwordView];
+//    }
+}
+
+
+- (void)authDoneWithStatus:(BOOL)isSuccess shouldDismissView:(BOOL)dismissView {
+    if (dismissView) {
+        [self dismissViewControllerAnimated:NO completion:nil];
+        return;
+    }
+    
+    NSString *password;
+    if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        password = self.authenticationTextField.text;
     } else {
+        password = nil;
+    }
+    
+    if (isSuccess) {
         self.authenticationView.hidden = YES;
         self.passwordView.hidden = NO;
         
         [self.textFiled becomeFirstResponder];
         self.lblTitleheader.text = _selectedText;
         if (_isAdvConfig) {
-            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess:)]) {
-                [_delegate toggleSelectedWithSuccess:YES];
-                [self dismissViewControllerAnimated:NO completion:nil];
+            if (_delegate && [_delegate respondsToSelector:@selector(toggleSelectedWithSuccess: andPassword:)]) {
+                [_delegate toggleSelectedWithSuccess:YES andPassword:password];
+                if (dismissView) {
+                    [self dismissViewControllerAnimated:NO completion:nil];
+                }
                 return;
             }
         }
         [self.view bringSubviewToFront:self.passwordView];
-
-
-
+    }
+    else {
+        [self showAlertViewWithCancelButtonTitle:kOK withMessage:kEnter_Valid_Password withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+            self.authenticationTextField.text = @"";
+            if ([alert isKindOfClass:[UIAlertController class]]) {
+                [alert dismissViewControllerAnimated:NO completion:nil];
+            }
+            
+        }];
     }
 }
 

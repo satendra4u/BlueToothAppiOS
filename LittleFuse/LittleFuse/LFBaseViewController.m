@@ -1,3 +1,4 @@
+
 //
 //  LFBaseViewController.m
 //  Littlefuse
@@ -29,7 +30,7 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     self.navigationItem.titleView = imageView;
     
-
+    
 }
 
 
@@ -39,14 +40,14 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
 }
 
 /*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 
 - (void)showAlertViewWithCancelButtonTitle:(NSString *)cancelTitle
@@ -56,48 +57,48 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
                    clickedAtIndexWithBlock:(void(^)(id alert, NSInteger index))block {
     dispatch_async(dispatch_get_main_queue(), ^{
         alertBlock = block;
-        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8")) {
-            UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:AlertTitle message:message preferredStyle:UIAlertControllerStyleAlert];
-            
-            [alertcontroller addAction:[UIAlertAction actionWithTitle:cancelTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                alertBlock (alertcontroller, 0);
-
-            }]];
-            for (NSString *button in otherButtons) {
-                [alertcontroller addAction:[UIAlertAction actionWithTitle:button style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                    alertBlock (alertcontroller, [otherButtons indexOfObject:button]+1);
-                    
-                }]];
-            }
-            [self presentViewController:alertcontroller animated:YES completion:nil];
-
-        } else {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:AlertTitle message:message delegate:self cancelButtonTitle:cancelTitle otherButtonTitles:nil];
-            
-            for (NSString *strings in otherButtons) {
-                [alert addButtonWithTitle:strings];
-            }
-            [alert show];
-
+        
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 9
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:AlertTitle message:message delegate:self cancelButtonTitle:cancelTitle otherButtonTitles:nil];
+        
+        for (NSString *strings in otherButtons) {
+            [alert addButtonWithTitle:strings];
         }
+        [alert show];
+#endif
+        
+        UIAlertController *alertcontroller = [UIAlertController alertControllerWithTitle:AlertTitle message:message preferredStyle:UIAlertControllerStyleAlert];
+        
+        [alertcontroller addAction:[UIAlertAction actionWithTitle:cancelTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            alertBlock (alertcontroller, 0);
+            
+        }]];
+        for (NSString *button in otherButtons) {
+            [alertcontroller addAction:[UIAlertAction actionWithTitle:button style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                alertBlock (alertcontroller, [otherButtons indexOfObject:button]+1);
+                
+            }]];
+        }
+        [self presentViewController:alertcontroller animated:YES completion:nil];
+        
     });
     
 }
-
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 9
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (alertBlock) {
         alertBlock(alertView, buttonIndex);
     }
 }
-
+#endif
 
 
 #pragma mark -
 - (void)showIndicatorOn:(UIView*)superView withText:(NSString *)msg
 {
     CGRect viewFrame = superView.bounds;
-
     indicatorView = [[UIView alloc] initWithFrame:self.view.bounds];
     UIView *aView = [[UIView alloc] initWithFrame:CGRectMake(10, ((CGRectGetHeight(viewFrame) - 150) / 2.0) , CGRectGetWidth(viewFrame)-20, 100)];
     aView.backgroundColor = [UIColor whiteColor];
@@ -119,8 +120,6 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     [superView bringSubviewToFront:indicatorView];
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 }
-
-
 - (void)removeIndicator
 {
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];

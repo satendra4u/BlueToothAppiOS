@@ -9,7 +9,7 @@
 #import "LFAppDelegate.h"
 #import "LFDataManager.h"
 #import "UIImage+LFImage.h"
-
+#import "LFTabbarItem.h"
 @interface LFAppDelegate ()
 
 @end
@@ -19,17 +19,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+
+#endif
+
+
     //For core data modal object initialization
     [[LFDataManager sharedManager] setManagedObjectContext:self.managedObjectContext];
     
-    float width = CGRectGetWidth(self.window.frame)/3;
-    
-    [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
+   // float width = CGRectGetWidth(self.window.frame)/3;
+   // [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
+   // [[UITabBar appearance] setItemWidth:width ];
 
 
     return YES;
 }
+
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -44,6 +50,7 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
