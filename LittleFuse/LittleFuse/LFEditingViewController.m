@@ -33,6 +33,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *lblMax;
 @property (weak, nonatomic) IBOutlet UITextField *authenticationTextField;
 @property (weak, nonatomic) IBOutlet UITextField *conformPasswordField;
+
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *conformPasswordFieldHeight;
 
 @property (weak, nonatomic) IBOutlet UIView *btnsView;
@@ -79,6 +80,8 @@
     if (_isChangePassword) {
         _conformPasswordField.hidden = NO;
         _conformPasswordFieldHeight.constant = 30;
+        self.textFiled.placeholder = @"NewPassword";
+
     } else {
         _conformPasswordField.hidden = YES;
         _conformPasswordFieldHeight.constant = 0;

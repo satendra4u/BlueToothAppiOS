@@ -107,7 +107,7 @@
 #pragma mark Alert Titles
 
 #define  kApp_Name  @"Littelfuse"
-#define  kConfigure @"Configure"
+#define  kConfigure @"CONFIGURE"
 #define  kFriendly_deviceName_title  @"Friendly Device Name"
 #define  kAuthentication_title @"Authentication"
 #define  kResetPassword_title @"Password Reset"
@@ -125,7 +125,7 @@
 #define  kEnter_Correct_Password @"Please enter correct password and try again."
 #define  kSave_Success @"Data saved successfully"
 #define  kProblem_Saving @"There is a problem saving data."
-#define  kNot_Configured @"This MP8000 has not yet been Configured. Configure this MP8000 now?"
+#define  kNot_Configured @"This MP8000 has not yet configured. Would you like to configure this device now?"
 #define  kEnter_Valid_Password @"Please enter password"
 #define  kPermision_Error @"Read or Write Permission Error"
 #define  kOutOf_Range @"Out of Range Error"
@@ -147,9 +147,9 @@
 #pragma mark Alert Button Titles
 
 #define kOK  @"OK"
-#define kNo @"No"
-#define kCancel @"Cancel"
-#define kContinue @"Continue"
+#define kNo @"NO"
+#define kCancel @"CANCEL"
+#define kContinue @"CONTINUE"
 
 
 

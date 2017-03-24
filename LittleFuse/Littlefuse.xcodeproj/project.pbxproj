@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0CB10062FC5C4BEC5ECA333C /* libPods-LittleFuseUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */; };
+		185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 185816AA1E829DD800C61013 /* LFTabbarItem.m */; };
 		21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */; };
 		21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */; };
 		3B348A97C919890D26BA7BDD /* libPods-Littlefuse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */; };
@@ -85,6 +86,8 @@
 /* Begin PBXFileReference section */
 		044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Littlefuse.release.xcconfig"; path = "Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse.release.xcconfig"; sourceTree = "<group>"; };
 		125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Littlefuse.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		185816A91E829DD800C61013 /* LFTabbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFTabbarItem.h; sourceTree = "<group>"; };
+		185816AA1E829DD800C61013 /* LFTabbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFTabbarItem.m; sourceTree = "<group>"; };
 		21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCharactersticBitDisplayCell.h; sourceTree = "<group>"; };
 		21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCharactersticBitDisplayCell.m; sourceTree = "<group>"; };
 		21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LFCharactersticBitDisplayCell.xib; sourceTree = "<group>"; };
@@ -300,6 +303,8 @@
 		932EF6E61C5251FD0098DFD4 /* Tabbar */ = {
 			isa = PBXGroup;
 			children = (
+				185816A91E829DD800C61013 /* LFTabbarItem.h */,
+				185816AA1E829DD800C61013 /* LFTabbarItem.m */,
 				932EF6E71C52520D0098DFD4 /* LFTabbarController.h */,
 				932EF6E81C52520D0098DFD4 /* LFTabbarController.m */,
 				939C10061C58BCC2007692B9 /* LFNavigationController.h */,
@@ -537,7 +542,7 @@
 				TargetAttributes = {
 					933600B01C50A81D007CD61A = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = A9ZQW7FAUR;
+						DevelopmentTeam = TV8M2M4B6L;
 						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -762,6 +767,7 @@
 				21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */,
 				93165BD21C902C3F005462CB /* LFInfoViewController.m in Sources */,
 				937B83A41C59EB4C008D1063 /* LFBluetoothManager.m in Sources */,
+				185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */,
 				937B83A11C59EB4C008D1063 /* LFCharactersticDisplayCell.m in Sources */,
 				937B83AA1C59F09B008D1063 /* LFFaultViewController.m in Sources */,
 				939C10081C58BCC2007692B9 /* LFNavigationController.m in Sources */,

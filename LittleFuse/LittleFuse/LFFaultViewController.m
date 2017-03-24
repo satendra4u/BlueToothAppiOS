@@ -26,7 +26,6 @@
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
     LFFaultData *currentData;
-    LFFaultData *prevFaultData;
     NSDate *selectedDate;
     NSUInteger stFieldSuccessCount;
     
@@ -146,7 +145,8 @@
     NSDateFormatter *dateformat = [[NSDateFormatter alloc] init];
     [dateformat setTimeZone:[NSTimeZone localTimeZone]];
     [dateformat setDateFormat:@"MMMM dd, YYYY"];
-    selectedDate = date;
+     NSDate *nextdate = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
+    selectedDate = nextdate;
     NSString *dateString = [dateformat stringFromDate:date];
     [dateformat setDateFormat:@"yyyy-MM-dd"];
     return dateString;
@@ -181,17 +181,25 @@
     currentData.other = data;
     // To save the Data
     if (![self isCurrentDataSameWithPreviousSavedOne]) {
-        if (currentData.date && [currentData.date compare:selectedDate ] == NSOrderedAscending) {
+             [self showData:currentData.voltage];
+       /* if (currentData.date && [currentData.date compare:selectedDate ] == NSOrderedDescending
+            ) {
             [self showData:currentData.voltage];
-        } else {
+        }*/
+        
+        if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
+        } else {
+            _noDataLabel.hidden = YES;
         }
+        [_tblFaults reloadData];
+        
         
         [[LFDataManager sharedManager] saveFaultDetails:currentData WithPeripheral:[[LFBluetoothManager sharedManager] selectedPeripheral]];
-        prevFaultData = currentData;
         currentData = nil;
         currentData = [[LFFaultData alloc] init];
         [[LFBluetoothManager sharedManager] readFaultData];
+
     } else {
         //currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
 //        currentIndex = sectionArray.count + 1;;
@@ -234,18 +242,67 @@
     [faultDict setValue:currentData forKey:FAULT_DETAILS];
     [faultDict setValue:faultCode forKey:FAULT_CODE];
     
-    [sectionArray addObject:[faultDict copy]];
+   /* if (islatestRecord) {
+         [sectionArray insertObject:[faultDict copy] atIndex:0];
+    }
+    else
+    {
+        [sectionArray addObject:[faultDict copy]];
+
+    }*/
+    
+    if (sectionArray.count) {
+        
+       // for (NSInteger i = sectionArray.count-1; i>= 0; i--)
+        //{
+            BOOL hasDuplicate = [[sectionArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"ErrorDate == %@ AND faultCode == %@", faultdate,faultCode]] count] > 0;
+            
+            if (hasDuplicate)
+            {
+                return;
+            }
+            else{
+                [sectionArray addObject:[faultDict copy]];
+
+            }
+       // }
+        NSSortDescriptor *dateDescriptor = [[NSSortDescriptor alloc] initWithKey:@"ErrorDate" ascending:NO];
+        
+        
+        NSArray *sortedArray = [sectionArray sortedArrayUsingDescriptors:@[dateDescriptor]];
+        
+        
+        
+        [sectionArray removeAllObjects];
+        //sectionArray = sortedArray;
+        [sectionArray addObjectsFromArray:sortedArray];
+    }
+    else{
+        [sectionArray addObject:[faultDict copy]];
+ 
+    }
+    
+    
     DLog(@"Show data  = %@ current count = %ld", data, (long)sectionArray.count);
     [faultDict removeAllObjects];
     _noDataLabel.hidden = YES;
-    if (sectionArray.count >= 10) {
+    [_tblFaults reloadData];
+
+   /* if (sectionArray.count >= 10) {
+        [_tblFaults reloadData];
         [_tblFaults beginUpdates];
-        [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:sectionArray.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+        if (islatestRecord) {
+        [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationTop];
+        }
+        else{
+            [_tblFaults insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:sectionArray.count - 1 inSection:0]] withRowAnimation:UITableViewRowAnimationBottom];
+        }
         [_tblFaults endUpdates];
+
     }
     else {
         [_tblFaults reloadData];
-    }
+    }*/
 }
 - (BOOL)isCurrentDataSameWithPreviousSavedOne
 {
@@ -386,6 +443,9 @@
         case 103:
             error = @"PHSQ";
             break;
+        case 4096:
+            error = @"FWUpdate";
+            break;
         case 61166:
             error = @"UNDEFF";
             break;
@@ -464,6 +524,9 @@
         case 103:
             error = @"Phase Sequence";
             break;
+        case 4096:
+            error = @"F/W Update";
+            break;
         case 61166:
             error = @"Undefined trip condition";
             break;
@@ -490,17 +553,27 @@
 
 - (void)fetchDataWithDate:(NSDate *)date
 {
+    
+   /* NSDateFormatter *dateformat = [[NSDateFormatter alloc] init];
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+
+    //[dateformat setTimeZone:[NSTimeZone defaultTimeZone]];
+    [dateformat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+
+    NSString *dateString = [dateformat stringFromDate:date];*/
+
+
     NSDate *tomorrow = [NSDate dateWithTimeInterval:(24*60*60) sinceDate:date];
     NSDateComponents *components = [[NSCalendar currentCalendar] components:NSIntegerMax fromDate:tomorrow];
-    [components setHour:5];
-    [components setMinute:30];
-    [components setSecond:0];
+   // [components setHour:5];
+    //[components setMinute:30];
+   // [components setSecond:0];
     NSArray *arr = [[LFDataManager sharedManager] getFaultDataForSelectedDate:[components date]];
-    NSInteger faultsCount  = sectionArray.count;
+   /* NSInteger faultsCount  = sectionArray.count;
     [sectionArray removeAllObjects];
     if (faultsCount > 0) {
         [_tblFaults reloadData];
-    }
+    }*/
     if (arr.count) {
         for (LFFaultData *fault in arr) {
             [faultDict removeAllObjects];

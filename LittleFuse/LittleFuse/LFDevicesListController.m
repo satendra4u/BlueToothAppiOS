@@ -16,9 +16,12 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "UIImage+LFImage.h"
 #import <CoreBluetooth/CoreBluetooth.h>
+#import "LFTabbarItem.h"
 
 
 #define kDeviceCellID  @"DeviceCellID"
+
+
 
 @interface LFDevicesListController () <BlutoothSharedDataDelegate, UITableViewDelegate, UITableViewDataSource, EditingDelegate>
 {
@@ -28,10 +31,13 @@
     BOOL isDeviceSelected;
     BOOL isScanDataFound;
     BOOL isInitialDisconnect;
+    
 
     
     NSInteger selectedIndex;
     NSInteger refreshTimeInterval;
+    //NSInteger numberOfControllers;
+
     
     NSMutableArray *peripheralsList;
     NSMutableArray *charactersticsList;
@@ -64,7 +70,7 @@
     [LFBluetoothManager sharedManager].centralManager = [[CBCentralManager alloc] initWithDelegate:[LFBluetoothManager sharedManager] queue:nil];
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
-    
+
     [LittleFuseNotificationCenter addObserver:self selector:@selector(navigateToDislay:) name:DISPLAY_TABBAR object:nil];
     lblVersion.text = [NSString stringWithFormat:@"Version:%@",  [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(peripheralConnected) name:PeripheralDidConnect object:nil];
@@ -74,6 +80,7 @@
     [LittleFuseNotificationCenter addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
+    
 }
 
 /**
@@ -323,10 +330,20 @@
     LFPeripheral *peripheral = peripheralsList[selectedIndex];
     LFTabbarController *tabbar = (LFTabbarController *)[self.storyboard instantiateViewControllerWithIdentifier:@"TabBarControllerID"];
     
+    float screenWidth;
+
+    if (([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) || ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeRight)) {
+        screenWidth = CGRectGetHeight(self.view.frame);
+    }
+    else{
+        screenWidth = CGRectGetWidth(self.view.frame);
+
+    }
+    
     if (!peripheral.isConfigured) { //(LV > HV)
         NSMutableArray *viewControllers = [tabbar.viewControllers mutableCopy];
         [self showAlertViewWithCancelButtonTitle:kConfigure withMessage:@"" withTitle:kNot_Configured otherButtons:@[kNo, kCancel] clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-            NSInteger numberOfControllers = 3;
+           NSInteger  numberOfControllers = 3;
             switch (index) {
                 case 2:
                 {
@@ -371,10 +388,8 @@
             }
             
             tabbar.viewControllers = viewControllers;
-            float width = CGRectGetWidth(self.view.frame)/numberOfControllers;
             
-            [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
-            
+            [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(screenWidth/numberOfControllers, 50)]];
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (![[self.navigationController.viewControllers lastObject] isKindOfClass:[LFTabbarController class]]) {
                     [self.navigationController pushViewController:tabbar animated:YES];
@@ -386,9 +401,8 @@
         }];
         
     } else {
-        float width = CGRectGetWidth(self.view.frame)/3;
-        
-        [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
+
+        [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(screenWidth/3, 50)]];
         
         if (![[self.navigationController.viewControllers lastObject] isKindOfClass:[LFTabbarController class]]) {
             [self.navigationController pushViewController:tabbar animated:YES];
@@ -426,7 +440,6 @@
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:YES completion:nil];
-            
         }
     }];
     //[self.navigationController popToRootViewControllerAnimated:NO];
@@ -446,12 +459,13 @@
     }
 }
 
-
 #pragma mark Authentication Delegate
 - (void)authenticationDoneWithStatus:(BOOL)isSuccess {
     if (isSuccess) {
         [self continueAfterPasswordAuthentication];
     }
 }
+
+
 
 @end

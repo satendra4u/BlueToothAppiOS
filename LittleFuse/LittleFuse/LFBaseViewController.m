@@ -1,3 +1,4 @@
+
 //
 //  LFBaseViewController.m
 //  Littlefuse
@@ -118,7 +119,6 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
     [indicatorView addSubview:aView];
     [superView bringSubviewToFront:indicatorView];
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
-    
 }
 - (void)removeIndicator
 {

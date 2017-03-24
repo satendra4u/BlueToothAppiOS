@@ -372,6 +372,8 @@ static LFBluetoothManager *sharedData = nil;
                 return;
             }
         }*/
+        
+        
         if (_delegate && [_delegate respondsToSelector:@selector(showAlertWithText:)]) {
             [_delegate showAlertWithText:[error localizedDescription]];
             //[self scan];
@@ -417,8 +419,6 @@ static LFBluetoothManager *sharedData = nil;
                 _faultPollingCount += 1;
                 [self readValueForCharacteristic:characteristic];
                 NSLog(@"\n========================== polling called ========================= ");
-               
-
             }
             _faultPollingCount = 0;
 
@@ -532,7 +532,7 @@ static LFBluetoothManager *sharedData = nil;
         return;
     }
     [[LFBluetoothManager sharedManager] setConfig:NO];
-    if (_tCurIndex > 1000) {
+    if (_tCurIndex > 1000) {//1000
         return;
     }
    // DLog(@"Reading Fault Data of %d", (int)_tCurIndex);

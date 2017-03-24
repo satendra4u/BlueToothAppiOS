@@ -599,6 +599,9 @@ NSLog(@"\n===============view will disappear called===================\n");
     } else if ([dataString isEqualToString:@"00100000"]) {
         codeVal = @"Undefined trip condition";
     }
+    else if ([dataString isEqualToString:@"10000000"]) {
+        codeVal = @"FW Update";
+    }
     return codeVal;
 }
 

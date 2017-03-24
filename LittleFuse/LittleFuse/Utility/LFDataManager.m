@@ -201,7 +201,7 @@ static LFDataManager *dataManager = nil;
             LFFaultData *faultData = [[LFFaultData alloc]initWithManagedObject:fault];
             [faultArr addObject:faultData];
         }
-        NSArray *sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO]];
+        NSArray *sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"date" ascending:YES]];
         [faultArr sortUsingDescriptors:sortDescriptors];
 
     }
