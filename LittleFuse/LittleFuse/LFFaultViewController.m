@@ -444,7 +444,7 @@
             error = @"PHSQ";
             break;
         case 4096:
-            error = @"FWUpdate";
+            error = @"FWU";
             break;
         case 61166:
             error = @"UNDEFF";
