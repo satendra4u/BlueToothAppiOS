@@ -10,8 +10,10 @@
 #import "LFBluetoothManager.h"
 #import "UIImage+LFImage.h"
 #import "LFTabbarItem.h"
+@interface LFTabbarController () <UITabBarDelegate>
+@end
 
-@implementation LFTabbarController
+@implementation LFTabbarController 
 
 - (void)viewDidLoad
 {
@@ -21,7 +23,6 @@
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     self.navigationItem.titleView = imageView;
     self.navigationItem.title = @"";
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rotated:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
 }
 
@@ -47,14 +48,6 @@
 //    DLog(@"Tab bar view disappeared");
 }
 
-// method signature
-- (void)rotated:(NSNotification *)notification {
-   /*     NSArray *items =  self.tabBar.items;
-    for (int i =0; i<items.count; i++) {
-       // LFTabbarItem *item = items[i];
-       // [item setItemSize];
-    }*/
-    
-}
+
 
 @end

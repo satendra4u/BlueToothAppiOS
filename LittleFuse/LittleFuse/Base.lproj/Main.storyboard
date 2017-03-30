@@ -314,8 +314,8 @@
                         <rect key="frame" x="0.0" y="64" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MP8000-00216FE3" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iMg-GQ-fOb">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="40"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MP8000-00216FE3" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iMg-GQ-fOb">
+                                <rect key="frame" x="20" y="0.0" width="140" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="P4u-a2-4MN"/>
                                     <constraint firstAttribute="height" constant="40" id="PNJ-9m-Naq"/>
@@ -503,23 +503,33 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loading..." textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1cV-Xj-czT">
+                                <rect key="frame" x="160" y="0.0" width="140" height="40"/>
+                                <fontDescription key="fontDescription" name="Arial-BoldMT" family="Arial" pointSize="15"/>
+                                <color key="textColor" red="0.37254901959999998" green="0.37254901959999998" blue="0.37254901959999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="0.92549019607843142" green="0.92941176470588238" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="6aH-a2-ygv" firstAttribute="centerX" secondItem="bJD-Ld-Q8a" secondAttribute="centerX" id="5Ld-P3-qqh"/>
                             <constraint firstItem="sKO-DW-RAC" firstAttribute="leading" secondItem="bJD-Ld-Q8a" secondAttribute="leading" id="6Qs-If-Fy5"/>
                             <constraint firstItem="sKO-DW-RAC" firstAttribute="top" secondItem="iMg-GQ-fOb" secondAttribute="bottom" id="6np-fO-lBS"/>
+                            <constraint firstItem="pok-aq-dhg" firstAttribute="top" secondItem="1cV-Xj-czT" secondAttribute="bottom" id="EHa-8l-x3B"/>
+                            <constraint firstAttribute="trailing" secondItem="1cV-Xj-czT" secondAttribute="trailing" constant="20" id="Ig1-kR-OOw"/>
                             <constraint firstItem="sKO-DW-RAC" firstAttribute="top" secondItem="pok-aq-dhg" secondAttribute="bottom" constant="1" id="Ihd-Nb-bEy"/>
                             <constraint firstItem="iMg-GQ-fOb" firstAttribute="top" secondItem="fMK-Yc-0kF" secondAttribute="bottom" id="NSP-Qh-3EL"/>
                             <constraint firstItem="pok-aq-dhg" firstAttribute="top" secondItem="iMg-GQ-fOb" secondAttribute="bottom" id="PCv-Li-CXz"/>
                             <constraint firstItem="pok-aq-dhg" firstAttribute="leading" secondItem="bJD-Ld-Q8a" secondAttribute="leading" id="Pq3-jJ-RmC"/>
                             <constraint firstItem="6aH-a2-ygv" firstAttribute="centerX" secondItem="bJD-Ld-Q8a" secondAttribute="centerX" id="Px3-1t-VsB"/>
                             <constraint firstItem="pok-aq-dhg" firstAttribute="top" secondItem="bJD-Ld-Q8a" secondAttribute="top" id="U5F-ql-luH"/>
+                            <constraint firstItem="1cV-Xj-czT" firstAttribute="width" secondItem="iMg-GQ-fOb" secondAttribute="width" id="cqB-NX-bf7"/>
                             <constraint firstItem="6aH-a2-ygv" firstAttribute="centerY" secondItem="bJD-Ld-Q8a" secondAttribute="centerY" id="dhC-yP-cj4"/>
-                            <constraint firstAttribute="trailing" secondItem="iMg-GQ-fOb" secondAttribute="trailing" id="oga-hH-APK"/>
+                            <constraint firstItem="1cV-Xj-czT" firstAttribute="leading" secondItem="iMg-GQ-fOb" secondAttribute="trailing" id="m60-Rh-8jv"/>
                             <constraint firstAttribute="trailing" secondItem="sKO-DW-RAC" secondAttribute="trailing" id="rHC-p2-bLS"/>
                             <constraint firstAttribute="trailing" secondItem="pok-aq-dhg" secondAttribute="trailing" id="sZG-To-8eA"/>
-                            <constraint firstItem="iMg-GQ-fOb" firstAttribute="leading" secondItem="bJD-Ld-Q8a" secondAttribute="leading" id="yBX-Eq-jV1"/>
+                            <constraint firstItem="1cV-Xj-czT" firstAttribute="top" secondItem="fMK-Yc-0kF" secondAttribute="bottom" id="wyb-Tl-IGl"/>
+                            <constraint firstItem="iMg-GQ-fOb" firstAttribute="leading" secondItem="bJD-Ld-Q8a" secondAttribute="leading" constant="20" id="yBX-Eq-jV1"/>
                             <constraint firstItem="Ymy-RT-deY" firstAttribute="top" secondItem="sKO-DW-RAC" secondAttribute="bottom" id="zeh-p3-ZCd"/>
                         </constraints>
                         <variation key="default">
@@ -534,6 +544,7 @@
                         <outlet property="btnSelectedDate" destination="37T-Jz-dyo" id="Lqx-Kc-1xJ"/>
                         <outlet property="datepicker" destination="4zK-lg-rf6" id="tpO-d1-he4"/>
                         <outlet property="lblDevice" destination="iMg-GQ-fOb" id="iYH-0i-qeB"/>
+                        <outlet property="loadingLabel" destination="1cV-Xj-czT" id="awD-Bf-IVE"/>
                         <outlet property="noDataLabel" destination="6aH-a2-ygv" id="Wpz-QY-4Lf"/>
                         <outlet property="tblFaults" destination="sKO-DW-RAC" id="ZTc-3L-SuC"/>
                         <outlet property="tfPicker" destination="N0T-AG-bF9" id="d7L-sU-ffw"/>
@@ -569,7 +580,7 @@
                     </items>
                 </toolbar>
             </objects>
-            <point key="canvasLocation" x="319" y="2605"/>
+            <point key="canvasLocation" x="318.75" y="2604.929577464789"/>
         </scene>
         <!--Real Time-->
         <scene sceneID="BJL-0J-vek">
