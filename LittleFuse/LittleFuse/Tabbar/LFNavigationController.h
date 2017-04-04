@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@protocol LFNavigationDelegate <NSObject>
+@required
+- (void)navigationBackAction;
+@end
 @interface LFNavigationController : UINavigationController
-
+@property (weak, nonatomic) id<LFNavigationDelegate> navigationDelegate;
 @end

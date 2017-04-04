@@ -15,6 +15,7 @@
 #import "LFFaultData.h"
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
+#import "LFNavigationController.h"
 
 #define Background_Fault_Refresh_Interval 20
 
@@ -62,6 +63,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     //currentIndex = 0;
+
+
     _loadingLabel.hidden = YES;
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -99,8 +102,9 @@
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [LFBluetoothManager sharedManager].canContinueTimer = NO;
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
-    [tabBarController setEnableRefresh:YES];
+    [self setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -109,6 +113,7 @@
     [[LFBluetoothManager sharedManager] setConfig:YES];
      self.navigationItem.title = @"";
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -130,8 +135,7 @@
    /* if(!canContinueTimer) {
         return;
     }*/
-    //_loadingLabel.hidden = NO;
-    _loadingLabel.hidden = YES;
+    _loadingLabel.hidden = NO;
 
     [LFBluetoothManager sharedManager].tCurIndex = 0;
    // currentIndex = 0;
@@ -151,6 +155,16 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    self.tabBarController.selectedIndex = 0;
+}
+-(void)refreshContentAction
+{
+     [self updateFaultData];
 }
 
 - (NSString *)convertDateToString:(NSDate *)date
@@ -192,8 +206,7 @@
 - (void)getFaultOtherData:(NSData *)data
 {
     currentData.other = data;
-    //_loadingLabel.hidden = NO;
-    _loadingLabel.hidden = YES;
+    _loadingLabel.hidden = NO;
 
 
     // To save the Data
@@ -593,8 +606,7 @@
     if (faultsCount > 0) {
         [_tblFaults reloadData];
     }*/
-    //_loadingLabel.hidden = NO;
-    _loadingLabel.hidden = YES;
+    _loadingLabel.hidden = NO;
 
     if (arr.count) {
         for (LFFaultData *fault in arr) {
@@ -651,10 +663,7 @@
 
 }
 
-#pragma mark Tab bar Delegate Refresh Method
 
-- (void)refreshContentInCurrentController {
-    [self updateFaultData];
-    
-}
+
+
 @end

@@ -20,10 +20,7 @@
  */
 - (void)updateFaultData;
 
-/**
- * Refresh the configuration data by reading from device again.
- */
-- (void)refreshContentInCurrentController;
+
 
 /**
  * This method reads characteristic data for a given index

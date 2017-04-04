@@ -10,8 +10,10 @@
 
 @interface LFBaseViewController : UIViewController
 
+
 @property (nonatomic,strong)UIView *indicatorView;
 @property (nonatomic, strong) UIView *blankView;
+@property (nonatomic) BOOL hideBackButton;
 
 - (void)showAlertViewWithCancelButtonTitle:(NSString *) cancelTitle
                                withMessage:(NSString *)message
@@ -22,5 +24,8 @@
 
 - (void)showIndicatorOn:(UIView*)superView withText:(NSString *)msg;
 - (void)removeIndicator;
+- (void)setEnableRefresh:(BOOL)enableRefresh;
+-(void)refreshContentAction;
+-(void)navigationBackAction;
 
 @end

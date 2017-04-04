@@ -19,10 +19,10 @@
     // Do any additional setup after loading the view.
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    //    [self.topItem setTitleView:imageView];
     self.navigationBar.topItem.titleView = imageView;
-
 }
+
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

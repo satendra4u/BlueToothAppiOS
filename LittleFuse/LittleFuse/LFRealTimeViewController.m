@@ -61,7 +61,6 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
     sectionArray = [[NSMutableArray alloc] initWithObjects:@[], @[], @[], @[], nil];
     configArr = [[NSMutableArray alloc] initWithCapacity:0];
     refreshTimeInterval = 1;
@@ -101,8 +100,7 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
     [super viewWillAppear:YES];
     [[LFBluetoothManager sharedManager] setDelegate:nil];
     [[LFBluetoothManager sharedManager] setDelegate:self];
-    LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
-    [tabBarController setEnableRefresh:NO];
+    [self setEnableRefresh:NO];
     canContinueTimer = YES;
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
     float batteryLevel = [[UIDevice currentDevice] batteryLevel];
@@ -133,18 +131,26 @@ const char realMemFieldLens[] = { 0x02, 0x02,0x02};
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
     canContinueTimer = NO;
-NSLog(@"\n===============view will disappear called===================\n");
+    NSLog(@"\n===============view will disappear called===================\n");
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-
 
     [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     [[LFBluetoothManager sharedManager] setRealtime:NO];
 
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+    
     //[[LFBluetoothManager sharedManager] disconnectDevice];
    // [[LFBluetoothManager sharedManager] setDelegate:nil];
 
 }
+
+#pragma  Mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    LFTabbarController *tabbarController = (LFTabbarController *)self.tabBarController;
+    [tabbarController moveToDevicesListController];
+}
+//-(void)refreshContentAction
 - (void)refreshCurrentController {
     /*if (!canContinueTimer) {
         return;
@@ -1165,5 +1171,8 @@ NSLog(@"\n===============view will disappear called===================\n");
     
     
 }
+
+
+
 
 @end

@@ -18,7 +18,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     self.navigationController.navigationBar.topItem.titleView = imageView;
@@ -29,6 +28,11 @@
    // [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"]]]; //@"http://www.littelfuse.com/products/protection-relays-and-controls/protection-relays/motor-protection"
 }
 
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.

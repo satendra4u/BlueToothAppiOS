@@ -31,6 +31,9 @@
    // float width = CGRectGetWidth(self.window.frame)/3;
    // [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
    // [[UITabBar appearance] setItemWidth:width ];
+    [[UINavigationBar appearance] setTintColor:APP_THEME_COLOR];
+
+
 
 
     return YES;

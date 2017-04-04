@@ -19,33 +19,25 @@
 {
     [super viewDidLoad];
     [self.tabBar setTintColor:[UIColor whiteColor]];
+    self.navigationController.navigationBar.hidden= YES;
+   /*
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     self.navigationItem.titleView = imageView;
     self.navigationItem.title = @"";
+    self.navigationController.navigationBar.hidden = YES;*/
+    //[self.navigationItem setHidesBackButton:YES];
 
-}
 
-- (void)refreshContent {
-    if (_tabBarDelegate && [_tabBarDelegate respondsToSelector:@selector(refreshContentInCurrentController)]) {
-        [_tabBarDelegate refreshContentInCurrentController];
-    }
-}
-
-//Setter method hide/unhide refresh button
-- (void)setEnableRefresh:(BOOL)enableRefresh {
-    if (!enableRefresh) {
-        self.navigationItem.rightBarButtonItems = @[];
-    }
-    else {
-        UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"scan_icon"] style:UIBarButtonItemStylePlain target:self action:@selector(refreshContent)];
-        self.navigationItem.rightBarButtonItems = @[refreshButton];
-    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
 //    DLog(@"Tab bar view disappeared");
+}
+-(void)moveToDevicesListController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 
