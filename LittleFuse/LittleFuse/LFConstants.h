@@ -100,6 +100,8 @@
 #define PeripheralDidConnect    @"PeripheralDidConnectNotification"
 #define LittleFuseNotificationCenter [NSNotificationCenter defaultCenter]
 
+#define LicenceAgreedKey @"licenceAgreed"
+
 // ------------------------------------------------------------------------------------------
 //                              ***** Alert titles *****
 // ------------------------------------------------------------------------------------------

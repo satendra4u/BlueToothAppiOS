@@ -9,6 +9,7 @@
 #import "LFAppDelegate.h"
 #import "LFDataManager.h"
 #import "UIImage+LFImage.h"
+#import "LFNavigationController.h"
 
 @interface LFAppDelegate ()
 
@@ -24,8 +25,19 @@
     [[LFDataManager sharedManager] setManagedObjectContext:self.managedObjectContext];
     
     float width = CGRectGetWidth(self.window.frame)/3;
-    
+    UIStoryboard *main = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+   BOOL isAgreed = [[[NSUserDefaults standardUserDefaults] objectForKey:LicenceAgreedKey] boolValue];
+    LFNavigationController *rootController;
+    if (isAgreed) {
+        rootController = [main instantiateViewControllerWithIdentifier:@"DevicesListNavigationControllerSID"];
+    }
+    else{
+        rootController = [main instantiateViewControllerWithIdentifier:@"LicenceNavigationControllerSID"];
+    }
+       self.window.rootViewController = rootController;
     [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageFromColor:APP_THEME_COLOR withSize:CGSizeMake(width, 50)]];
+    //[self.window makeKeyAndVisible];
+
 
 
     return YES;

@@ -13,6 +13,7 @@
 #import "LFDeviceTableViewCell.h"
 #import "LFTabbarController.h"
 #import "LFConstants.h"
+#import "LFLicenceViewController.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "UIImage+LFImage.h"
 #import <CoreBluetooth/CoreBluetooth.h>
@@ -48,6 +49,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+   
     isInitialLaunch = YES;
     isDeviceSelected = NO;
     isScanDataFound = NO;
@@ -57,7 +59,7 @@
     
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] createObjects];
-
+    
     [LFBluetoothManager sharedManager].centralManager = [[CBCentralManager alloc] initWithDelegate:[LFBluetoothManager sharedManager] queue:nil];
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
@@ -71,6 +73,25 @@
     [LittleFuseNotificationCenter addObserver:self selector:@selector(willBecomeInActive) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [LittleFuseNotificationCenter addObserver:self selector:@selector(appEnteredBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
+    
+}
+
+
+-(void)displayLicenceView
+{
+    LFLicenceViewController *licenceVC = [self.storyboard instantiateViewControllerWithIdentifier:@"LicenceViewControllerSID"];
+    //licenceVC.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+   // [self.navigationController pushViewController:licenceVC animated:YES];
+    
+    [self.navigationController presentViewController:licenceVC animated:YES completion:nil];
+    
+   /* [licenceVC configureLicenceWithAgreementCompletionHandler:^(LFLicenceButtonType selectedButton) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+        
+        if (selectedButton == LFLicenceButtonTypeAgree) {
+            [self configureIntialBLESetup];
+        }
+    }];*/
 }
 
 /**
@@ -220,11 +241,13 @@
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
     selectedIndex = indexPath.row;
     isPopupOpened = YES;
     isDeviceSelected = YES;
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+   
     
 }
 

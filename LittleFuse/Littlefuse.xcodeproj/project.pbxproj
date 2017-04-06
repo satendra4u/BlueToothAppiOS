@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0CB10062FC5C4BEC5ECA333C /* libPods-LittleFuseUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */; };
+		184156DE1E94CD1500500BB3 /* LFLicenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184156DD1E94CD1500500BB3 /* LFLicenceViewController.m */; };
+		18C82EA61E962D5E00EDF465 /* Terms&Conditions.html in Resources */ = {isa = PBXBuildFile; fileRef = 18C82EA51E962D5E00EDF465 /* Terms&Conditions.html */; };
 		21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */; };
 		21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */; };
 		3B348A97C919890D26BA7BDD /* libPods-Littlefuse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */; };
@@ -85,6 +87,9 @@
 /* Begin PBXFileReference section */
 		044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Littlefuse.release.xcconfig"; path = "Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse.release.xcconfig"; sourceTree = "<group>"; };
 		125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Littlefuse.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		184156DC1E94CD1500500BB3 /* LFLicenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFLicenceViewController.h; sourceTree = "<group>"; };
+		184156DD1E94CD1500500BB3 /* LFLicenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFLicenceViewController.m; sourceTree = "<group>"; };
+		18C82EA51E962D5E00EDF465 /* Terms&Conditions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "Terms&Conditions.html"; sourceTree = "<group>"; };
 		21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCharactersticBitDisplayCell.h; sourceTree = "<group>"; };
 		21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCharactersticBitDisplayCell.m; sourceTree = "<group>"; };
 		21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LFCharactersticBitDisplayCell.xib; sourceTree = "<group>"; };
@@ -267,6 +272,8 @@
 				93EC633A1C9ABAF0001ACB9C /* LFCommunicationSettingsController.m */,
 				93EC633C1C9ABB01001ACB9C /* LFRTDViewController.h */,
 				93EC633D1C9ABB01001ACB9C /* LFRTDViewController.m */,
+				184156DC1E94CD1500500BB3 /* LFLicenceViewController.h */,
+				184156DD1E94CD1500500BB3 /* LFLicenceViewController.m */,
 			);
 			name = "Devices List";
 			sourceTree = "<group>";
@@ -357,6 +364,7 @@
 		933600B41C50A81D007CD61A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				18C82EA51E962D5E00EDF465 /* Terms&Conditions.html */,
 				933600B51C50A81D007CD61A /* main.m */,
 				932EF6CE1C5251DC0098DFD4 /* Fonts */,
 			);
@@ -599,6 +607,7 @@
 				932EF6E11C5251DC0098DFD4 /* OpenSans-Light.ttf in Resources */,
 				932EF6E31C5251DC0098DFD4 /* OpenSans-Regular.ttf in Resources */,
 				932EF6DF1C5251DC0098DFD4 /* OpenSans-ExtraBoldItalic.ttf in Resources */,
+				18C82EA61E962D5E00EDF465 /* Terms&Conditions.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -767,6 +776,7 @@
 				939C10081C58BCC2007692B9 /* LFNavigationController.m in Sources */,
 				933600B61C50A81D007CD61A /* main.m in Sources */,
 				932EF6EC1C5258640098DFD4 /* LFRealTimeViewController.m in Sources */,
+				184156DE1E94CD1500500BB3 /* LFLicenceViewController.m in Sources */,
 				937E0E591C5F5D5C00246A8D /* LFBaseViewController.m in Sources */,
 				93C7508B1C6B8A2E0051712B /* LFFaultTableViewCell.m in Sources */,
 				93EC63371C9A9424001ACB9C /* LFConfigureButtonsCell.m in Sources */,
