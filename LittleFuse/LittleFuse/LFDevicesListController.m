@@ -13,6 +13,7 @@
 #import "LFDeviceTableViewCell.h"
 #import "LFTabbarController.h"
 #import "LFConstants.h"
+#import "LFLicenceViewController.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "UIImage+LFImage.h"
 #import <CoreBluetooth/CoreBluetooth.h>
@@ -56,6 +57,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+   
     isInitialLaunch = YES;
     isDeviceSelected = NO;
     isScanDataFound = NO;
@@ -68,7 +70,7 @@
     
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] createObjects];
-
+    
     [LFBluetoothManager sharedManager].centralManager = [[CBCentralManager alloc] initWithDelegate:[LFBluetoothManager sharedManager] queue:nil];
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
@@ -84,6 +86,9 @@
     [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
     
 }
+
+
+
 
 
 /**
@@ -230,12 +235,14 @@
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
     selectedIndex = indexPath.row;
     isPopupOpened = YES;
     isDeviceSelected = YES;
     [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:0];
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+   
     
 }
 
