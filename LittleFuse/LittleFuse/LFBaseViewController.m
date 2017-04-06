@@ -8,7 +8,7 @@
 //
 
 #import "LFBaseViewController.h"
-
+#import "UIImage+LFImage.h"
 
 #define INDICATOR_WIDTH_HT  37.0
 
@@ -26,19 +26,75 @@ typedef void(^LFAlertBlock)(id alert, NSInteger index);
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+
     UIImage *image = [UIImage imageNamed:@"header-logo"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     self.navigationItem.titleView = imageView;
+    self.navigationItem.hidesBackButton = YES;
+    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
     
+    [self addBackButton];
+   /* if (!_hideBackButton) {
+        [self addBackButton];
+    }*/
     
 }
 
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
+
+-(void)addBackButton
+{
+    UIBarButtonItem *negativeSpacer = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    
+    negativeSpacer.width = -16;
+    
+    
+    UIButton *backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
+    [backButton setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(navigationBackAction) forControlEvents:UIControlEventTouchUpInside];
+    backButton.tintColor = [UIColor whiteColor];
+
+    UIBarButtonItem *leftBarButton = [[UIBarButtonItem alloc] initWithCustomView:backButton];
+    self.navigationItem.leftBarButtonItems = @[negativeSpacer,leftBarButton];
+
+}
+
+-(void)navigationBackAction
+{
+    //Implemented in sub classes
+}
+
+//Setter method hide/unhide refresh button
+- (void)setEnableRefresh:(BOOL)enableRefresh {
+    if (enableRefresh) {
+        UIButton *refreshButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
+        [refreshButton setImage:[UIImage imageNamed:@"scan_icon"] forState:UIControlStateNormal];
+        refreshButton.tintColor = [UIColor whiteColor];
+        [refreshButton addTarget:self action:@selector(refreshContentAction) forControlEvents:UIControlEventTouchUpInside];
+        
+
+        UIBarButtonItem *refreshBarButton = [[UIBarButtonItem alloc] initWithCustomView:refreshButton];
+        self.navigationItem.rightBarButtonItems = @[refreshBarButton];
+    }
+    else {
+        self.navigationItem.rightBarButtonItems = @[];
+
+    }
+}
+
+- (void)refreshContentAction {
+//sub class methods will implement this
+}
 /*
  #pragma mark - Navigation
  

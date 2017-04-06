@@ -13,6 +13,7 @@
 #import "LFDeviceTableViewCell.h"
 #import "LFTabbarController.h"
 #import "LFConstants.h"
+#import "LFLicenceViewController.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "UIImage+LFImage.h"
 #import <CoreBluetooth/CoreBluetooth.h>
@@ -56,17 +57,20 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+   
     isInitialLaunch = YES;
     isDeviceSelected = NO;
     isScanDataFound = NO;
     isInitialDisconnect = YES;
+    [self setEnableRefresh:YES];
+    self.navigationItem.leftBarButtonItems = nil;
     // Do any additional setup after loading the view, typically from a nib.
     peripheralsList = [[NSMutableArray alloc] initWithCapacity:0];
     charactersticsList = [[NSMutableArray alloc] initWithCapacity:0];
     
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [[LFBluetoothManager sharedManager] createObjects];
-
+    
     [LFBluetoothManager sharedManager].centralManager = [[CBCentralManager alloc] initWithDelegate:[LFBluetoothManager sharedManager] queue:nil];
     
     [tblDevices setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
@@ -82,6 +86,10 @@
     [self performSelector:@selector(checkForNoDevices) withObject:nil afterDelay:5];
     
 }
+
+
+
+
 
 /**
  * This method is called when app enters background.
@@ -133,6 +141,8 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    self.navigationController.navigationBar.hidden= NO;
+
 //    if ([[LFBluetoothManager sharedManager] discoveredPeripheral] != nil) {
 //        [[LFBluetoothManager sharedManager] disconnectPeripheral];
 //    }
@@ -198,9 +208,7 @@
     else {
         refreshTimeInterval = 600;
     }
-    if (!isPopupOpened) {
-        [self scanAction:nil];
-    }
+    
     
    // [self performSelector:@selector(reloadDevicesList) withObject:nil afterDelay:refreshTimeInterval];
 }
@@ -227,12 +235,14 @@
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
     selectedIndex = indexPath.row;
     isPopupOpened = YES;
     isDeviceSelected = YES;
     [[LFBluetoothManager sharedManager] setDevicePairingRetryCount:0];
     [[LFBluetoothManager sharedManager] connectToDevice:indexPath.row];
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+   
     
 }
 
@@ -279,12 +289,17 @@
 
 #pragma mark - Private methods -
 
-- (IBAction)scanAction:(id)sender
+-(void)refreshContentAction
 {
+    if (!isPopupOpened) {
+        return;
+    }
     isScanDataFound = NO;
     [self performSelector:@selector(verifyDeviceCount) withObject:nil afterDelay:3];
     [[LFBluetoothManager sharedManager] disconnectDevice];
+  
 }
+
 
 /**
  * This method checks if there are any devices available to connect.

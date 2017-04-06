@@ -12,14 +12,15 @@
 
 @optional
 //This method is called when refresh button is tapped in the configuration controller.
-- (void)refreshContentInCurrentController;
 
 @end
 
 @interface LFTabbarController : UITabBarController
 
-@property (nonatomic,assign) BOOL enableRefresh;//Used to handle refresh button in configuration screen.
+//@property (nonatomic,assign) BOOL enableRefresh;//Used to handle refresh button in configuration screen.
 
 @property (weak, nonatomic) id <LFTabbarRefreshDelegate> tabBarDelegate;
+
+-(void)moveToDevicesListController;
 
 @end

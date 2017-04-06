@@ -15,13 +15,16 @@
 #import "LFFaultData.h"
 #import "LFFaultsDetailsController.h"
 #import "LFTabbarController.h"
+#import "LFNavigationController.h"
 
 #define Background_Fault_Refresh_Interval 20
 
 
-@interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface LFFaultViewController () <BlutoothSharedDataDelegate, UITableViewDataSource, UITableViewDelegate,LFTabbarRefreshDelegate>
 {
     BOOL canContinueTimer;
+    BOOL isFaultsCompletlyLoaded;
+    BOOL isPopedFromFaultsDetailController;
    // NSInteger currentIndex;
     NSMutableArray *sectionArray;
     NSMutableDictionary *faultDict;
@@ -40,6 +43,9 @@
 @property (strong, nonatomic) IBOutlet UIToolbar *toolBar;
 
 @property (weak, nonatomic) IBOutlet UILabel *noDataLabel;
+@property (weak, nonatomic) IBOutlet UILabel *loadingLabel;
+
+
 
 @property (nonatomic, assign) BOOL isSTFieldSuccess;
 
@@ -57,7 +63,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     //currentIndex = 0;
-    
+
+
+    _loadingLabel.hidden = YES;
     currentData = [[LFFaultData alloc] init];
     faultDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
@@ -94,7 +102,9 @@
     [[LFBluetoothManager sharedManager] setDelegate:self];
     [LFBluetoothManager sharedManager].canContinueTimer = NO;
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
-    [tabBarController setEnableRefresh:NO];
+    [self setEnableRefresh:YES];
+    tabBarController.tabBarDelegate = self;
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -103,12 +113,17 @@
     [[LFBluetoothManager sharedManager] setConfig:YES];
      self.navigationItem.title = @"";
     [[LFBluetoothManager sharedManager] stopFaultTimer];
+
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     canContinueTimer = YES;
+    if (!isPopedFromFaultsDetailController) {
+        isFaultsCompletlyLoaded = NO;
+    }
+    isPopedFromFaultsDetailController = NO;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
     NSDate *date = [NSDate date];
     [self.btnSelectedDate setTitle:[self convertDateToString:date] forState:UIControlStateNormal];
@@ -120,6 +135,8 @@
    /* if(!canContinueTimer) {
         return;
     }*/
+    _loadingLabel.hidden = NO;
+
     [LFBluetoothManager sharedManager].tCurIndex = 0;
    // currentIndex = 0;
     [LFBluetoothManager sharedManager].canContinueTimer = YES;
@@ -138,6 +155,16 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    self.tabBarController.selectedIndex = 0;
+}
+-(void)refreshContentAction
+{
+     [self updateFaultData];
 }
 
 - (NSString *)convertDateToString:(NSDate *)date
@@ -179,13 +206,13 @@
 - (void)getFaultOtherData:(NSData *)data
 {
     currentData.other = data;
+    _loadingLabel.hidden = NO;
+
+
     // To save the Data
     if (![self isCurrentDataSameWithPreviousSavedOne]) {
              [self showData:currentData.voltage];
-       /* if (currentData.date && [currentData.date compare:selectedDate ] == NSOrderedDescending
-            ) {
-            [self showData:currentData.voltage];
-        }*/
+       
         
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
@@ -201,16 +228,19 @@
         [[LFBluetoothManager sharedManager] readFaultData];
 
     } else {
-        //currentIndex = (currentIndex-1) + [[LFDataManager sharedManager] getTotalFaultsCount];
-//        currentIndex = sectionArray.count + 1;;
-       // currentIndex += 1;
-        [[LFBluetoothManager sharedManager] readFaultData];
+        if (isFaultsCompletlyLoaded) {
+            [self restartFaultLoading];
+        }
+        else{
+            [[LFBluetoothManager sharedManager] readFaultData];
+
+        }
         if (sectionArray.count == 0) {
             _noDataLabel.hidden = NO;
         } else {
             _noDataLabel.hidden = YES;
         }
-        [_tblFaults reloadData];
+        //[_tblFaults reloadData];
     }
 
 }
@@ -374,6 +404,8 @@
     faultDeatil.errorDate = dict[FAULT_DATE];
     
     [self.navigationController pushViewController:faultDeatil animated:YES];
+    isPopedFromFaultsDetailController = YES;
+
 }
 
 - (NSString *)faultCodeWithCode:(NSInteger)code
@@ -444,7 +476,7 @@
             error = @"PHSQ";
             break;
         case 4096:
-            error = @"FWUpdate";
+            error = @"FWU";
             break;
         case 61166:
             error = @"UNDEFF";
@@ -574,6 +606,8 @@
     if (faultsCount > 0) {
         [_tblFaults reloadData];
     }*/
+    _loadingLabel.hidden = NO;
+
     if (arr.count) {
         for (LFFaultData *fault in arr) {
             [faultDict removeAllObjects];
@@ -622,7 +656,14 @@
 
 -(void)restartFaultLoading
 {
+    _loadingLabel.hidden = YES;
+    isFaultsCompletlyLoaded = YES;
+
     [self performSelector:@selector(updateFaultData) withObject:nil afterDelay:Background_Fault_Refresh_Interval];
 
 }
+
+
+
+
 @end

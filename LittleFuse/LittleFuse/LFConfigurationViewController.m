@@ -187,6 +187,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self setEnableRefresh:YES];
     isInitialReading = YES;
     [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
     curPassWriteIndex = 0;
@@ -334,7 +335,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [[LFBluetoothManager sharedManager] setDelegate:nil];
     [[LFBluetoothManager sharedManager] setDelegate:self];
     LFTabbarController *tabBarController = (LFTabbarController *)self.tabBarController;
-    [tabBarController setEnableRefresh:YES];
+    [self setEnableRefresh:YES];
     tabBarController.tabBarDelegate = self;
     [[LFBluetoothManager sharedManager] setConfig:YES];
     canContinueTimer = YES;
@@ -360,6 +361,25 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 {
     CBCharacteristic *charactestic = (CBCharacteristic *)charactersticsArray[2];
     [[LFBluetoothManager sharedManager] connectToCharactertics:charactestic];
+}
+
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    self.tabBarController.selectedIndex = 0;
+}
+-(void)refreshContentAction{
+    if (!canContinueTimer) {
+        return;
+    }
+    isInitialReading = YES;
+    [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
+    canContinueTimer = YES;
+    currentIndex = 0;
+    [self removeIndicator];
+    [self readCharactisticsWithIndex:currentIndex];
+    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
+    [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
 }
 
 #pragma mark Read Mac Data
@@ -423,22 +443,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 }
 
 
-#pragma mark Tab bar Delegate Refresh Method
 
-- (void)refreshContentInCurrentController {
-    if (!canContinueTimer) {
-        return;
-    }
-    isInitialReading = YES;
-    [[LFBluetoothManager sharedManager] setIsPassWordChange:NO];
-    canContinueTimer = YES;
-    currentIndex = 0;
-    [self removeIndicator];
-    [self readCharactisticsWithIndex:currentIndex];
-    [self showIndicatorOn:self.tabBarController.view withText:@"Loading Configuration..."];
-    [self performSelector:@selector(stopIndicator) withObject:nil afterDelay:5.5];
-    
-}
 
 
 #pragma mark - Table view data source
@@ -799,6 +804,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             int stVal = 0x0000000F & ((Byte)byteVal[0] >> 4); // this for getting response st val
             NSString *alertMessage;
                 DLog(@"\n\n\n\n Success status : %d\n\n\n\n", stVal);
+            BOOL shouldHideAlert = NO;
             switch (stVal) {
                 case 0:
                     isReRead = NO;
@@ -867,6 +873,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
                         /////////////////                               ///////////
                         alertMessage = kSave_Success;
                         isReRead = YES;
+                        if (isVerifyingPassword) {
+                            shouldHideAlert = YES;
+                        }
                     }
                 break;
                 case 2:
@@ -904,11 +913,14 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
             }
             if (stVal != 0) {
             [self removeIndicator];
-            [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
-                if ([alert isKindOfClass:[UIAlertController class]]) {
-                    [alert dismissViewControllerAnimated:NO completion:nil];
+                if (!shouldHideAlert) {
+                    [self showAlertViewWithCancelButtonTitle:kOK withMessage:alertMessage withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
+                        if ([alert isKindOfClass:[UIAlertController class]]) {
+                            [alert dismissViewControllerAnimated:NO completion:nil];
+                        }
+                    }];
                 }
-            }];
+                
             }
             [self readCharactisticsWithIndex:currentIndex];
             return;
@@ -1860,6 +1872,16 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 - (void)changePasswordWithNewValue:(NSString *)newPassword {
     // TODO: for present requirements  we got 32 bits remining 32 bite data fill with zeros
     [self showIndicatorOn:self.tabBarController.view withText:@"Changing password..."];
+    if (authUtils == nil) {
+        authUtils = [[LFAuthUtils alloc]init];
+        //[authUtils initWithPassKey:[[LFBluetoothManager sharedManager] getPasswordString] andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed: [[LFBluetoothManager sharedManager] getConfigSeedData].bytes ];
+    }
+   /* if (![[LFBluetoothManager sharedManager] isPasswordVerified]) {
+        [authUtils initWithPassKey:[[LFBluetoothManager sharedManager] getPasswordString] andMacAddress:[[LFBluetoothManager sharedManager] getMacString] andSeed: [[LFBluetoothManager sharedManager] getConfigSeedData].bytes ];
+    }*/
+    
+    
+    
     char *filledData = (char *) malloc(32);
     memset(filledData, 0, 32);
     newPasswordStr = newPassword;
@@ -2099,5 +2121,7 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
         }
     }];
 }
+
+
 
 @end

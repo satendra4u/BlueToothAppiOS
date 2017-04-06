@@ -87,6 +87,12 @@
     [self.faultDetails reloadData];
 }
 
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 #pragma mark - UITableView
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
