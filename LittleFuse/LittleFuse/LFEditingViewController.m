@@ -60,7 +60,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    self.textFiled.secureTextEntry = NO;
+
 
     if (_showAuthentication) {
         self.authenticationView.hidden = NO;
@@ -81,6 +82,7 @@
         _conformPasswordField.hidden = NO;
         _conformPasswordFieldHeight.constant = 30;
         self.textFiled.placeholder = @"NewPassword";
+        self.textFiled.secureTextEntry = YES;
 
     } else {
         _conformPasswordField.hidden = YES;

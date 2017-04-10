@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0CB10062FC5C4BEC5ECA333C /* libPods-LittleFuseUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BDC89FDDE5F6ABC5E65EE539 /* libPods-LittleFuseUITests.a */; };
-		185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 185816AA1E829DD800C61013 /* LFTabbarItem.m */; };
 		184156DE1E94CD1500500BB3 /* LFLicenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 184156DD1E94CD1500500BB3 /* LFLicenceViewController.m */; };
+		185816AB1E829DD800C61013 /* LFTabbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 185816AA1E829DD800C61013 /* LFTabbarItem.m */; };
 		18C82EA61E962D5E00EDF465 /* Terms&Conditions.html in Resources */ = {isa = PBXBuildFile; fileRef = 18C82EA51E962D5E00EDF465 /* Terms&Conditions.html */; };
 		21AEF19C1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */; };
 		21AEF19E1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21AEF19D1CB6976E0070D0E7 /* LFCharactersticBitDisplayCell.xib */; };
@@ -88,10 +88,10 @@
 /* Begin PBXFileReference section */
 		044A6A2C49047B12B9AEC673 /* Pods-Littlefuse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Littlefuse.release.xcconfig"; path = "Pods/Target Support Files/Pods-Littlefuse/Pods-Littlefuse.release.xcconfig"; sourceTree = "<group>"; };
 		125C1E929E2EEA24E71C9641 /* libPods-Littlefuse.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Littlefuse.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		185816A91E829DD800C61013 /* LFTabbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFTabbarItem.h; sourceTree = "<group>"; };
-		185816AA1E829DD800C61013 /* LFTabbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFTabbarItem.m; sourceTree = "<group>"; };
 		184156DC1E94CD1500500BB3 /* LFLicenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFLicenceViewController.h; sourceTree = "<group>"; };
 		184156DD1E94CD1500500BB3 /* LFLicenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFLicenceViewController.m; sourceTree = "<group>"; };
+		185816A91E829DD800C61013 /* LFTabbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFTabbarItem.h; sourceTree = "<group>"; };
+		185816AA1E829DD800C61013 /* LFTabbarItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFTabbarItem.m; sourceTree = "<group>"; };
 		18C82EA51E962D5E00EDF465 /* Terms&Conditions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "Terms&Conditions.html"; sourceTree = "<group>"; };
 		21AEF19A1CB695310070D0E7 /* LFCharactersticBitDisplayCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFCharactersticBitDisplayCell.h; sourceTree = "<group>"; };
 		21AEF19B1CB695310070D0E7 /* LFCharactersticBitDisplayCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LFCharactersticBitDisplayCell.m; sourceTree = "<group>"; };

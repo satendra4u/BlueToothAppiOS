@@ -649,7 +649,10 @@
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
-            [self.navigationController popToRootViewControllerAnimated:NO];
+           // [self.navigationController popToRootViewControllerAnimated:NO];
+            LFTabbarController *tabController = (LFTabbarController *)self.tabBarController;
+            [tabController moveToDevicesListController];
+
         }
     }];
 }
