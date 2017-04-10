@@ -28,7 +28,6 @@
     NSString* htmlString = [NSString stringWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:nil];
     [_licenceWebView loadHTMLString:htmlString baseURL: [[NSBundle mainBundle] bundleURL]];
     _licenceWebView.backgroundColor = [UIColor clearColor];
-
 }
 
 /*- (void)configureLicenceWithAgreementCompletionHandler:(LFLicenceAgreementCompletionHandler)licenceAgreementCompletionBlock
@@ -68,8 +67,8 @@
 }
 - (IBAction)cancelAction:(id)sender {
    // licenceAgreementCompletionHandler(LFLicenceButtonTypeCancel);
-
-    }
+    exit(0);
+}
 
 
 @end

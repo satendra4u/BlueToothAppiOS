@@ -1867,7 +1867,9 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
 -(void)resetPasswordCompletionAction
 {
     [self removeIndicator];
-    [self.navigationController popToRootViewControllerAnimated:NO];
+   // [self.navigationController popToRootViewControllerAnimated:NO];
+    LFTabbarController *tabController = (LFTabbarController *)self.tabBarController;
+    [tabController moveToDevicesListController];
 }
 - (void)changePasswordWithNewValue:(NSString *)newPassword {
     // TODO: for present requirements  we got 32 bits remining 32 bite data fill with zeros
@@ -2117,7 +2119,11 @@ const char changePassword_AddrArr[]  = {0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC, 0xC4
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:kDevice_Disconnected withTitle:kApp_Name otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
         if ([alert isKindOfClass:[UIAlertController class]]) {
             [alert dismissViewControllerAnimated:NO completion:nil];
-            [self.navigationController popToRootViewControllerAnimated:NO];
+            
+            LFTabbarController *tabController = (LFTabbarController *)self.tabBarController;
+            [tabController moveToDevicesListController];
+            
+           // [self.navigationController popToRootViewControllerAnimated:NO];
         }
     }];
 }
