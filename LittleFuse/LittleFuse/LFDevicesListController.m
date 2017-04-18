@@ -285,6 +285,7 @@
         [self presentViewController:alertcontroller animated:YES completion:nil];
     //}
     //isInitialDisconnect = NO;
+    
 }
 
 #pragma mark - Private methods -
@@ -434,7 +435,7 @@
  */
 - (void)showAlertWithText:(NSString *)msg
 {
-    if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame)) {
+    if (([msg caseInsensitiveCompare:@"Encryption is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Encryption is insufficient"] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Authentication is insufficient."] == NSOrderedSame) || ([msg caseInsensitiveCompare:@"Authentication is insufficient"] == NSOrderedSame)) {
         isPopupOpened = NO;
         if ([[LFBluetoothManager sharedManager] devicePairingRetryCount] < 3)// Here 3 is just static count, we are retrying 3 times to connect device to avoid encryption is insufficient when we enter correct pairing code. If client suggest any number of time we have to replace it
         {
@@ -449,7 +450,6 @@
             [[LFBluetoothManager sharedManager] pairingCancelledForDeviceAtIndex:selectedIndex];
             //        DLog(@"%s", __func__);
             [tblDevices reloadData];
-
         }
     }
     [self showAlertViewWithCancelButtonTitle:kOK withMessage:msg withTitle:APP_NAME otherButtons:nil clickedAtIndexWithBlock:^(id alert, NSInteger index) {
