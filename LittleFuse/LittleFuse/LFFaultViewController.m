@@ -251,6 +251,7 @@
     if (!data || data.length == 0) {
         return;
     }
+    
     NSInteger code = [LFUtilities getValueFromHexData:[data subdataWithRange:NSMakeRange(0, 2)]];
     NSString *faultError = [self faultWithCode:code];
     
@@ -271,6 +272,7 @@
     
     [faultDict setValue:currentData forKey:FAULT_DETAILS];
     [faultDict setValue:faultCode forKey:FAULT_CODE];
+    [faultDict setValue:date forKey:@"createdDate"];
     
    /* if (islatestRecord) {
          [sectionArray insertObject:[faultDict copy] atIndex:0];
@@ -293,10 +295,9 @@
             }
             else{
                 [sectionArray addObject:[faultDict copy]];
-
             }
        // }
-        NSSortDescriptor *dateDescriptor = [[NSSortDescriptor alloc] initWithKey:@"ErrorDate" ascending:NO];
+         NSSortDescriptor *dateDescriptor = [[NSSortDescriptor alloc] initWithKey:@"createdDate" ascending:NO];
         
         
         NSArray *sortedArray = [sectionArray sortedArrayUsingDescriptors:@[dateDescriptor]];
