@@ -33,5 +33,10 @@
     // Pass the selected object to the new view controller.
 }
 */
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 
 @end

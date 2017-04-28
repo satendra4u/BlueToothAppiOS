@@ -37,5 +37,10 @@
     return cell;
 }
 
+#pragma  mark - Base Controller Methods
+-(void)navigationBackAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 
 @end
