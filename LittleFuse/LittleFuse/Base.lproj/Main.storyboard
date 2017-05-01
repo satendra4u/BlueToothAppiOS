@@ -196,7 +196,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Device ID:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nIa-wo-oNd">
-                                <rect key="frame" x="123.5" y="0.0" width="73" height="50"/>
+                                <rect key="frame" x="124" y="0.0" width="73" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="PVD-DE-Peh"/>
                                 </constraints>
@@ -492,7 +492,7 @@
                                 </connections>
                             </tableView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Faults recorded" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6aH-a2-ygv">
-                                <rect key="frame" x="92" y="243.5" width="137" height="17"/>
+                                <rect key="frame" x="92" y="244" width="137" height="17"/>
                                 <fontDescription key="fontDescription" name="Arial-BoldMT" family="Arial" pointSize="15"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -868,7 +868,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TBD" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JUP-Yf-ObH">
-                                <rect key="frame" x="20" y="271.5" width="280" height="25"/>
+                                <rect key="frame" x="20" y="272" width="280" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="25" id="OqA-m3-3Qc"/>
                                 </constraints>
@@ -1504,7 +1504,7 @@
                                 </connections>
                             </webView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="fSs-h4-tpH">
-                                <rect key="frame" x="141.5" y="265.5" width="37" height="37"/>
+                                <rect key="frame" x="142" y="266" width="37" height="37"/>
                                 <color key="color" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </activityIndicatorView>
                         </subviews>

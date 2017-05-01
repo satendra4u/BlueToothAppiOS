@@ -292,9 +292,9 @@
 
 -(void)refreshContentAction
 {
-    if (!isPopupOpened) {
+   /* if (!isPopupOpened) {
         return;
-    }
+    }*/
     isScanDataFound = NO;
     [self performSelector:@selector(verifyDeviceCount) withObject:nil afterDelay:3];
     [[LFBluetoothManager sharedManager] disconnectDevice];
